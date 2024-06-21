@@ -1,0 +1,19 @@
+# Django
+Django==5.0.6
+django-unfold==0.28.1
+Pillow==10.3.0
+django-advance-thumbnail==1.0.0
+django-health-check==3.18.2
+django-cleanup==8.1.0
+django-extensions==3.2.3
+django-modelclone-next==0.8.2
+
+# Environment variables
+django-environ==0.11.2
+python-dotenv==1.0.1
+
+# prod server
+gunicorn==22.0.0
+
+# Dataabse (psycopg[binary] cannot be locked to specific version number)
+psycopg[binary]
