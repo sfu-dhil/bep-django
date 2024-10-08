@@ -1,5 +1,5 @@
 # Django
-Django==5.0.6
+Django==5.0.9
 django-unfold==0.28.1
 Pillow==10.3.0
 django-advance-thumbnail==1.0.0
