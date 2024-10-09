@@ -1,5 +1,5 @@
 # Node deps
-FROM node:22.3-slim AS bep-prod-assets
+FROM node:23.1-slim AS bep-vite
 WORKDIR /app
 
 RUN npm upgrade -g npm \
@@ -7,12 +7,19 @@ RUN npm upgrade -g npm \
     && rm -rf /var/lib/apt/lists/*
 
 # build js deps
-COPY package.json yarn.lock /app/
+COPY bep_vite/package.json bep_vite/yarn.lock /app/
+RUN yarn
+
+# run vite build
+COPY bep_vite /app
+RUN yarn build
+
+FROM bep-vite AS bep-vite-prod
 RUN yarn --production \
     && yarn cache clean
 
 # Django app
-FROM python:3.12-alpine as bep
+FROM python:3.12-alpine AS bep
 EXPOSE 80
 WORKDIR /app
 
@@ -30,7 +37,8 @@ RUN pip install -r requirements.txt --no-cache-dir
 COPY . /app
 
 # add prod assets
-COPY --from=bep-prod-assets /app/node_modules /app/node_modules
+COPY --from=bep-vite-prod /app/dist /static-vite/dist
+COPY --from=bep-vite-prod /app/node_modules /app/node_modules
 
 # collect static assets for production
 RUN python manage.py collectstatic --noinput

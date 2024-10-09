@@ -1,0 +1,31 @@
+{% load static %}
+{% load django_vite %}
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="google" content="notranslate" />
+        <title>Books in English Parishes</title>
+        <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+
+        {% vite_hmr_client %}
+        <link rel="stylesheet" href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" />
+        <link rel="stylesheet" href="{% static 'bootstrap-icons/font/bootstrap-icons.css' %}" />
+        <link rel="stylesheet" href="{% static '@fortawesome/fontawesome-free/css/fontawesome.min.css' %}" />
+        <link rel="stylesheet" href="{% static '@fortawesome/fontawesome-free/css/solid.min.css' %}" />
+        <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+        {% block styles %}
+        {% endblock %}
+
+        <script src="{% static 'bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
+    </head>
+    <body>
+        {% block content %}
+        {% endblock %}
+
+        {% block javascript %}
+        {% endblock %}
+    </body>
+</html>

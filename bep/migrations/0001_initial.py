@@ -179,7 +179,7 @@ class Migration(migrations.Migration):
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
                 ('archive', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='holdings', to='bep.archive')),
-                ('books', models.ManyToManyField(blank=True, null=True, related_name='holdings', to='bep.book')),
+                ('books', models.ManyToManyField(blank=True, related_name='holdings', to='bep.book')),
             ],
             options={
                 'db_table': 'bep_holding',
@@ -247,7 +247,7 @@ class Migration(migrations.Migration):
                 ('written_date', models.CharField(blank=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
-                ('books', models.ManyToManyField(blank=True, null=True, related_name='inventories', to='bep.book')),
+                ('books', models.ManyToManyField(blank=True, related_name='inventories', to='bep.book')),
                 ('injunction', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='inventories', to='bep.injunction')),
             ],
             options={
@@ -418,13 +418,13 @@ class Migration(migrations.Migration):
                 ('written_date', models.CharField(blank=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
-                ('books', models.ManyToManyField(blank=True, null=True, related_name='transactions', to='bep.book')),
+                ('books', models.ManyToManyField(blank=True, related_name='transactions', to='bep.book')),
                 ('injunction', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='transactions', to='bep.injunction')),
                 ('manuscript_source', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='transactions', to='bep.manuscriptsource')),
                 ('monarch', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='transactions', to='bep.monarch')),
                 ('parish', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='transactions', to='bep.parish')),
                 ('print_source', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='transactions', to='bep.printsource')),
-                ('transaction_categories', models.ManyToManyField(blank=True, null=True, related_name='transactions', to='bep.transactioncategory')),
+                ('transaction_categories', models.ManyToManyField(blank=True, related_name='transactions', to='bep.transactioncategory')),
             ],
             options={
                 'db_table': 'bep_transaction',

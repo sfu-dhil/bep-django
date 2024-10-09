@@ -15,28 +15,41 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.conf.urls.static import static
+from django.views.decorators.cache import cache_control
+from django.contrib.staticfiles.views import serve
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import include, path
+
+admin.site.site_header = "Books in English Parishes"
+admin.site.site_title = "Books in English Parishes"
+admin.site.index_title = "Welcome to the Books in English Parishes admin interface"
 
 urlpatterns = [
     # health check ping endpoint
     path('health_check/', include('health_check.urls')),
 
     # admin password reset endpoints (from https://docs.djangoproject.com/en/5.0/ref/contrib/admin/#adding-a-password-reset-feature)
-    path('admin/password_reset/',  auth_views.PasswordResetView.as_view(), name="admin_password_reset"),
-    path('admin/password_reset/done/', auth_views.PasswordResetDoneView.as_view(), name="password_reset_done"),
-    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name="password_reset_confirm"),
-    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name="password_reset_complete"),
+    path("admin/password_reset/", auth_views.PasswordResetView.as_view(), name="admin_password_reset"),
+    path("admin/password_reset/done/", auth_views.PasswordResetDoneView.as_view(), name="password_reset_done"),
+    path("reset/<uidb64>/<token>/", auth_views.PasswordResetConfirmView.as_view(), name="password_reset_confirm"),
+    path("reset/done/", auth_views.PasswordResetCompleteView.as_view(), name="password_reset_complete"),
 
+    # admin site endpoints
     path('admin/', admin.site.urls),
+
+    # tinymce urls
+    path('tinymce/', include('tinymce.urls')),
 
     # main bep site
     path('', include("bep.urls")),
 ]
 
 if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(
+        settings.STATIC_URL,
+        view=cache_control(no_cache=True, must_revalidate=True)(serve),
+    )
     # nginx serving media files
     # urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

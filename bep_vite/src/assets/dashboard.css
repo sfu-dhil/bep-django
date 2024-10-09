@@ -1,0 +1,60 @@
+#dashboard-app {
+  height: 100%;
+}
+#dashboard-map {
+  cursor: grab;
+}
+#dashboard-map:active {
+  cursor: grabbing;
+}
+
+.input-group > .multiselect {
+  flex: 1 1 auto;
+  width: 1%;
+}
+.input-group > .multiselect > .multiselect__tags {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+/* #dashboard-map canvas {
+  filter: invert(100%) hue-rotate(180deg);
+} */
+
+.ol-attribution {
+  bottom: 4.5em;
+}
+.ol-timeline {
+  font-size: 2em;
+}
+.ol-timeline .ol-scroll {
+  height: 2em;
+}
+.ol-timeline .ol-scroll .ol-features {
+  z-index: 1000;
+}
+
+.ol-timeline .ol-scroll .ol-feature {
+  padding: 0;
+  background: none;
+  border: none;
+  transition: none;
+  top: 0 !important;
+}
+.ol-timeline .ol-scroll .ol-features .ol-feature {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.timeline-tooltip {
+  --bs-tooltip-bg: var(--bs-body-bg);
+  --bs-tooltip-color: var(--bs-body-color);
+}
+
+.multiselect__tags {
+  padding-right: 4em !important;
+}
+
+.multiselect__input {
+  color: #35495e !important;
+}

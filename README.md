@@ -14,6 +14,20 @@ about books used in English parishes.
 Frontend will be available at `http://localhost:8080/`
 Admin Interface will be available at `http://localhost:8080/admin/`
 
+### Install/Switch the admin theme
+
+    # Bootstrap
+    docker exec -it bep_app python manage.py loaddata admin_interface_theme_bootstrap.json
+
+    # Django
+    docker exec -it bep_app python manage.py loaddata  admin_interface_theme_django.json
+
+    # Foundation
+    docker exec -it bep_app python manage.py loaddata  admin_interface_theme_foundation.json
+
+    # U.S. Web Design Standards
+    docker exec -it bep_app python manage.py loaddata  admin_interface_theme_uswds.json
+
 ### Create your superuser
 
     docker exec -it bep_app python manage.py createsuperuser
@@ -78,28 +92,14 @@ Create new migrations
 
 ### Yarn (javascript)
 
-First setup an image to build the yarn deps in
-
-    docker build -t bep_yarn_helper --target bep-prod-assets .
-
-Then run the following as needed
-
     # add new package
-    docker run -it --rm -v $(pwd):/app bep_yarn_helper yarn add [package]
+    docker exec -it bep_vite yarn add [package]
 
     # update a package
-    docker run -it --rm -v $(pwd):/app bep_yarn_helper yarn upgrade [package]
+    docker exec -it bep_vite yarn upgrade [package]
 
     # update all packages
-    docker run -it --rm -v $(pwd):/app bep_yarn_helper yarn upgrade
-
-Note: If you are having problems starting/building the application due to javascript dependencies issues you can also run a standalone node container to help resolve them
-
-    docker run -it --rm -v $(pwd):/app -w /app node:22.3 bash
-
-    [check Dockerfile for the 'apt-get update' code piece of bep-prod-assets]
-
-    yarn ...
+    docker exec -it bep_vite yarn upgrade
 
 After you update a dependency make sure to rebuild the images
 

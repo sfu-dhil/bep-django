@@ -51,7 +51,7 @@ class Nation(models.Model):
         db_table = 'bep_nation'
 
     def __str__(self):
-        return mark_safe(unescape(f"{self.label}"))
+        return mark_safe(f"{self.label}")
 
 class Archive(models.Model):
     label = models.CharField(unique=True)
@@ -70,7 +70,7 @@ class Archive(models.Model):
         db_table = 'bep_archive'
 
     def __str__(self):
-        return mark_safe(unescape(f"{self.label}"))
+        return mark_safe(f"{self.label}")
 
 class TransactionCategory(models.Model):
     label = models.CharField(unique=True)
@@ -88,7 +88,7 @@ class TransactionCategory(models.Model):
         verbose_name_plural = 'transaction categories'
 
     def __str__(self):
-        return mark_safe(unescape(f"{self.label}"))
+        return mark_safe(f"{self.label}")
 
 class SourceCategory(models.Model):
     label = models.CharField(unique=True)
@@ -107,7 +107,7 @@ class SourceCategory(models.Model):
         verbose_name_plural = 'source categories'
 
     def __str__(self):
-        return mark_safe(unescape(f"{self.label}"))
+        return mark_safe(f"{self.label}")
 
 class Monarch(models.Model):
     label = models.CharField(unique=True)
@@ -146,7 +146,7 @@ class Format(models.Model):
         db_table = 'bep_format'
 
     def __str__(self):
-        return mark_safe(unescape(f"{self.label}"))
+        return mark_safe(f"{self.label}")
 
 
 class County(models.Model):
@@ -164,14 +164,14 @@ class County(models.Model):
         on_delete=models.CASCADE,
     )
 
-    # one-to-many towns via Towns Model
+    # one-to-many towns via Town Model
 
     class Meta:
         db_table = 'bep_county'
         verbose_name_plural = 'counties'
 
     def __str__(self):
-        return mark_safe(unescape(f"{self.label}"))
+        return mark_safe(f"{self.label}")
 
 
 class Province(models.Model):
@@ -196,7 +196,7 @@ class Province(models.Model):
         db_table = 'bep_province'
 
     def __str__(self):
-        return mark_safe(unescape(f"{self.label}"))
+        return mark_safe(f"{self.label}")
 
 class Town(models.Model):
     label = models.CharField(unique=True)
@@ -220,7 +220,7 @@ class Town(models.Model):
         db_table = 'bep_town'
 
     def __str__(self):
-        return mark_safe(unescape(f"{self.label}"))
+        return mark_safe(f"{self.label}")
 
 
 class Diocese(models.Model):
@@ -245,7 +245,7 @@ class Diocese(models.Model):
         db_table = 'bep_diocese'
 
     def __str__(self):
-        return mark_safe(unescape(f"{self.label}"))
+        return mark_safe(f"{self.label}")
 
 class Archdeaconry(models.Model):
     label = models.CharField(unique=True)
@@ -269,7 +269,7 @@ class Archdeaconry(models.Model):
         verbose_name_plural = 'archdeaconries and courts'
 
     def __str__(self):
-        return mark_safe(unescape(f"{self.label}"))
+        return mark_safe(f"{self.label}")
 
 
 class Parish(models.Model):
@@ -306,7 +306,7 @@ class Parish(models.Model):
         verbose_name_plural = "parishes"
 
     def __str__(self):
-        return mark_safe(unescape(f"{self.label}"))
+        return mark_safe(f"{self.label}")
 
 class PrintSource(models.Model):
     title = models.CharField()
@@ -333,7 +333,7 @@ class PrintSource(models.Model):
         db_table = 'bep_print_source'
 
     def __str__(self):
-        return mark_safe(unescape(f"{self.title}"))
+        return mark_safe(f"{self.title}")
 
 class ManuscriptSource(models.Model):
     call_number = models.CharField(blank=True)
@@ -363,7 +363,7 @@ class ManuscriptSource(models.Model):
         db_table = 'bep_manuscript_source'
 
     def __str__(self):
-        return mark_safe(unescape(f"{self.label}"))
+        return mark_safe(f"{self.label}")
 
 class Book(models.Model):
     title = models.CharField(blank=True)
@@ -407,11 +407,11 @@ class Book(models.Model):
 
     def __str__(self):
         if self.uniform_title:
-            return mark_safe(unescape(self.uniform_title))
+            return mark_safe(self.uniform_title)
         elif self.title:
-            return mark_safe(unescape(self.title))
+            return mark_safe(self.title)
         elif self.description:
-            return mark_safe(unescape(self.description))
+            return mark_safe(self.description)
         return 'No description provided'
 
 class Holding(models.Model):
@@ -439,7 +439,6 @@ class Holding(models.Model):
     )
     books = models.ManyToManyField(
         Book,
-        null=True,
         blank=True,
         related_name='holdings',
     )
@@ -470,6 +469,7 @@ class HoldingImage(AbstractImage):
 
     class Meta:
         db_table = 'bep_holding_image'
+        verbose_name = 'surviving text image'
 
     def __str__(self):
         return self.image.name if self.image else self.id
@@ -536,7 +536,7 @@ class Injunction(models.Model):
         db_table = 'bep_injunction'
 
     def __str__(self):
-        return mark_safe(unescape(f"{self.title}"))
+        return mark_safe(f"{self.title}")
 
 class Inventory(models.Model):
     page_number = models.CharField(blank=True)
@@ -587,7 +587,6 @@ class Inventory(models.Model):
     )
     books = models.ManyToManyField(
         Book,
-        null=True,
         blank=True,
         related_name='inventories',
     )
@@ -599,7 +598,8 @@ class Inventory(models.Model):
         verbose_name_plural = 'inventories'
 
     def __str__(self):
-        return f"{strip_tags(self.transcription)[:50]}"
+        str = strip_tags(unescape(self.transcription))
+        return f"{str[:100]}..." if len(str) > 103 else str
 
 
 class InventoryImage(AbstractImage):
@@ -676,13 +676,11 @@ class Transaction(models.Model):
 
     transaction_categories = models.ManyToManyField(
         TransactionCategory,
-        null=True,
         blank=True,
         related_name='transactions',
     )
     books = models.ManyToManyField(
         Book,
-        null=True,
         blank=True,
         related_name='transactions',
     )

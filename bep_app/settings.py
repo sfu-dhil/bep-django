@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 from environ import FileAwareEnv
 from dotenv import load_dotenv, find_dotenv
+import warnings
 
 env = FileAwareEnv()
 load_dotenv(find_dotenv())
@@ -27,8 +28,10 @@ MEDIA_ROOT = '/media'
 STATIC_ROOT = BASE_DIR / 'static/'
 
 STATICFILES_DIRS = [
-    ('bootstrap', BASE_DIR / "node_modules/bootstrap/dist"),
+    ('bootstrap', BASE_DIR / "node_modules/bootstrap"),
     ('bootstrap-icons', BASE_DIR / "node_modules/bootstrap-icons"),
+    ('@fortawesome', BASE_DIR / "node_modules/@fortawesome"),
+    '/static-vite',
 ]
 
 # Quick-start development settings - unsuitable for production
@@ -47,20 +50,21 @@ ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
 
 INSTALLED_APPS = [
     'bep.apps.BepConfig',
-    'unfold',
-    'unfold.contrib.filters',
-    'unfold.contrib.forms',
-    'unfold.contrib.inlines',
+    'admin_interface',
+    'colorfield',
+    'tinymce',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'health_check',
-    'django_extensions',
+    'django_select2',
     'django_cleanup.apps.CleanupConfig',
     'modelclone',
+    'django_vite',
 ]
 
 MIDDLEWARE = [
@@ -90,6 +94,14 @@ TEMPLATES = [
         },
     },
 ]
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/django_cache',
+    }
+}
+CACHE_SECONDS = 1 if DEBUG else (60 * 15) # 1 second if debugging else 15 minutes
 
 WSGI_APPLICATION = 'bep_app.wsgi.application'
 
@@ -166,22 +178,38 @@ EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
 
 # CSRF form settings
-CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=['http://localhost:8080'])
-SECURE_CONTENT_TYPE_NOSNIFF = False
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=['http://localhost:8080', 'http://localhost:5173'])
 
 # iframe settings
 X_FRAME_OPTIONS = "SAMEORIGIN"
+SILENCED_SYSTEM_CHECKS = ["security.W019"]
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 256 * 1024 * 1024 # 256MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 256 * 1024 * 1024 # 256MB
 
 # logout redirection
+LOGIN_URL = 'admin:login'
 LOGIN_REDIRECT_URL = 'admin:index'
 LOGOUT_REDIRECT_URL = 'admin:login'
 
-UNFOLD = {
-    "SITE_TITLE": 'BEP Admin Panel',
-    "SITE_HEADER": 'BEP Admin Panel',
-    "SHOW_HISTORY": True,
-    "SHOW_VIEW_ON_SITE": True,
+DJANGO_VITE = {
+    "default": {
+        "dev_mode": DEBUG,
+        "static_url_prefix": "dist",
+    }
+}
+
+# admin interface
+warnings.filterwarnings("ignore", module="admin_interface.templatetags.admin_interface_tags")
+
+# tinymce settings
+TINYMCE_DEFAULT_CONFIG = {
+    'height': '250px',
+    'branding': False,
+    'menubar': False,
+    'plugins': 'autolink, code, link, anchor, lists, table, quickbars, wordcount, pagebreak, nonbreaking',
+    'toolbar': 'undo redo | numlist bullist | fontsize | alignleft aligncenter alignright | link anchor | hr | removeformat',
+    'quickbars_insert_toolbar': False,
+    'quickbars_selection_toolbar': 'bold italic underline strikethrough | fontsize | forecolor | blockquote',
+    'contextmenu': 'undo redo | inserttable | cell row column deletetable',
 }

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load django_vite %}
+
+{% block styles %}
+{% endblock %}
+
+{% block javascript %}
+    {{ nations|json_script:"bep-nations-data" }}
+    {{ counties|json_script:"bep-counties-data" }}
+    {{ towns|json_script:"bep-towns-data" }}
+    {{ provinces|json_script:"bep-provinces-data" }}
+    {{ dioceses|json_script:"bep-dioceses-data" }}
+    {{ archdeaconries|json_script:"bep-archdeaconries-data" }}
+    {{ parishes|json_script:"bep-parishes-data" }}
+    {{ transactions|json_script:"bep-transactions-data" }}
+    {{ inventories|json_script:"bep-inventories-data" }}
+    {{ holdings|json_script:"bep-holdings-data" }}
+    {{ books|json_script:"bep-books-data" }}
+    {{ monarchs|json_script:"bep-monarchs-data" }}
+    {% vite_asset 'dashboard.js' crossorigin="" %}
+{% endblock %}
+
+{% block content %}
+    <div id="dashboard-app"></div>
+{% endblock %}

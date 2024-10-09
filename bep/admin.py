@@ -1,33 +1,16 @@
 from django.contrib import admin
-from django.contrib.auth.admin import GroupAdmin as BaseGroupAdmin, UserAdmin as BaseUserAdmin
-from django.contrib.auth.models import Group, User
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.utils.safestring import mark_safe
-from html import unescape
-from unfold.admin import ModelAdmin, TabularInline, StackedInline
-from unfold.forms import AdminPasswordChangeForm, UserChangeForm, UserCreationForm
-from unfold.contrib.forms.widgets import ArrayWidget, WysiwygWidget
-from unfold.decorators import display
+from django.contrib.admin import ModelAdmin, TabularInline, StackedInline
+from tinymce.widgets import TinyMCE
 from modelclone import ClonableModelAdmin
+from bep.widgets import Select2TagArrayWidget
 
 from .models import Archdeaconry, Archive, Book, Holding, ManuscriptSource, Parish, \
     Injunction, Transaction, Inventory, County, Town, Diocese, InventoryImage, HoldingImage, \
     Monarch, Nation, Province, PrintSource, Format, SourceCategory, TransactionCategory
 from .forms import TransactionAdminForm
-
-# override the Auth User and Group models to use unfold UI theme
-admin.site.unregister(User)
-@admin.register(User)
-class UserAdmin(BaseUserAdmin, ModelAdmin):
-    form = UserChangeForm
-    add_form = UserCreationForm
-    change_password_form = AdminPasswordChangeForm
-
-admin.site.unregister(Group)
-@admin.register(Group)
-class GroupAdmin(BaseGroupAdmin, ModelAdmin):
-    pass
 
 
 # Inlines (used by admin panel items)
@@ -39,12 +22,16 @@ class ReadOnlyTabularInline(TabularInline):
         return False
     def has_delete_permission(self, request, obj):
         return False
+    classes = ['collapse']
 
 class SimpleTermReadOnlyInline(ReadOnlyTabularInline):
     ordering = ['label']
-    readonly_preprocess_fields = {
-        "description": lambda contents: mark_safe(unescape(contents)),
-    }
+    exclude = ['description', 'links']
+    readonly_fields = ['_description']
+
+    def _description(self, obj):
+        return mark_safe(obj.description)
+    _description.short_description = 'Description'
 
 class ManuscriptSourceReadOnlyInline(SimpleTermReadOnlyInline):
     model = ManuscriptSource
@@ -70,48 +57,70 @@ class DioceseReadOnlyInline(SimpleTermReadOnlyInline):
 class HoldingReadOnlyInline(ReadOnlyTabularInline):
     exclude = ['notes', 'books']
     ordering = ['description']
-    readonly_preprocess_fields = {
-        "description": lambda contents: mark_safe(unescape(contents)),
-    }
+    exclude = ['description']
+    readonly_fields = ['_description']
     model = Holding
 
+    def _description(self, obj):
+        return mark_safe(obj.description)
+    _description.short_description = 'Description'
+
 class InjunctionReadOnlyInline(ReadOnlyTabularInline):
-    exclude = ['imprint', 'transcription', 'modern_transcription', 'notes']
+    exclude = ['imprint', 'transcription', 'modern_transcription', 'notes', 'physical_description']
     ordering = ['title']
-    readonly_preprocess_fields = {
-        "physical_description": lambda contents: mark_safe(unescape(contents)),
-    }
+    readonly_fields = ['_physical_description']
     model = Injunction
 
+    def _physical_description(self, obj):
+        return mark_safe(obj.physical_description)
+    _physical_description.short_description = 'Physical Description'
+
+
 class TransactionReadOnlyInline(ReadOnlyTabularInline):
-    fields = ['written_date', 'value', 'copies', 'location']
+    fields = ['written_date', '_value', 'copies', 'location']
     ordering = ['id']
+    readonly_fields = ['_value']
     model = Transaction
 
-    readonly_preprocess_fields = {
-        "value": lambda contents: Transaction.get_lsd_str(contents),
-    }
+    def _value(self, obj):
+        return Transaction.get_lsd_str(obj.value)
+    _value.short_description = 'Value'
 
 class InventoryReadOnlyInline(ReadOnlyTabularInline):
-    exclude = ['notes']
+    exclude = ['notes', 'transcription', 'description', 'modifications']
     ordering = ['transcription']
-    readonly_preprocess_fields = {
-        "transcription": lambda contents: mark_safe(unescape(contents)),
-        "description": lambda contents: mark_safe(unescape(contents)),
-        "modifications": lambda contents: mark_safe(unescape(contents)),
-    }
-
+    readonly_fields = ['_transcription', '_description', '_modifications']
     model = Inventory
 
+    def _transcription(self, obj):
+        return mark_safe(obj.transcription)
+    _transcription.short_description = 'Transcription'
+
+    def _description(self, obj):
+        return mark_safe(obj.description)
+    _description.short_description = 'Description'
+
+    def _modifications(self, obj):
+        return mark_safe(obj.modifications)
+    _modifications.short_description = 'Modifications'
+
 class BookReadOnlyInline(ReadOnlyTabularInline):
-    fields = ['title', 'uniform_title', 'author', 'imprint', 'date']
+    fields = ['_title', '_uniform_title', 'author', '_imprint', 'date']
     ordering = ['title']
-    readonly_preprocess_fields = {
-        "title": lambda contents: mark_safe(unescape(contents)),
-        "uniform_title": lambda contents: mark_safe(unescape(contents)),
-        "imprint": lambda contents: mark_safe(unescape(contents)),
-    }
+    readonly_fields = ['_title', '_uniform_title', '_imprint']
     model = Book
+
+    def _title(self, obj):
+        return mark_safe(obj.title)
+    _title.short_description = 'Title'
+
+    def _uniform_title(self, obj):
+        return mark_safe(obj.uniform_title)
+    _uniform_title.short_description = 'Uniform Title'
+
+    def _imprint(self, obj):
+        return mark_safe(obj.imprint)
+    _imprint.short_description = 'Imprint'
 
 class PrintSourceReadOnlyInline(ReadOnlyTabularInline):
     fields = ['title', 'author', 'date', 'publisher']
@@ -121,15 +130,20 @@ class PrintSourceReadOnlyInline(ReadOnlyTabularInline):
 # Inlines for Many-toMany
 class BookM2MTransactionReadOnlyInline(ReadOnlyTabularInline):
     model = Book.transactions.through
+    verbose_name = 'Transaction'
 
 class BookM2MInventoryReadOnlyInline(ReadOnlyTabularInline):
     model = Book.inventories.through
+    verbose_name = 'Inventory'
+    verbose_name_plural = 'inventories'
 
 class BookM2MHoldingReadOnlyInline(ReadOnlyTabularInline):
     model = Book.holdings.through
+    verbose_name = 'surviving text'
 
 class TransactionCategoryM2MTransactionReadOnlyInline(ReadOnlyTabularInline):
     model = TransactionCategory.transactions.through
+    verbose_name = 'transaction'
 
 # Image Inlines
 class InventoryImageInline(StackedInline):
@@ -153,22 +167,30 @@ class BepAdminDefaults(ModelAdmin):
 
     formfield_overrides = {
         models.TextField: {
-            "widget": WysiwygWidget,
+            "widget": TinyMCE,
         },
-        ArrayField: {
-            "widget": ArrayWidget,
-        }
     }
 
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        if db_field.name == 'links':
+            kwargs['widget'] = Select2TagArrayWidget(attrs={
+                'data-placeholder': 'Click to add one or more links',
+            })
+        elif db_field.name == 'variant_titles':
+            kwargs['widget'] = Select2TagArrayWidget(attrs={
+                'data-placeholder': 'Click to add one or more variant title',
+            })
+        return super().formfield_for_dbfield(db_field, **kwargs)
 
 class SimpleTermModelDefaults(BepAdminDefaults):
     list_display = ['label', '_description']
     search_fields = ['label', 'description']
     ordering = ['label']
 
-    @display(description="Description", ordering="description")
     def _description(self, obj):
         return mark_safe(obj.description)
+    _description.short_description = 'Description'
+    _description.admin_order_field = 'description'
 
 @admin.register(Archdeaconry)
 class ArchdeaconryAdmin(SimpleTermModelDefaults):
@@ -199,17 +221,20 @@ class BookAdmin(BepAdminDefaults):
         BookM2MHoldingReadOnlyInline,
     ]
 
-    @display(description="Title", ordering="title")
     def _title(self, obj):
         return obj.title if len(obj.title) <= 100 else obj.title[:100].rsplit(' ', 1)[0] + '...'
+    _title.short_description = 'Title'
+    _title.admin_order_field = 'title'
 
-    @display(description="Uniform Title", ordering="uniform_title")
     def _uniform_title(self, obj):
         return obj.uniform_title if len(obj.uniform_title) <= 100 else obj.uniform_title[:100].rsplit(' ', 1)[0] + '...'
+    _uniform_title.short_description = 'Uniform Title'
+    _uniform_title.admin_order_field = 'uniform_title'
 
-    @display(description="Imprint", ordering="imprint")
     def _imprint(self, obj):
         return mark_safe(obj.imprint)
+    _imprint.short_description = 'Imprint'
+    _imprint.admin_order_field = 'imprint'
 
 @admin.register(County)
 class CountyAdmin(SimpleTermModelDefaults):
@@ -238,13 +263,15 @@ class InjunctionAdmin(BepAdminDefaults):
         InventoryReadOnlyInline,
     ]
 
-    @display(description="Title", ordering="title")
     def _title(self, obj):
         return mark_safe(obj.title)
+    _title.short_description = 'Title'
+    _title.admin_order_field = 'title'
 
-    @display(description="Transcription", ordering="transcription")
     def _transcription(self, obj):
         return mark_safe(obj.transcription)
+    _transcription.short_description = 'Transcription'
+    _transcription.admin_order_field = 'transcription'
 
 
 @admin.register(Inventory)
@@ -258,15 +285,16 @@ class InventoryAdmin(BepAdminDefaults):
         InventoryImageInline,
     ]
 
-    @display(description="ID", ordering="id")
     def _id(self, obj):
         return f"{obj.id:05d}"
+    _id.short_description = 'ID'
+    _id.admin_order_field = 'id'
 
-    @display(description="Transcription", ordering="transcription")
     def _transcription(self, obj):
         return f"{obj}"
+    _transcription.short_description = 'Transcription'
+    _transcription.admin_order_field = 'transcription'
 
-    @display(description="Date", ordering="start_date")
     def _date(self, obj):
         if obj.start_date and obj.end_date:
             return f"{obj.start_date}-{obj.end_date}"
@@ -275,10 +303,13 @@ class InventoryAdmin(BepAdminDefaults):
         elif obj.end_date:
             return f"{obj.end_date}"
         return None
+    _date.short_description = 'Date'
+    _date.admin_order_field = 'start_date'
 
-    @display(description="Books", ordering="books__count")
     def _books(self, obj):
         return obj.books.count()
+    _books.short_description = 'Books'
+    _books.admin_order_field = 'books__count'
 
 
 @admin.register(ManuscriptSource)
@@ -374,31 +405,35 @@ class TransactionAdmin(ClonableModelAdmin, BepAdminDefaults):
         'books',
     ]
 
-    @display(description="ID", ordering="id")
     def _id(self, obj):
         return f"{obj.id:05d}"
+    _id.short_description = 'ID'
+    _id.admin_order_field = 'id'
 
-    @display(description="Date")
     def _date(self, obj):
         if obj.written_date:
-            return mark_safe(unescape(obj.written_date))
+            return mark_safe(obj.written_date)
         if obj.start_date and obj.end_date:
             return f"{obj.start_date}-{obj.end_date}"
         elif obj.start_date:
             return f"{obj.start_date}"
         return 'No date'
+    _date.short_description = 'Date'
 
-    @display(description="Value", ordering=models.F('value').desc(nulls_last=True))
     def _value(self, obj):
         return Transaction.get_lsd_str(obj.value)
+    _value.short_description = 'Value'
+    _value.admin_order_field = models.F('value').desc(nulls_last=True)
 
-    @display(description="Books", ordering="books__count")
     def _books(self, obj):
         return obj.books.count()
+    _books.short_description = 'Books'
+    _books.admin_order_field = 'books__count'
 
-    @display(description="Modern English", ordering="modern_transcription")
     def _modern_transcription(self, obj):
-        return mark_safe(unescape(obj.modern_transcription))
+        return mark_safe(obj.modern_transcription)
+    _modern_transcription.short_description = 'Modern English'
+    _modern_transcription.admin_order_field = 'modern_transcription'
 
 @admin.register(Holding)
 class HoldingAdmin(BepAdminDefaults):
@@ -410,7 +445,6 @@ class HoldingAdmin(BepAdminDefaults):
         HoldingImageInline,
     ]
 
-    @display(description="Date & Source")
     def _date(self, obj):
         if obj.start_date and obj.end_date:
             return f"{obj.start_date}-{obj.end_date}"
@@ -419,16 +453,18 @@ class HoldingAdmin(BepAdminDefaults):
         elif obj.written_date:
             return obj.written_date
         return 'No date'
+    _date.short_description = 'Date & Source'
 
-    @display(description="Modern English", ordering="modern_transcription")
     def _modern_transcription(self, obj):
-        return mark_safe(unescape(obj.modern_transcription))
+        return mark_safe(obj.modern_transcription)
+    _modern_transcription.short_description = 'Modern English'
+    _modern_transcription.admin_order_field = 'modern_transcription'
 
-    @display(description="Book")
     def _book(self, obj):
         return mark_safe('<br>'.join(
             [str(n) for n in obj.books.all()]
         ))
+    _book.short_description = 'Book'
 
 @admin.register(Format)
 class FormatAdmin(SimpleTermModelDefaults):

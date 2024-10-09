@@ -1,15 +1,14 @@
 from django import forms
-from unfold.widgets import UnfoldAdminIntegerFieldWidget
 
 from .models import Transaction
 
 class TransactionAdminForm(forms.ModelForm):
-    value_l = forms.IntegerField(min_value=0, initial=0, required=True, widget=UnfoldAdminIntegerFieldWidget, label="Cost in Pounds")
-    value_s = forms.IntegerField(min_value=0, initial=0, required=True, widget=UnfoldAdminIntegerFieldWidget, label="Shillings")
-    value_d = forms.IntegerField(min_value=0, initial=0, required=True, widget=UnfoldAdminIntegerFieldWidget, label="Pence")
-    shipping_l = forms.IntegerField(min_value=0, initial=0, required=True, widget=UnfoldAdminIntegerFieldWidget, label="Carriage in Pounds")
-    shipping_s = forms.IntegerField(min_value=0, initial=0, required=True, widget=UnfoldAdminIntegerFieldWidget, label="Shillings")
-    shipping_d = forms.IntegerField(min_value=0, initial=0, required=True, widget=UnfoldAdminIntegerFieldWidget, label="Pence")
+    value_l = forms.IntegerField(min_value=0, initial=0, required=True, label="Cost in Pounds")
+    value_s = forms.IntegerField(min_value=0, initial=0, required=True, label="Shillings")
+    value_d = forms.IntegerField(min_value=0, initial=0, required=True, label="Pence")
+    shipping_l = forms.IntegerField(min_value=0, initial=0, required=True, label="Carriage in Pounds")
+    shipping_s = forms.IntegerField(min_value=0, initial=0, required=True, label="Shillings")
+    shipping_d = forms.IntegerField(min_value=0, initial=0, required=True, label="Pence")
 
     class Meta:
         model = Transaction

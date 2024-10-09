@@ -31,6 +31,21 @@ services:
       app:
         condition: service_healthy
 
+  vite:
+    container_name: bep_vite
+    build:
+      context: .
+      target: bep-vite
+    command: yarn dev
+    ports:
+      - "5173:5173"
+    volumes:
+      # code for development
+      - ./bep_vite:/app
+
+      # use the container's node_modules folders (don't override with local dev)
+      - /app/node_modules
+
   app:
     container_name: bep_app
     # image: dhil/bep

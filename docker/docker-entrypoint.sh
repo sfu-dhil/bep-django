@@ -4,6 +4,8 @@ set -e
 # app specific setup here
 python manage.py migrate
 
+mkdir -p /app/static
+chown $MEDIA_FOLDER_UID:$MEDIA_FOLDER_GID /app/static
 # collect static if needed
 python manage.py collectstatic --noinput
 
@@ -17,5 +19,10 @@ MEDIA_FOLDER_UID=${MEDIA_FOLDER_UID-101}
 MEDIA_FOLDER_GID=${MEDIA_FOLDER_GID-101}
 mkdir -p /media/images /media/thumbnails
 chown $MEDIA_FOLDER_UID:$MEDIA_FOLDER_GID /media /media/images /media/thumbnails
+mkdir -p /static-vite/dist/assets
+chown $MEDIA_FOLDER_UID:$MEDIA_FOLDER_GID /static-vite/dist /static-vite/dist/assets
+
+# ensure django file cache directory exists
+mkdir -p /django_cache
 
 gunicorn --config /app/gunicorn.config.py bep_app.wsgi:application
