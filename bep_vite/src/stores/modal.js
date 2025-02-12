@@ -1,13 +1,9 @@
 import { defineStore } from 'pinia'
-import { useData } from './data'
 import { useFilterStore } from './filter'
-
-const {
-  parishMap,
-  getParishTransactions,
-  getParishInventories,
-  getParishHoldings,
-} = useData()
+import { useParishesStore } from './api/parishes'
+import { useTransactionsStore } from './api/transactions'
+import { useInventoriesStore } from './api/inventories'
+import { useHoldingsStore } from './api/holdings'
 
 export const useParishModalStore = defineStore('parishModal', {
   state: () => ({
@@ -16,12 +12,12 @@ export const useParishModalStore = defineStore('parishModal', {
   }),
   getters: {
     parish: (state) => {
-      return parishMap.get(state.parishId) || null
+      return useParishesStore().parishesMap.get(state.parishId) || null
     },
     inventories: (state) => {
         if (state.parishId) {
             const filterStore = useFilterStore()
-            return getParishTransactions(state.parishId)
+            return useTransactionsStore().getParishTransactions(state.parishId)
                 .filter(filterStore.bookFilter())
                 .sort((a, b) => a.start_date - b.start_date)
         }
@@ -30,7 +26,7 @@ export const useParishModalStore = defineStore('parishModal', {
     transactions: (state) => {
         if (state.parishId) {
             const filterStore = useFilterStore()
-            return getParishInventories(state.parishId)
+            return useInventoriesStore().getParishInventories(state.parishId)
                 .filter(filterStore.bookFilter())
                 .sort((a, b) => a.start_date - b.start_date)
         }
@@ -39,7 +35,7 @@ export const useParishModalStore = defineStore('parishModal', {
     holdings: (state) => {
       if (state.parishId) {
           const filterStore = useFilterStore()
-          return getParishHoldings(state.parishId)
+          return useHoldingsStore().getParishHoldings(state.parishId)
               .filter(filterStore.bookFilter())
               .sort((a, b) => a.start_date - b.start_date)
       }

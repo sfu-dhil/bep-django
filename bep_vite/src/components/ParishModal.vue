@@ -3,7 +3,6 @@ import { watch, ref, onMounted, onUnmounted, nextTick, } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useParishModalStore } from '../stores/modal.js'
 import { useFilterStore } from '../stores/filter.js'
-import { useData } from '../stores/data.js'
 import ParishModalList from './ParishModalList.vue'
 
 const store = useParishModalStore()
@@ -19,9 +18,6 @@ const filterStore = useFilterStore()
 const {
   bookRecordToggle,
 } = storeToRefs(filterStore)
-const {
-  bookMap,
-} = useData()
 
 const modal = ref(null)
 

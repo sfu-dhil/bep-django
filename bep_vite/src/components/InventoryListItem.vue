@@ -1,10 +1,12 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { useData } from '../stores/data.js'
+import { storeToRefs } from 'pinia'
+import { useBooksStore } from '../stores/api/books'
 
+const bookStore = useBooksStore()
 const {
-  bookMap,
-} = useData()
+  booksMap,
+} = storeToRefs(bookStore)
 
 const props = defineProps({
   inventory: {
@@ -18,7 +20,7 @@ const bookLimit = 5
 
 const bookCount = computed(() => props.inventory.books.length )
 const books = computed(() => {
-  const books = props.inventory.books.map((bookId) => bookMap.get(bookId))
+  const books = props.inventory.books.map((bookId) => booksMap.get(bookId))
   return books.length > bookLimit && !showMoreBooks.value ? books.slice(0, bookLimit) : books
 })
 </script>

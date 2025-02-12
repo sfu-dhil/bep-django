@@ -1,21 +1,17 @@
 import { defineStore } from 'pinia'
-import { useData } from './data'
 import { isSameObjectArrayById } from '../helpers/utils'
-
-const {
-  nationMap,
-  countyMap,
-  townMap,
-  provinceMap,
-  dioceseMap,
-  archdeaconryMap,
-  parishMap,
-  bookMap,
-  monarchMap,
-  getTransactionsContainingBooks,
-  getInventoriesContainingBooks,
-  getHoldingsContainingBooks,
-} = useData()
+import { useNationsStore } from './api/nations'
+import { useCountiesStore } from './api/counties'
+import { useTownsStore } from './api/towns'
+import { useProvincesStore } from './api/provinces'
+import { useDiocesesStore } from './api/dioceses'
+import { useArchdeaconriesStore } from './api/archdeaconries'
+import { useParishesStore } from './api/parishes'
+import { useMonarchsStore } from './api/monarchs'
+import { useBooksStore } from './api/books'
+import { useTransactionsStore } from './api/transactions'
+import { useInventoriesStore } from './api/inventories'
+import { useHoldingsStore } from './api/holdings'
 
 export const useFilterStore = defineStore('filter', {
   state: () => ({
@@ -34,15 +30,15 @@ export const useFilterStore = defineStore('filter', {
     endYear: null,
   }),
   getters: {
-    listedNations: () => [...nationMap.values()],
-    listedCounties: (state) => [...countyMap.values()].filter(state.nationFilter()),
-    listedTowns: (state) => [...townMap.values()].filter((o) => state.nationFilter()(o) && state.countyFilter()(o)),
-    listedProvinces: (state) => [...provinceMap.values()].filter(state.nationFilter()),
-    listedDioceses: (state) => [...dioceseMap.values()].filter((o) => state.nationFilter()(o) && state.provinceFilter()(o)),
-    listedArchdeaconries: (state) => [...archdeaconryMap.values()].filter((o) => state.nationFilter()(o) && state.provinceFilter()(o) && state.dioceseFilter()(o)),
-    listedParishes: (state) => [...parishMap.values()].filter((o) => state.nationFilter()(o) && state.provinceFilter()(o) && state.dioceseFilter()(o) && state.archdeaconryFilter()(o) && state.countyFilter()(o) && state.townFilter()(o) && state.parishBookRecordFilter()(o)),
-    listedMonarchs: () => [...monarchMap.values()],
-    listedBooks: () => [...bookMap.values()],
+    listedNations: () => useNationsStore().nations,
+    listedCounties: (state) => useCountiesStore().counties.filter(state.nationFilter()),
+    listedTowns: (state) => useTownsStore().towns.filter((o) => state.nationFilter()(o) && state.countyFilter()(o)),
+    listedProvinces: (state) => useProvincesStore().provinces.filter(state.nationFilter()),
+    listedDioceses: (state) => useDiocesesStore().dioceses.filter((o) => state.nationFilter()(o) && state.provinceFilter()(o)),
+    listedArchdeaconries: (state) => useArchdeaconriesStore().archdeaconries.filter((o) => state.nationFilter()(o) && state.provinceFilter()(o) && state.dioceseFilter()(o)),
+    listedParishes: (state) => useParishesStore().parishes.filter((o) => state.nationFilter()(o) && state.provinceFilter()(o) && state.dioceseFilter()(o) && state.archdeaconryFilter()(o) && state.countyFilter()(o) && state.townFilter()(o) && state.parishBookRecordFilter()(o)),
+    listedMonarchs: () => useMonarchsStore().monarchs,
+    listedBooks: () => useBooksStore().books,
   },
   actions: {
     toggleSelectedMonarch(monarch) {
@@ -94,12 +90,12 @@ export const useFilterStore = defineStore('filter', {
       if (this.selectedBooks.length > 0) {
         const bookIds = this.selectedBooks.map((o) => o.id)
         let dataset = []
-        if (this.bookRecordToggle == 'inventory') {
-          dataset = getTransactionsContainingBooks(bookIds)
-        } else if (this.bookRecordToggle == 'transaction') {
-          dataset = getInventoriesContainingBooks(bookIds)
+        if (this.bookRecordToggle == 'transaction') {
+          dataset = useTransactionsStore().getTransactionsContainingBooks(bookIds)
+        } else if (this.bookRecordToggle == 'inventory') {
+          dataset = useInventoriesStore().getInventoriesContainingBooks(bookIds)
         } else {
-          dataset = getHoldingsContainingBooks(bookIds)
+          dataset = useHoldingsStore().getHoldingsContainingBooks(bookIds)
         }
         const parishIds = dataset.map((o) => o.parish_id)
         return (o) => parishIds.includes(o.id)

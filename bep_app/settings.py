@@ -59,12 +59,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
     'health_check',
     'django_select2',
     'django_cleanup.apps.CleanupConfig',
     'modelclone',
     'django_vite',
+    'ninja_extra',
+    'django_json_ld',
 ]
 
 MIDDLEWARE = [
@@ -213,3 +214,18 @@ TINYMCE_DEFAULT_CONFIG = {
     'quickbars_selection_toolbar': 'bold italic underline strikethrough | fontsize | forecolor | blockquote',
     'contextmenu': 'undo redo | inserttable | cell row column deletetable',
 }
+
+# django ninja api
+# NINJA_PAGINATION_CLASS = 'ninja.pagination.PageNumberPagination'
+NINJA_EXTRA={
+    'PAGINATION_CLASS': 'ninja_extra.pagination.PageNumberPaginationExtra'
+}
+
+# django-json-ld settings
+# JSON_LD_CONTEXT_ATTRIBUTE = 'sd'
+# JSON_LD_MODEL_ATTRIBUTE = 'sd'
+# JSON_LD_DEFAULT_CONTEXT = 'https://schema.org/'
+# JSON_LD_INDENT = None
+# JSON_LD_DEFAULT_TYPE = 'Thing'
+# JSON_LD_GENERATE_URL = True
+JSON_LD_EMPTY_INPUT_RENDERING = 'silent' # strict/silent/generate_thing

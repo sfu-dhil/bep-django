@@ -53,7 +53,7 @@ watch(countyProvincesToggle, (newValue, oldValue) => {
 </script>
 
 <template>
-  <div class="my-2 px-3 sidebar">
+  <div class="my-0 p-3 sidebar">
     <h3 class="w-100 text-center">
       Time Period
     </h3>
