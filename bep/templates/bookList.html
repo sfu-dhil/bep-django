@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+
+{% block styles %}
+{% endblock %}
+
+{% block javascript %}
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <figure>
+            <blockquote class="blockquote"><h1>Books</h1></blockquote>
+            <figcaption class="blockquote-footer">{% include "_partials/pagination_label.html" with page_obj=page_obj %}</figcaption>
+        </figure>
+        {% include "_partials/search_bar.html" %}
+        <hr />
+        {% for object in object_list %}
+            <div class="card mb-3">
+                <div class="card-header">
+                    {% if request.GET.q %}
+                        {{ object.title_headline|safe }}
+                    {% else %}
+                        {{ object.title|safe }}
+                    {% endif %}
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% include '_partials/search_detail.html' with label="Uniform Title" value=object.uniform_title value_headline=object.uniform_title_headline %}
+                    {% include '_partials/search_detail.html' with label="Author" value=object.author value_headline=object.author_headline %}
+                    {% include '_partials/search_detail.html' with label="Date" value=object.date value_headline=object.date_headline %}
+                    {% include '_partials/search_detail.html' with label="Imprint" value_headline=object.imprint_headline %}
+                    {% include '_partials/search_detail.html' with label="Description" value_headline=object.description_headline %}
+                </ul>
+                {% if request.GET.q %}
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary" title="Matching Score">
+                        {{ object.rank|floatformat:"0" }}%
+                    </span>
+                {% endif %}
+                <a href="{% url 'book-details' pk=object.pk %}" class="stretched-link"></a>
+            </div>
+        {% endfor %}
+        {% if page_obj.paginator.num_pages > 1 %}
+            {% bootstrap_pagination page_obj url=request.get_full_path justify_content='center' %}
+        {% endif %}
+    </div>
+{% endblock %}

@@ -11,6 +11,7 @@ export default defineConfig({
     host: true,
     strictPort: true,
     origin: 'http://localhost:5173',
+    cors: 'http://localhost:8080',
   },
   root: resolve("./src"),
   base: "/static/dist/",
@@ -20,7 +21,8 @@ export default defineConfig({
     outDir: resolve("./dist"),
     rollupOptions: {
       input: {
-        dashboard: resolve('./src/dashboard.js'),
+        parish_map_app: resolve('./src/parish_map_app.js'),
+        location_map_app: resolve('./src/location_map_app.js'),
       },
     },
   },

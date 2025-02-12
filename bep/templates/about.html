@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block styles %}
+{% endblock %}
+
+{% block javascript %}
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-xxl-6">
+                <div class="my-5 text-center">
+                    <h1 class="display-5 fw-bolder mb-2">Books in English Parishes</h1>
+                    <p class="lead fw-normal text-muted mb-4">{% lorem 1 %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <section class="py-5 bg-dark">
+        <div class="container">
+            <div class="row gx-5 align-items-center">
+                <div class="col-lg-6">
+                    <img src="https://dummyimage.com/600x400/343a40/6c757d" alt="" class="img-fluid rounded mb-5 mb-lg-0" />
+                </div>
+                <div class="col-lg-6">
+                    <h2 class="fw-bolder">{% lorem 7 w random %}</h2>
+                    <p class="lead fw-normal text-muted mb-0">{% lorem 1 %}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="py-5">
+        <div class="container">
+            <div class="row gx-5 align-items-center">
+                <div class="col-lg-6">
+                    <h2 class="fw-bolder">{% lorem 7 w random %}</h2>
+                    <p class="lead fw-normal text-muted mb-0">{% lorem 1 %}</p>
+                </div>
+                <div class="col-lg-6">
+                    <img src="https://dummyimage.com/600x400/343a40/6c757d" alt="" class="img-fluid rounded mb-5 mb-lg-0" />
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="py-5 bg-dark">
+        <div class="container">
+            <div class="row gx-5 align-items-center">
+                <div class="col-lg-6">
+                    <img src="https://dummyimage.com/600x400/343a40/6c757d" alt="" class="img-fluid rounded mb-5 mb-lg-0" />
+                </div>
+                <div class="col-lg-6">
+                    <h2 class="fw-bolder">{% lorem 7 w random %}</h2>
+                    <p class="lead fw-normal text-muted mb-0">{% lorem 1 %}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="py-5">
+        <div class="container">
+            <h2 class="fw-bolder text-center">Team Members</h2>
+
+            <div class="row gx-5 row-cols-1 row-cols-sm-2 row-cols-xl-4 justify-content-center">
+                <div class="col mb-5 mb-5 mb-xl-0 text-center">
+                    <img src="https://dummyimage.com/150x150/ced4da/6c757d" alt="" class="img-fluid rounded-circle mb-4 px-4" />
+                    <h5 class="fw-bolder">{% lorem 3 w random %}</h5>
+                    <div class="fst-italic text-muted">{% lorem 7 w random %}</div>
+                </div>
+                <div class="col mb-5 mb-5 mb-xl-0 text-center">
+                    <img src="https://dummyimage.com/150x150/ced4da/6c757d" alt="" class="img-fluid rounded-circle mb-4 px-4" />
+                    <h5 class="fw-bolder">{% lorem 3 w random %}</h5>
+                    <div class="fst-italic text-muted">{% lorem 7 w random %}</div>
+                </div>
+                <div class="col mb-5 mb-5 mb-xl-0 text-center">
+                    <img src="https://dummyimage.com/150x150/ced4da/6c757d" alt="" class="img-fluid rounded-circle mb-4 px-4" />
+                    <h5 class="fw-bolder">{% lorem 3 w random %}</h5>
+                    <div class="fst-italic text-muted">{% lorem 7 w random %}</div>
+                </div>
+                <div class="col mb-5 mb-5 mb-xl-0 text-center">
+                    <img src="https://dummyimage.com/150x150/ced4da/6c757d" alt="" class="img-fluid rounded-circle mb-4 px-4" />
+                    <h5 class="fw-bolder">{% lorem 3 w random %}</h5>
+                    <div class="fst-italic text-muted">{% lorem 7 w random %}</div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

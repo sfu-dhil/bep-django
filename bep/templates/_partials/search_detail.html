@@ -1,0 +1,12 @@
+{% if value_headline and '<mark>' in value_headline %}
+    <li class="list-group-item list-group-item-action">
+        <div class="fw-bold">{{ label }}</div>
+        {{ value_headline|safe }}
+    </li>
+{% elif value %}
+    <li class="list-group-item list-group-item-action">
+        <div class="fw-bold">{{ label }}</div>
+        {{ value|striptags|safe }}
+    </li>
+{% endif %}
+

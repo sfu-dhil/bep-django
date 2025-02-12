@@ -1,6 +1,8 @@
 from django.db import models
 from django_advance_thumbnail import AdvanceThumbnailField
 from django.contrib.postgres.fields import ArrayField
+from django.contrib.postgres.search import SearchVector, SearchVectorField
+from django.contrib.postgres.indexes import GinIndex
 from django.utils.html import strip_tags
 from django.utils.safestring import mark_safe
 from html import unescape
@@ -283,6 +285,14 @@ class Parish(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    search_vector = models.GeneratedField(
+        expression=SearchVector("label", config="english", weight="A") +
+            SearchVector("description", config="english", weight="B") +
+            SearchVector("address", config="english", weight="C"),
+        output_field=SearchVectorField(),
+        db_persist=True,
+    )
+
     # relationships
     archdeaconry = models.ForeignKey(
         Archdeaconry,
@@ -304,6 +314,9 @@ class Parish(models.Model):
     class Meta:
         db_table = 'bep_parish'
         verbose_name_plural = "parishes"
+        indexes = [
+            GinIndex(fields=["search_vector"]),
+        ]
 
     def __str__(self):
         return mark_safe(f"{self.label}")
@@ -337,7 +350,7 @@ class PrintSource(models.Model):
 
 class ManuscriptSource(models.Model):
     call_number = models.CharField(blank=True)
-    label = models.CharField(unique=True)
+    label = models.CharField()
     description = models.TextField(blank=True)
     links = ArrayField(models.URLField(max_length=None), blank=True)
 
@@ -382,6 +395,18 @@ class Book(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    search_vector = models.GeneratedField(
+        expression=SearchVector("title", config="english", weight="A") +
+            SearchVector("uniform_title", config="english", weight="B") +
+            SearchVector("author", config="english", weight="A") +
+            SearchVector("imprint", config="english", weight="C") +
+            SearchVector("variant_imprint", config="english", weight="D") +
+            SearchVector("description", config="english", weight="C") +
+            SearchVector("date", config="english", weight="C"),
+        output_field=SearchVectorField(),
+        db_persist=True,
+    )
+
     # relationships
     format = models.ForeignKey(
         Format,
@@ -404,6 +429,9 @@ class Book(models.Model):
 
     class Meta:
         db_table = 'bep_book'
+        indexes = [
+            GinIndex(fields=["search_vector"]),
+        ]
 
     def __str__(self):
         if self.uniform_title:
@@ -476,7 +504,7 @@ class HoldingImage(AbstractImage):
 
 class Injunction(models.Model):
     title = models.CharField()
-    uniform_title = models.CharField(blank=True)
+    uniform_title = models.TextField(blank=True)
     variant_titles = ArrayField(models.CharField(), blank=True)
     author = models.CharField(blank=True)
     imprint = models.TextField(blank=True)

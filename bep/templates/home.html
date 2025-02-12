@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load django_vite %}
+
+{% block styles %}
+{% endblock %}
+
+{% block javascript %}
+    {% vite_asset 'location_map_app.js' crossorigin="" %}
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row align-items-stretch gx-5 justify-content-center">
+            <div class="col-lg-12 col-xl-5">
+                <div class="my-5 text-center text-xl-start">
+                    <h1 class="display-5 fw-bolder mb-2">{% lorem 7 w random %}</h1>
+                    <p class="lead fw-normal mb-4">{% lorem 2 %}</p>
+                    <div class="d-grid gap-3 d-sm-flex justify-content-sm-center justify-content-xl-start">
+                        <a class="btn btn-primary btn-lg px-4 me-sm-3" href="">{% lorem 2 w random %}</a>
+                        <a class="btn btn-outline-light btn-lg px-4" href="">{% lorem 2 w random %}</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12 col-xl-7 min-vh-100-lg">
+                <div id="location-map-app" class="h-100"></div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

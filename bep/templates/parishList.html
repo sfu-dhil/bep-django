@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+
+{% block styles %}
+{% endblock %}
+
+{% block javascript %}
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <figure>
+            <blockquote class="blockquote"><h1>Parishes</h1></blockquote>
+            <figcaption class="blockquote-footer">{% include "_partials/pagination_label.html" with page_obj=page_obj %}</figcaption>
+        </figure>
+        {% include "_partials/search_bar.html" %}
+        <hr />
+        {% for object in object_list %}
+            <div class="card mb-3">
+                <div class="card-header">
+                    {% if request.GET.q %}
+                        {{ object.label_headline|safe }}
+                    {% else %}
+                        {{ object.label|safe }}
+                    {% endif %}
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% include '_partials/search_detail.html' with label="Street Address" value=object.address value_headline=object.address_headline %}
+                    {% include '_partials/search_detail.html' with label="Description" value=object.description value_headline=object.description_headline %}
+                </ul>
+                {% if request.GET.q %}
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary" title="Matching Score">
+                        {{ object.rank|floatformat:"0" }}%
+                    </span>
+                {% endif %}
+                <a href="{% url 'parish-details' pk=object.pk %}" class="stretched-link"></a>
+            </div>
+        {% endfor %}
+        {% if page_obj.paginator.num_pages > 1 %}
+            {% bootstrap_pagination page_obj url=request.get_full_path justify_content='center' %}
+        {% endif %}
+    </div>
+{% endblock %}

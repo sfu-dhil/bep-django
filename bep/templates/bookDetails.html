@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block styles %}
+{% endblock %}
+
+{% block javascript %}
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>{{ object.title }}</h1>
+        <hr />
+
+        <div class="card mb-5">
+            <div class="card-header">Book Details</div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item list-group-item-action">
+                    <div class="fw-bold">Uniform Title</div>
+                    {% if object.uniform_title %}
+                        {{ object.uniform_title|safe }}
+                    {% endif %}
+                </li>
+                <li class="list-group-item list-group-item-action">
+                    <div class="fw-bold">Variant Titles</div>
+                    {% if object.variant_titles|length > 0 %}
+                        <ul class="list-group list-group-flush my-2">
+                            {% for variant_title in object.variant_titles %}
+                                <li class="list-group-item list-group-item-action">{{ variant_title }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </li>
+                <li class="list-group-item list-group-item-action">
+                    <div class="fw-bold">Author</div>
+                    {% if object.author %}
+                        {{ object.author|safe }}
+                    {% endif %}
+                </li>
+                <li class="list-group-item list-group-item-action">
+                    <div class="fw-bold">Date</div>
+                    {% if object.date %}
+                        {{ object.date|safe }}
+                    {% endif %}
+                </li>
+                <li class="list-group-item list-group-item-action">
+                    <div class="fw-bold">Imprint</div>
+                    {% if object.imprint %}
+                        {{ object.imprint|safe }}
+                    {% endif %}
+                </li>
+                <li class="list-group-item list-group-item-action">
+                    <div class="fw-bold">Variant Imprint</div>
+                    {% if object.variant_imprint %}
+                        {{ object.variant_imprint|safe }}
+                    {% endif %}
+                </li>
+            </ul>
+        </div>
+
+        <div class="card mb-5">
+            <div class="card-header">Misc Details</div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item list-group-item-action">
+                    <div class="fw-bold">Monarch</div>
+                    {% if object.monarch %}
+                        {{ object.monarch.label|safe }}
+                    {% endif %}
+                </li>
+                <li class="list-group-item list-group-item-action">
+                    <div class="fw-bold">Description</div>
+                    {% if object.description %}
+                        {{ object.description|safe }}
+                    {% endif %}
+                </li>
+                <li class="list-group-item list-group-item-action">
+                    <div class="fw-bold">Format</div>
+                    {% if object.format %}
+                        {{ object.format.label|safe }}
+                    {% endif %}
+                </li>
+                <li class="list-group-item list-group-item-action">
+                    <div class="fw-bold">Physical Description</div>
+                    {% if object.physical_description %}
+                        {{ object.physical_description|safe }}
+                    {% endif %}
+                </li>
+                <li class="list-group-item list-group-item-action">
+                    <div class="fw-bold">Links</div>
+                    {% for link in object.links %}
+                        <a target="_blank" href="{{ link }}">{{ link }}</a><br />
+                    {% endfor %}
+                </li>
+            </ul>
+        </div>
+
+        <div class="card mb-5">
+            <div class="card-header">Inventory/Transaction/Holding Details</div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item list-group-item-action">
+                    Lists?
+                </li>
+            </ul>
+        </div>
+    </div>
+{% endblock %}

@@ -66,7 +66,7 @@ example:
 
 Command line:
 
-    docker exec -it bep_db mysql -u bep -ppassword bep
+    PGPASSWORD=password docker exec -it bep_db psql --username=bep bep
 
 Through a database management tool:
 - Host:`127.0.0.1`

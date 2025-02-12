@@ -1,21 +1,19 @@
-
-
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import Multiselect from 'vue-multiselect'
 import OpenLayersMap from 'vue3-openlayers'
-import DashboardApp from './DashboardApp.vue'
+import LocationMapApp from './LocationMapApp.vue'
 
 import 'vue-multiselect/dist/vue-multiselect.min.css'
 import 'vue3-openlayers/styles.css'
-import './assets/dashboard.css'
+import './assets/base.css'
 
 const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate)
 
-const app = createApp(DashboardApp)
+const app = createApp(LocationMapApp)
 app.use(pinia)
 app.use(OpenLayersMap)
 app.component('Multiselect', Multiselect)
-app.mount('#dashboard-app')
+app.mount('#location-map-app')

@@ -44,7 +44,7 @@ SECRET_KEY = env('SECRET_KEY', default='django-insecure-0lgov2k26n+=bjocstuna-@8
 DEBUG = env.bool('DEBUG', default=False)
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
-
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Application definition
 
@@ -59,12 +59,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
+    'django.contrib.postgres',
     'health_check',
     'django_select2',
     'django_cleanup.apps.CleanupConfig',
     'modelclone',
     'django_vite',
+    'ninja_extra',
+    'django_bootstrap5',
 ]
 
 MIDDLEWARE = [
@@ -90,6 +92,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'bep.context_processors.get_git_info',
             ],
         },
     },
@@ -187,6 +190,12 @@ SILENCED_SYSTEM_CHECKS = ["security.W019"]
 DATA_UPLOAD_MAX_MEMORY_SIZE = 256 * 1024 * 1024 # 256MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 256 * 1024 * 1024 # 256MB
 
+GIT_REPO = "https://github.com/sfu-dhil/bep-django"
+GIT_COMMIT = env('GIT_COMMIT', default='')
+GIT_COMMIT_SHORT = env('GIT_COMMIT_SHORT', default='')
+GIT_BRANCH = env('GIT_BRANCH', default='')
+GIT_TAG = env('GIT_TAG', default='')
+
 # logout redirection
 LOGIN_URL = 'admin:login'
 LOGIN_REDIRECT_URL = 'admin:index'
@@ -212,4 +221,10 @@ TINYMCE_DEFAULT_CONFIG = {
     'quickbars_insert_toolbar': False,
     'quickbars_selection_toolbar': 'bold italic underline strikethrough | fontsize | forecolor | blockquote',
     'contextmenu': 'undo redo | inserttable | cell row column deletetable',
+}
+
+# django ninja api
+# NINJA_PAGINATION_CLASS = 'ninja.pagination.PageNumberPagination'
+NINJA_EXTRA={
+    'PAGINATION_CLASS': 'ninja_extra.pagination.PageNumberPaginationExtra'
 }

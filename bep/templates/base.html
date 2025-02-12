@@ -1,4 +1,5 @@
 {% load static %}
+{% load django_bootstrap5 %}
 {% load django_vite %}
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
@@ -20,10 +21,56 @@
         {% endblock %}
 
         <script src="{% static 'bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
+        <script src="{% static 'js/base.js' %}"></script>
     </head>
-    <body>
-        {% block content %}
-        {% endblock %}
+    <body class="d-flex flex-column h-100">
+        <header>
+            <nav class="navbar navbar-expand-lg flex-shrink-0">
+                <div class="container px-5">
+                    <a class="navbar-brand" href="{% url 'home' %}">Books in English Parishes</a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div id="navbarSupportedContent" class="collapse navbar-collapse">
+                        <ul class="navbar-nav mb-2 mb-lg-0">
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'parish-list' %}">Parishes</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'book-list' %}">Books</a>
+                            </li>
+                        </ul>
+                        <ul class="navbar-nav mb-2 mb-lg-0 ms-auto">
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'about' %}">About</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </header>
+        <main class="flex-grow-1 bg-secondary-subtle py-5">
+            {% bootstrap_messages %}
+
+            {% block content %}
+            {% endblock %}
+        </main>
+        <footer class="py-4 flex-shrink-0">
+            <div class="container px-5">
+                <div class="row align-items-center justify-content-between flex-column flex-sm-row">
+                    <div class="col-auto">
+                        <div class="small m-0 text-white">Books in English Parishes</div>
+                    </div>
+                    <div class="col-auto">
+                        <a class="link-light small" href="{% url 'privacy' %}">Privacy</a>
+                        {% if GIT_REPO_LINK and GIT_REPO_LINK_TEXT %}
+                            <span class="text-white mx-1">&middot;</span>
+                            <a class="link-light small" target="_blank" href="{{ GIT_REPO_LINK }}">{{ GIT_REPO_LINK_TEXT }}</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </footer>
 
         {% block javascript %}
         {% endblock %}

@@ -1,19 +1,14 @@
-name: Unit Tests & Tagged Deploy
+name: Tagged Deploy
 
 # based on: https://docs.docker.com/build/ci/github-actions/multi-platform/#distribute-build-across-multiple-runners
 
 on:
   push:
-    branches:
-    - '*'
     tags:
     - 'v*'
 
 env:
   REGISTRY_IMAGE: dhilsfu/bep
-  DB_NAME: pipeline_db
-  DB_USER: pipeline_user
-  DB_PASSWORD: pipeline_password
 
 
 jobs:
@@ -25,12 +20,12 @@ jobs:
         platform:
           # - linux/386
           - linux/amd64
-          # - linux/arm/v5
-          - linux/arm/v7
+          # - linux/arm/v6
+          # - linux/arm/v7 # psycopg[binary] issue
           - linux/arm64
-          # - linux/mips64le
-          # - linux/ppc64le
-          # - linux/s390x
+          - linux/arm64/v8
+          # - linux/ppc64le # Pillow issue
+          # - linux/s390x # psycopg[binary] issue
     steps:
     - name: Prepare
       run: |
@@ -68,26 +63,6 @@ jobs:
         outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
         cache-from: type=registry,ref=${{ env.REGISTRY_IMAGE }}:buildcache-${{ env.PLATFORM_PAIR }}
         cache-to: type=registry,ref=${{ env.REGISTRY_IMAGE }}:buildcache-${{ env.PLATFORM_PAIR }},mode=max
-
-    - name: Shutdown Ubuntu MySQL (SUDO)
-      run: sudo service mysql stop
-
-    - name: Set up MariaDB
-      uses: getong/mariadb-action@v1.1
-      with:
-        mysql database: ${{ env.DB_NAME }}_test
-        mysql user: ${{ env.DB_USER }}
-        mysql password: ${{ env.DB_PASSWORD }}
-
-    - name: Run Unit Tests
-      run: |
-        touch .env.test.local
-        echo DATABASE_URL="mysql://${{ env.DB_USER }}:${{ env.DB_PASSWORD }}@127.0.0.1:3306/${{ env.DB_NAME }}?serverVersion=mariadb-10.11.0" >> .env.test.local
-        docker run --rm \
-          -v "${GITHUB_WORKSPACE}/.env.test.local":/var/www/html/.env.test.local \
-          --network host \
-          --platform=${{ matrix.platform }} \
-          ${{ env.REGISTRY_IMAGE }}@${{ steps.build.outputs.digest }} make test
 
     - name: Export digest
       run: |
