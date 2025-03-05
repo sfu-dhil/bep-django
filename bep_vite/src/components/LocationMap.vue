@@ -1,15 +1,18 @@
 
 
 <script setup>
-import { ref, watch, inject, nextTick } from 'vue'
+import { ref, watch, inject, nextTick, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { Style, Text, Fill, Stroke, Circle } from "ol/style"
-import FilterSingleSelect from './FilterSingleSelect.vue'
 import { useGeographic } from 'ol/proj.js'
 import { createEmpty, extend } from 'ol/extent.js';
+import GeoJSON from 'ol/format/GeoJSON'
 import { useLocationMapStore } from '../stores/map/location.js'
 import { useInfoModalStore } from '../stores/info_modals.js'
 import { useParishesStore } from '../stores/data/parishes.js'
+import FilterSingleSelect from './FilterSingleSelect.vue'
+// import DiocesePre1541 from '../assets/diocese_pre_1541.json?url'
+import DiocesePost1541 from '../assets/diocese_post_1541.json?url'
 
 const store = useLocationMapStore()
 const {
@@ -25,6 +28,7 @@ const {
   listedProvinces,
   selectedProvinceId,
   listedDioceses,
+  listedDiocesesSet,
   selectedDioceseId,
   listedArchdeaconries,
   selectedArchdeaconryId,
@@ -40,10 +44,16 @@ const {
 
 const mapRef = ref(null)
 const viewRef = ref(null)
-const clusterSourceRef = ref(null)
-const clickFeature = (event) => {
+const sourceClusterRef = ref(null)
+const diocesePost1541SourceVectorRef = ref(null)
+const geoJson = new GeoJSON()
+
+const isCluster = (feature) => !!feature.get('features')
+const isRegion = (feature) => !isCluster(feature)
+const clickCluster = (event) => {
   if (event.selected.length == 1) {
-    const features = event.selected[0].get('features')
+    const feature = event.selected[0]
+    const features = feature.get('features')
     if (features.length > 1) {
       // zoom to fit cluster within extent
       const extent = createEmpty()
@@ -61,91 +71,90 @@ const clickFeature = (event) => {
 }
 const isShown = (id) => selectedParishId.value ? selectedParishId.value == id : listedParishesSet.value.has(id)
 const overrideGeometryFunction = (feature) => isShown(feature.get('id')) ? feature.getGeometry() : null
+const clusterGroupingStyle = (features, active) => {
+  return [
+    new Style({
+      image: new Circle({
+        radius: 10,
+        fill: new Fill({ color: active ? 'red' : '#7cb341' }),
+        stroke: new Stroke({ color: 'black', width: 1 }),
+      }),
+      text: new Text({
+        text: `${features.length}`,
+        fill: new Fill({ color: '#fff' }),
+      }),
+      zIndex: active ? Infinity : undefined,
+    }),
+  ]
+}
+const clusterPointStyle = (feature, active) => {
+  const parish = parishesMap.value.get(feature.get('id'))
+  return [
+    new Style({
+      text: new Text({
+        text: '\uf041',
+        scale: 1,
+        textBaseline: 'bottom',
+        font: 'bold 1em "Font Awesome 6 Free"',
+        fill: new Fill({ color: active ? 'red' : '#7cb341' }),
+        stroke: new Stroke({ color: 'black', width: 3 }),
+      }),
+      zIndex: active ? Infinity : undefined,
+    }),
+    new Style({
+      text: new Text({
+        text: `${parish.label}`,
+        textBaseline: 'top',
+        font: 'bold 0.6em system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans","Liberation Sans",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"',
+        fill: new Fill({ color: 'black' }),
+        stroke: new Stroke({ color: 'white', width: 3 }),
+      }),
+      zIndex: active ? Infinity : -1,
+    }),
+  ]
+}
 const overrideClusterStyle = (feature) => {
   const features = feature.get('features')
   if (features.length > 1) {
-    return [
-      new Style({
-        image: new Circle({
-          radius: 10,
-          fill: new Fill({ color: '#7cb341' }),
-          stroke: new Stroke({ color: 'black', width: 1 }),
-        }),
-        text: new Text({
-          text: `${features.length}`,
-          fill: new Fill({ color: '#fff' }),
-        }),
-      }),
-    ]
+    return clusterGroupingStyle(features, false)
   } else if (features.length == 1) {
-    const parish = parishesMap.value.get(features[0].get('id'))
-    return [
-      new Style({
-        text: new Text({
-          text: '\uf041',
-          scale: 1,
-          textBaseline: 'bottom',
-          font: 'bold 1em "Font Awesome 6 Free"',
-          fill: new Fill({ color: '#7cb341' }),
-          stroke: new Stroke({ color: 'black', width: 3 }),
-        }),
-      }),
-      new Style({
-        text: new Text({
-          text: `${parish.label}`,
-          textBaseline: 'top',
-          font: 'bold 0.6em system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans","Liberation Sans",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"',
-          fill: new Fill({ color: 'black' }),
-          stroke: new Stroke({ color: 'white', width: 3 }),
-        }),
-        zIndex: -1,
-      }),
-    ]
+    return clusterPointStyle(features[0], false)
   }
   return new Style()
 }
-const overrideSelectedFeatureStyle = (feature) => {
+const overrideSelectedClusterStyle = (feature) => {
   const features = feature.get('features')
   if (features.length > 1) {
-    return [
-      new Style({
-        image: new Circle({
-          radius: 10,
-          fill: new Fill({ color: 'red' }),
-          stroke: new Stroke({ color: 'black', width: 1 }),
-        }),
-        text: new Text({
-            text: `${features.length}`,
-            fill: new Fill({ color: '#fff' }),
-        }),
-        zIndex: Infinity,
-      }),
-    ]
+    return clusterGroupingStyle(features, true)
   } else if (features.length == 1) {
-    const parish = parishesMap.value.get(features[0].get('id'))
-    return [
-      new Style({
-        text: new Text({
-            text: '\uf041',
-            scale: 1,
-            textBaseline: 'bottom',
-            font: 'bold 1em "Font Awesome 6 Free"',
-            fill: new Fill({ color: 'red' }),
-            stroke: new Stroke({ color: 'black', width: 3 }),
-        }),
-        zIndex: Infinity,
-      }),
-      new Style({
-        text: new Text({
-          text: `${parish.label}`,
-          textBaseline: 'top',
-          font: 'bold 0.6em system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans","Liberation Sans",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"',
-          fill: new Fill({ color: 'black' }),
-          stroke: new Stroke({ color: 'white', width: 3 }),
-        }),
-        zIndex: Infinity,
-      }),
-    ]
+    return clusterPointStyle(features[0], true)
+  }
+  return new Style()
+}
+const dioceseRegionStyle = (feature, active) => {
+  active = active || (selectedDioceseId.value && selectedDioceseId.value == feature.get('pk'))
+  const activeFill = new Fill({
+    color: 'rgba(0, 0, 255, 0.1)',
+  })
+  return new Style({
+    stroke: new Stroke({
+      color: 'blue',
+      lineDash:[4],
+      width: active ? 2 : 1,
+    }),
+    fill: active ? activeFill : null,
+    text: new Text({
+      text: `${feature.get('name')}`,
+      font: 'bold 0.5em system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans","Liberation Sans",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"',
+      fill: new Fill({ color: 'black' }),
+      stroke: new Stroke({ color: 'white', width: 3 }),
+    }),
+    zIndex: active ? Infinity : undefined,
+  })
+}
+const overrideRegionsFunction = (feature) => {
+  if (['diocese_post_1541', 'diocese_pre_1541'].includes(feature.get('type'))) {
+    return dioceseRegionStyle(feature, false)
   }
   return new Style()
 }
@@ -162,13 +171,43 @@ useGeographic()
 const updateFilters = (newValue, oldValue) => {
   if (newValue !== oldValue) {
     store.updateFilters()
-    nextTick(() => clusterSourceRef.value?.source.getSource().changed())
+    nextTick(() => {
+      sourceClusterRef.value?.source.getSource().changed()
+      diocesePost1541SourceVectorRef.value?.source.changed()
+    })
   }
 }
-watch(selectedNationId, updateFilters)
-watch(selectedProvinceId, updateFilters)
-watch(selectedDioceseId, updateFilters)
-watch(selectedArchdeaconryId, updateFilters)
+watch(selectedNationId, (newValue, oldValue) => {
+  if (newValue !== oldValue) {
+    selectedProvinceId.value = null
+    selectedDioceseId.value = null
+    selectedArchdeaconryId.value = null
+    selectedParishId.value = null
+  }
+  updateFilters(newValue, oldValue)
+})
+watch(selectedProvinceId, (newValue, oldValue) => {
+  if (newValue !== oldValue) {
+    selectedDioceseId.value = null
+    selectedArchdeaconryId.value = null
+    selectedParishId.value = null
+  }
+  updateFilters(newValue, oldValue)
+})
+watch(listedDiocesesSet, updateFilters)
+watch(selectedDioceseId, (newValue, oldValue) => {
+  if (newValue !== oldValue) {
+    selectedArchdeaconryId.value = null
+    selectedParishId.value = null
+  }
+  updateFilters(newValue, oldValue)
+})
+watch(selectedArchdeaconryId, (newValue, oldValue) => {
+  if (newValue !== oldValue) {
+    selectedParishId.value = null
+  }
+  updateFilters(newValue, oldValue)
+})
 watch(selectedParishId, updateFilters)
 </script>
 
@@ -198,18 +237,25 @@ watch(selectedParishId, updateFilters)
 
       <ol-interaction-select
         :condition="pointerMoveCondition"
+        :filter="isCluster"
       >
-        <ol-style :overrideStyleFunction="overrideSelectedFeatureStyle"></ol-style>
+        <ol-style :overrideStyleFunction="overrideSelectedClusterStyle"></ol-style>
+      </ol-interaction-select>
+      <ol-interaction-select
+        @select="clickCluster"
+        :condition="clickCondition"
+        :filter="isCluster"
+      >
+        <ol-style :overrideStyleFunction="overrideSelectedClusterStyle"></ol-style>
       </ol-interaction-select>
 
-      <ol-interaction-select
-        @select="clickFeature"
-        :condition="clickCondition"
-      >
-        <ol-style :overrideStyleFunction="overrideSelectedFeatureStyle"></ol-style>
-      </ol-interaction-select>
+      <ol-vector-layer>
+        <ol-source-vector ref="diocesePost1541SourceVectorRef" :url="DiocesePost1541" :format="geoJson">
+          <ol-style :overrideStyleFunction="overrideRegionsFunction"></ol-style>
+        </ol-source-vector>
+      </ol-vector-layer>
       <ol-vector-layer v-if="points.length > 0">
-        <ol-source-cluster ref="clusterSourceRef" :distance="20" :geometryFunction="overrideGeometryFunction">
+        <ol-source-cluster ref="sourceClusterRef" :distance="20" :geometryFunction="overrideGeometryFunction">
           <ol-source-vector>
             <ol-feature v-for="point in points" :key="point.id" :properties="{ 'id': point.id }">
               <ol-geom-point :coordinates="point.coordinates"></ol-geom-point>

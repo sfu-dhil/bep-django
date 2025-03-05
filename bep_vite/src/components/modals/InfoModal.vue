@@ -60,7 +60,7 @@ onUnmounted(() => {
   <div id="info-modal" class="modal fade" data-bs-backdrop="static" tabindex="-1">
     <div class="modal-dialog modal-fullscreen-lg-down modal-lg modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content">
-        <ParishDetailModal :parish="object" v-if="objectType == 'parish'"></ParishDetailModal>
+        <ParishDetailModal :parish="object" v-if="objectType == 'parish' && object"></ParishDetailModal>
       </div>
     </div>
   </div>

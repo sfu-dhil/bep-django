@@ -35,6 +35,7 @@ export const useLocationMapStore = defineStore('map-location', {
     listedTowns: (state) => useTownsStore().towns.filter((o) => filterByNationId(state.selectedNationId)(o) && filterByCountyId(state.selectedCountyId)(o)),
     listedProvinces: (state) => useProvincesStore().provinces.filter(filterByNationId(state.selectedNationId)),
     listedDioceses: (state) => useDiocesesStore().dioceses.filter((o) => filterByNationId(state.selectedNationId)(o) && filterByProvinceId(state.selectedProvinceId)(o)),
+    listedDiocesesSet: (state) => new Set(state.listedDioceses.map((o) => o.id)),
     listedArchdeaconries: (state) => useArchdeaconriesStore().archdeaconries.filter((o) => filterByNationId(state.selectedNationId)(o) && filterByProvinceId(state.selectedProvinceId)(o) && filterByDioceseId(state.selectedDioceseId)(o)),
     listedParishes: (state) => useParishesStore().parishes.filter((o) => filterByNationId(state.selectedNationId)(o) && filterByProvinceId(state.selectedProvinceId)(o) && filterByDioceseId(state.selectedDioceseId)(o) && filterByArchdeaconryId(state.selectedArchdeaconryId)(o) && filterByCountyId(state.selectedCountyId)(o) && filterByTownId(state.selectedTownId)(o)),
     listedParishesSet: (state) => new Set(state.listedParishes.map((o) => o.id)),
@@ -49,9 +50,9 @@ export const useLocationMapStore = defineStore('map-location', {
   },
   actions: {
     updateFilters() {
-      if (this.selectedNationId && !this.listedNations.map((o) => o.id).includes(this.selectedNationId)) { this.selectedNationId = null }
+      // if (this.selectedNationId && !this.listedNations.map((o) => o.id).includes(this.selectedNationId)) { this.selectedNationId = null }
       if (this.selectedCountyId && !this.listedCounties.map((o) => o.id).includes(this.selectedCountyId)) { this.selectedCountyId = null }
-      if (this.selectedCountyId && !this.listedTowns.map((o) => o.id).includes(this.selectedTownId)) { this.selectedCountyId = null }
+      if (this.selectedTownId && !this.listedTowns.map((o) => o.id).includes(this.selectedTownId)) { this.selectedTownId = null }
       if (this.selectedProvinceId && !this.listedProvinces.map((o) => o.id).includes(this.selectedProvinceId)) { this.selectedProvinceId = null }
       if (this.selectedDioceseId && !this.listedDioceses.map((o) => o.id).includes(this.selectedDioceseId)) { this.selectedDioceseId = null }
       if (this.selectedArchdeaconryId && !this.listedArchdeaconries.map((o) => o.id).includes(this.selectedArchdeaconryId)) { this.selectedArchdeaconryId = null }
