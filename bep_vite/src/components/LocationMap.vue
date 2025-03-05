@@ -232,7 +232,7 @@ watch(selectedParishId, updateFilters)
       />
 
       <ol-tile-layer>
-        <ol-source-osm />
+        <ol-source-osm url="https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png" />
       </ol-tile-layer>
 
       <ol-interaction-select
