@@ -1,6 +1,6 @@
 # Books in English Parishes
 
-[Books in English Parishes][https://dhil.lib.sfu.ca/bep] (affectionately known as BEP) is a Python application written using the [Django][https://www.djangoproject.com/] framework. It is a digital tool for collecting data and metadata
+[Books in English Parishes](https://dhil.lib.sfu.ca/bep) (affectionately known as BEP) is a Python application written using the [Django](https://www.djangoproject.com/) framework. It is a digital tool for collecting data and metadata
 about books used in English parishes.
 
 ## Requirements
