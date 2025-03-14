@@ -11,7 +11,6 @@ const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate)
 
 const mountElList = document.querySelectorAll('.parish-map-app')
-
 mountElList.forEach((mountEl) => {
   const app = createApp(ParishMapApp, { ...mountEl.dataset })
   app.use(pinia)

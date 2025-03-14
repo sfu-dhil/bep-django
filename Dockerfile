@@ -1,5 +1,5 @@
 # Node deps
-FROM node:23.1-slim AS bep-vite
+FROM node:23.9-slim AS bep-vite
 WORKDIR /app
 
 RUN npm upgrade -g npm \
@@ -19,7 +19,7 @@ RUN yarn --production \
     && yarn cache clean
 
 # Django app
-FROM python:3.12-alpine AS bep
+FROM python:3.13-alpine AS bep
 EXPOSE 80
 WORKDIR /app
 
