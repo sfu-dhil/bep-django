@@ -224,7 +224,6 @@ TINYMCE_DEFAULT_CONFIG = {
 }
 
 # django ninja api
-# NINJA_PAGINATION_CLASS = 'ninja.pagination.PageNumberPagination'
 NINJA_EXTRA={
     'PAGINATION_CLASS': 'ninja_extra.pagination.PageNumberPaginationExtra'
 }
