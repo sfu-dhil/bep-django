@@ -11,6 +11,18 @@
   height: 1.55em !important;
   width: 1.55em !important;
 }
+.ol-layerswitcher.ol-unselectable.ol-control.ol-forceopen {
+  background-color: transparent !important;
+}
+.ol-layerswitcher .panel li label {
+  max-width: none;
+}
+.ol-layerswitcher .panel li label span {
+  color: #35495e !important;
+}
+.ol-layerswitcher .layerswitcher-opacity {
+  display: none !important;
+}
 
 .multiselect__tags {
   padding-right: 4em !important;

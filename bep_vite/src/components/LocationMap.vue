@@ -4,21 +4,22 @@
 import { ref, watch, inject, nextTick, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { Style, Text, Fill, Stroke, Circle } from "ol/style"
-import { useGeographic } from 'ol/proj.js'
-import { createEmpty, extend } from 'ol/extent.js';
-import GeoJSON from 'ol/format/GeoJSON'
+import { useGeographic, transformExtent } from 'ol/proj.js'
+import Feature from 'ol/Feature.js'
+import { createEmpty, extend } from 'ol/extent.js'
+import MVT from 'ol/format/MVT'
 import { useLocationMapStore } from '../stores/map/location.js'
 import { useInfoModalStore } from '../stores/info_modals.js'
 import { useParishesStore } from '../stores/data/parishes.js'
 import FilterSingleSelect from './FilterSingleSelect.vue'
-// import DiocesePre1541 from '../assets/diocese_pre_1541.json?url'
-import DiocesePost1541 from '../assets/diocese_post_1541.json?url'
 
 const store = useLocationMapStore()
 const {
   center,
   zoom,
   rotation,
+  diocesePre1541Visible,
+  diocesePost1541Visible,
 } = store
 const {
   projection,
@@ -45,8 +46,9 @@ const {
 const mapRef = ref(null)
 const viewRef = ref(null)
 const sourceClusterRef = ref(null)
-const diocesePost1541SourceVectorRef = ref(null)
-const geoJson = new GeoJSON()
+const diocesePre1541TileLayerRef = ref(null)
+const diocesePost1541TileLayerRef = ref(null)
+const mvt = new MVT()
 
 const isCluster = (feature) => !!feature.get('features')
 const isRegion = (feature) => !isCluster(feature)
@@ -131,8 +133,8 @@ const overrideSelectedClusterStyle = (feature) => {
   }
   return new Style()
 }
-const dioceseRegionStyle = (feature, active) => {
-  active = active || (selectedDioceseId.value && selectedDioceseId.value == feature.get('pk'))
+const dioceseRegionStyle = (feature) => {
+  const active = selectedDioceseId.value && selectedDioceseId.value == feature.get('id')
   const activeFill = new Fill({
     color: 'rgba(0, 0, 255, 0.1)',
   })
@@ -144,7 +146,7 @@ const dioceseRegionStyle = (feature, active) => {
     }),
     fill: active ? activeFill : null,
     text: new Text({
-      text: `${feature.get('name')}`,
+      text: `${feature.get('label')}`,
       font: 'bold 0.5em system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans","Liberation Sans",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"',
       fill: new Fill({ color: 'black' }),
       stroke: new Stroke({ color: 'white', width: 3 }),
@@ -152,11 +154,16 @@ const dioceseRegionStyle = (feature, active) => {
     zIndex: active ? Infinity : undefined,
   })
 }
-const overrideRegionsFunction = (feature) => {
-  if (['diocese_post_1541', 'diocese_pre_1541'].includes(feature.get('type'))) {
-    return dioceseRegionStyle(feature, false)
+
+const layerSwitcherChange = (layer) => {
+  if (diocesePre1541TileLayerRef.value?.vectorTileLayer === layer) {
+    store.diocesePre1541Visible = layer.getVisible()
+  } else if (diocesePost1541TileLayerRef.value?.vectorTileLayer === layer) {
+    store.diocesePost1541Visible = layer.getVisible()
   }
-  return new Style()
+}
+const layerSwitcherDisplayLayer = (layer) => {
+  return diocesePre1541TileLayerRef.value?.vectorTileLayer === layer || diocesePost1541TileLayerRef.value?.vectorTileLayer === layer
 }
 
 const updateCenter = (event) => store.center = event.target.getCenter()
@@ -173,7 +180,6 @@ const updateFilters = (newValue, oldValue) => {
     store.updateFilters()
     nextTick(() => {
       sourceClusterRef.value?.source.getSource().changed()
-      diocesePost1541SourceVectorRef.value?.source.changed()
     })
   }
 }
@@ -199,6 +205,17 @@ watch(selectedDioceseId, (newValue, oldValue) => {
   if (newValue !== oldValue) {
     selectedArchdeaconryId.value = null
     selectedParishId.value = null
+
+    nextTick(() => {
+      // hack to reset styles (using vectorTileLayer.getSource().changed() causes blinking)
+      const resetStyle = (layer) => {
+        const currentStyle = layer.getStyle()
+        layer.setStyle(new Style())
+        layer.setStyle(currentStyle)
+      }
+      resetStyle(diocesePre1541TileLayerRef.value?.vectorTileLayer)
+      resetStyle(diocesePost1541TileLayerRef.value?.vectorTileLayer)
+    })
   }
   updateFilters(newValue, oldValue)
 })
@@ -249,11 +266,22 @@ watch(selectedParishId, updateFilters)
         <ol-style :overrideStyleFunction="overrideSelectedClusterStyle"></ol-style>
       </ol-interaction-select>
 
-      <ol-vector-layer>
-        <ol-source-vector ref="diocesePost1541SourceVectorRef" :url="DiocesePost1541" :format="geoJson">
-          <ol-style :overrideStyleFunction="overrideRegionsFunction"></ol-style>
-        </ol-source-vector>
-      </ol-vector-layer>
+      <!-- -->
+      <ol-vector-tile-layer ref="diocesePre1541TileLayerRef"
+          :renderMode="'vector'" :updateWhileAnimating="true" :updateWhileInteracting="true" :visible="diocesePre1541Visible"
+          :properties="{ 'name': 'Dioceses before 1541' }">
+        <ol-source-vector-tile :url="'dioceses/tiles/pre1541/{z}/{x}/{y}'" :format="mvt">
+          <ol-style :overrideStyleFunction="dioceseRegionStyle"></ol-style>
+        </ol-source-vector-tile>
+      </ol-vector-tile-layer>
+      <ol-vector-tile-layer ref="diocesePost1541TileLayerRef"
+          :renderMode="'vector'" :updateWhileAnimating="true" :updateWhileInteracting="true" :visible="diocesePost1541Visible"
+          :properties="{ 'name': 'Dioceses 1541 and after' }">
+        <ol-source-vector-tile :url="'dioceses/tiles/post1541/{z}/{x}/{y}'" :format="mvt">
+          <ol-style :overrideStyleFunction="dioceseRegionStyle"></ol-style>
+        </ol-source-vector-tile>
+      </ol-vector-tile-layer>
+
       <ol-vector-layer v-if="points.length > 0">
         <ol-source-cluster ref="sourceClusterRef" :distance="20" :geometryFunction="overrideGeometryFunction">
           <ol-source-vector>
@@ -270,6 +298,10 @@ watch(selectedParishId, updateFilters)
       <ol-rotate-control :autoHide="true" />
       <ol-fullscreen-control />
       <ol-scaleline-control />
+      <ol-layerswitcher-control
+        :collapsed="false" :reordering="false" :trash="false" :noScroll="true"
+        :displayInLayerSwitcher="layerSwitcherDisplayLayer" :onchangeCheck="layerSwitcherChange"
+      />
       <ol-attribution-control :collapsible="true" :collapsed="true" />
     </ol-map>
     <FilterSingleSelect

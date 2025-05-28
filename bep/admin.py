@@ -5,6 +5,7 @@ from django.contrib.admin import ModelAdmin, TabularInline, StackedInline
 from tinymce.widgets import TinyMCE
 from modelclone import ClonableModelAdmin
 from bep.widgets import Select2TagArrayWidget
+from leaflet.admin import LeafletGeoAdmin
 
 from .models import Archdeaconry, Archive, Book, Holding, ManuscriptSource, Parish, \
     Injunction, Transaction, Inventory, County, Town, Diocese, InventoryImage, HoldingImage, \
@@ -243,7 +244,7 @@ class CountyAdmin(SimpleTermModelDefaults):
     ]
 
 @admin.register(Diocese)
-class DioceseAdmin(SimpleTermModelDefaults):
+class DioceseAdmin(SimpleTermModelDefaults, LeafletGeoAdmin):
     autocomplete_fields = ['province']
     inlines = [
         ArchdeaconryReadOnlyInline,

@@ -1,7 +1,9 @@
 services:
   db:
     container_name: bep_db
-    image: postgres:17.4
+    image: postgis/postgis:17-3.5
+    # postgis only supports the linux/amd64 platform
+    platform: linux/amd64
     ports:
       - "15432:5432"
     volumes:
@@ -12,7 +14,7 @@ services:
       POSTGRES_USER: bep
       POSTGRES_PASSWORD: password
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-U", "bep", "-d", "bep"]
+      test: pg_isready -U bep -d bep && psql -U bep -d bep -c 'SELECT 1;' || exit 1
       interval: 2s
       retries: 120
 
@@ -78,7 +80,7 @@ services:
       MEDIA_FOLDER_GID: 101
       GUNICORN_RELOAD: True
     healthcheck:
-      test: ["CMD-SHELL", "curl --fail http://localhost/health_check/ || exit 1"]
+      test: curl --fail http://localhost/health_check/ || exit 1
       interval: 2s
       retries: 120
     depends_on:

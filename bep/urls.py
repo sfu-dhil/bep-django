@@ -12,4 +12,6 @@ urlpatterns = [
     path("books/", views.BookListView.as_view(), name="book-list"),
     path("books/<int:pk>/", views.BookDetailsView.as_view(), name="book-details"),
     path("api/", api.urls),
+    views.DiocesePre1541TileView.get_url(prefix='dioceses/tiles/pre1541', url_name="diocese-tiles-pre-1541"),
+    views.DiocesePost1541TileView.get_url(prefix='dioceses/tiles/post1541', url_name="diocese-tiles-post-1541"),
 ]

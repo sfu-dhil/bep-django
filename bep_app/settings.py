@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "django.contrib.gis",
     'django.contrib.postgres',
     'health_check',
     'django_select2',
@@ -67,6 +68,7 @@ INSTALLED_APPS = [
     'django_vite',
     'ninja_extra',
     'django_bootstrap5',
+    'leaflet',
 ]
 
 MIDDLEWARE = [
@@ -114,7 +116,7 @@ WSGI_APPLICATION = 'bep_app.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'HOST': env('DB_HOST', default=''),
         'NAME': env('DB_NAME', default=''),
         'USER': env('DB_USER', default=''),
@@ -227,3 +229,8 @@ TINYMCE_DEFAULT_CONFIG = {
 NINJA_EXTRA={
     'PAGINATION_CLASS': 'ninja_extra.pagination.PageNumberPaginationExtra'
 }
+
+# GDAL & GEOS paths
+# (alphine installs it in `/usr/lib/` with a major version number or full version number)
+GDAL_LIBRARY_PATH = '/usr/lib/libgdal.so.36'
+GEOS_LIBRARY_PATH = '/usr/lib/libgeos_c.so.1'

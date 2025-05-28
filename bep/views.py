@@ -1,13 +1,19 @@
 from functools import reduce
 from operator import or_
+from hashlib import md5
 import re
 
+from django.core.cache import cache
+from django.views.decorators.cache import cache_page
 from django.views.generic import TemplateView, DetailView, ListView
 from django.db.models import F
 from django.contrib.postgres.search import SearchHeadline, SearchQuery, SearchRank
+from django.conf import settings
+from vectortiles.views import MVTView
 
 from .models import Parish, Book
 from .schema import ParishSchema
+from .vector_layers import DiocesePre1541VL, DiocesePost1541VL
 
 class HomeView(TemplateView):
     template_name = 'home.html'
@@ -26,7 +32,7 @@ class ParishListView(ListView):
     def get_queryset(self):
         q = self.request.GET.get('q')
         if q:
-            query = reduce(or_, [SearchQuery(word, config='english') for word in re.split('\s+', q)])
+            query = reduce(or_, [SearchQuery(word, config='english') for word in re.split(r'\s+', q)])
             return Parish.objects \
                 .filter(search_vector=query) \
                 .annotate(rank=SearchRank(F('search_vector'), query) * 100) \
@@ -66,7 +72,7 @@ class BookListView(ListView):
     def get_queryset(self):
         q = self.request.GET.get('q')
         if q:
-            query = reduce(or_, [SearchQuery(word, config='english') for word in re.split('\s+', q)])
+            query = reduce(or_, [SearchQuery(word, config='english') for word in re.split(r'\s+', q)])
             return Book.objects \
                 .filter(search_vector=query) \
                 .annotate(rank=SearchRank(F('search_vector'), query) * 100) \
@@ -83,3 +89,25 @@ class BookListView(ListView):
 class BookDetailsView(DetailView):
     model = Book
     template_name = 'bookDetails.html'
+
+class DiocesePre1541TileView(MVTView):
+    layer_classes = [DiocesePre1541VL]
+
+    def get_tile(self, x, y, z):
+        cache_key = md5(f"{self.get_id()}-{z}-{x}-{y}".encode()).hexdigest()
+        if cache.has_key(cache_key):
+            return cache.get(cache_key)
+        tile = super().get_tile(x, y, z)
+        cache.set(cache_key, tile, timeout=settings.CACHE_SECONDS) # timeout of 1 day
+        return tile
+
+class DiocesePost1541TileView(MVTView):
+    layer_classes = [DiocesePost1541VL]
+
+    def get_tile(self, x, y, z):
+        cache_key = md5(f"{self.get_id()}-{z}-{x}-{y}".encode()).hexdigest()
+        if cache.has_key(cache_key):
+            return cache.get(cache_key)
+        tile = super().get_tile(x, y, z)
+        cache.set(cache_key, tile, timeout=settings.CACHE_SECONDS) # timeout of 1 day
+        return tile

@@ -1,5 +1,6 @@
 from django.db import models
 from django_advance_thumbnail import AdvanceThumbnailField
+from django.contrib.gis.db.models.fields import MultiPolygonField
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.search import SearchVector, SearchVectorField
 from django.contrib.postgres.indexes import GinIndex
@@ -229,6 +230,9 @@ class Diocese(models.Model):
     label = models.CharField(unique=True)
     description = models.TextField(blank=True)
     links = ArrayField(models.URLField(max_length=None), blank=True)
+
+    geom_pre_1541 = MultiPolygonField(verbose_name='Pre 1541 Geom', blank=True, null=True)
+    geom_post_1541 = MultiPolygonField(verbose_name='Post 1541 Geom', blank=True, null=True)
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
