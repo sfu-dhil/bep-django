@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useTransactionsStore } from '../../stores/data/transactions.js'
 import { useInventoriesStore } from '../../stores/data/inventories.js'
 import { useHoldingsStore } from '../../stores/data/holdings.js'
+import LoadingDots from '../LoadingDots.vue'
 
 const props = defineProps({
   parish: {
@@ -36,6 +37,8 @@ const holdings = computed(() => useHoldingsStore().getParishHoldings(props.paris
 const holdingsUniqueBooks = computed(() => [...holdings.value.reduce((result, o) => result.union(new Set(o.books)), new Set())])
 const holdingsDateRange = computed(() => formattedDateRange(holdings.value))
 const allUniqueBooks = computed(() => [...new Set([...inventoriesUniqueBooks.value, ...transactionsUniqueBooks.value, ...holdingsUniqueBooks.value])])
+
+const isLoadingData = computed(() => useInventoriesStore().inventoriesMap.size === 0 || useTransactionsStore().transactionsMap.size === 0 || useHoldingsStore().holdingsMap.size === 0)
 </script>
 
 <template>
@@ -86,6 +89,7 @@ const allUniqueBooks = computed(() => [...new Set([...inventoriesUniqueBooks.val
   <div class="modal-footer">
     <a :href="`/parishes/${parish.id}`" class="btn btn-secondary ms-auto">View Parish Details</a>
   </div>
+  <LoadingDots :show="isLoadingData"></LoadingDots>
 </template>
 
 <style scoped>

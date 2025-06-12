@@ -93,21 +93,5 @@ class BookDetailsView(DetailView):
 class DiocesePre1541TileView(MVTView):
     layer_classes = [DiocesePre1541VL]
 
-    def get_tile(self, x, y, z):
-        cache_key = md5(f"{self.get_id()}-{z}-{x}-{y}".encode()).hexdigest()
-        if cache.has_key(cache_key):
-            return cache.get(cache_key)
-        tile = super().get_tile(x, y, z)
-        cache.set(cache_key, tile, timeout=settings.CACHE_SECONDS) # timeout of 1 day
-        return tile
-
 class DiocesePost1541TileView(MVTView):
     layer_classes = [DiocesePost1541VL]
-
-    def get_tile(self, x, y, z):
-        cache_key = md5(f"{self.get_id()}-{z}-{x}-{y}".encode()).hexdigest()
-        if cache.has_key(cache_key):
-            return cache.get(cache_key)
-        tile = super().get_tile(x, y, z)
-        cache.set(cache_key, tile, timeout=settings.CACHE_SECONDS) # timeout of 1 day
-        return tile

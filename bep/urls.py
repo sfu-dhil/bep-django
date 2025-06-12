@@ -1,4 +1,6 @@
 from django.urls import path
+from django.views.decorators.cache import cache_page
+from django.conf import settings
 
 from . import views
 from .api import api
@@ -12,6 +14,6 @@ urlpatterns = [
     path("books/", views.BookListView.as_view(), name="book-list"),
     path("books/<int:pk>/", views.BookDetailsView.as_view(), name="book-details"),
     path("api/", api.urls),
-    views.DiocesePre1541TileView.get_url(prefix='dioceses/tiles/pre1541', url_name="diocese-tiles-pre-1541"),
-    views.DiocesePost1541TileView.get_url(prefix='dioceses/tiles/post1541', url_name="diocese-tiles-post-1541"),
+    path("dioceses/tiles/pre1541/<int:z>/<int:x>/<int:y>", cache_page(settings.CACHE_SECONDS)(views.DiocesePre1541TileView.as_view()), name="book-details"),
+    path("dioceses/tiles/post1541/<int:z>/<int:x>/<int:y>", cache_page(settings.CACHE_SECONDS)(views.DiocesePost1541TileView.as_view()), name="book-details"),
 ]

@@ -89,6 +89,7 @@ services:
 
   mail:
     container_name: bep_mail
-    image: jcalonso/mailhog:v1.0.1
+    image: mailhog/mailhog:v1.0.1
+    platform: linux/amd64
     ports:
       - "8025:8025"

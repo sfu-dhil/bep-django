@@ -1,7 +1,7 @@
 
 
 <script setup>
-import { ref, watch, inject, nextTick, onMounted } from 'vue'
+import { ref, watch, inject, nextTick, computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { Style, Text, Fill, Stroke, Circle } from "ol/style"
 import { useGeographic, transformExtent } from 'ol/proj.js'
@@ -12,6 +12,7 @@ import { useLocationMapStore } from '../stores/map/location.js'
 import { useInfoModalStore } from '../stores/info_modals.js'
 import { useParishesStore } from '../stores/data/parishes.js'
 import FilterSingleSelect from './FilterSingleSelect.vue'
+import LoadingDots from './LoadingDots.vue'
 
 const store = useLocationMapStore()
 const {
@@ -50,6 +51,7 @@ const diocesePre1541TileLayerRef = ref(null)
 const diocesePost1541TileLayerRef = ref(null)
 const mvt = new MVT()
 
+const isLoadingData = computed(() => useParishesStore().parishesMap.size === 0)
 const isCluster = (feature) => !!feature.get('features')
 const isRegion = (feature) => !isCluster(feature)
 const clickCluster = (event) => {
@@ -338,6 +340,7 @@ watch(selectedParishId, updateFilters)
       class="position-absolute filter select-parish"
       v-if="selectedNationId && selectedProvinceId && selectedDioceseId && selectedArchdeaconryId"
     ></FilterSingleSelect>
+    <LoadingDots :show="isLoadingData"></LoadingDots>
   </div>
 </template>
 
