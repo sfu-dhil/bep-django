@@ -245,6 +245,12 @@ class CountyAdmin(SimpleTermModelDefaults):
 
 @admin.register(Diocese)
 class DioceseAdmin(SimpleTermModelDefaults, LeafletGeoAdmin):
+    # LeafletGeoAdmin
+    settings_overrides = {
+        'RESET_VIEW': False,
+    }
+    display_raw = True
+
     autocomplete_fields = ['province']
     inlines = [
         ArchdeaconryReadOnlyInline,
@@ -338,7 +344,14 @@ class NationAdmin(SimpleTermModelDefaults):
     ]
 
 @admin.register(Parish)
-class ParishAdmin(SimpleTermModelDefaults):
+class ParishAdmin(SimpleTermModelDefaults, LeafletGeoAdmin):
+    # LeafletGeoAdmin
+    settings_overrides = {
+        'RESET_VIEW': False,
+    }
+    display_raw = True
+
+    list_display = ['label', '_description', 'geom_point']
     autocomplete_fields = ['archdeaconry', 'town']
     inlines = [
         TransactionReadOnlyInline,
@@ -377,6 +390,7 @@ class TownAdmin(SimpleTermModelDefaults):
 class TransactionAdmin(ClonableModelAdmin, BepAdminDefaults):
     clone_verbose_name = 'Create new copy of transaction'
     form = TransactionAdminForm
+    list_filter = ['transaction_categories']
     list_display = ['_id', '_date', 'manuscript_source', '_value', '_books', 'parish', '_modern_transcription']
     search_fields = ['id', 'written_date', 'value', 'modern_transcription']
     ordering = ['id']

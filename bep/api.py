@@ -47,7 +47,7 @@ def monarchs(request):
 @decorate_view(cache_page(settings.CACHE_SECONDS))
 def nations(request):
     return Nation.objects \
-        .filter(Q(counties__towns__parishes__latitude__isnull=False) | Q(provinces__dioceses__archdeaconries__parishes__latitude__isnull=False)) \
+        .filter(Q(counties__towns__parishes__geom_point__isnull=False) | Q(provinces__dioceses__archdeaconries__parishes__geom_point__isnull=False)) \
         .distinct() \
         .order_by('label').all()
 
@@ -56,7 +56,7 @@ def nations(request):
 @decorate_view(cache_page(settings.CACHE_SECONDS))
 def counties(request):
     return County.objects.prefetch_related('nation') \
-        .filter(towns__parishes__latitude__isnull=False) \
+        .filter(towns__parishes__geom_point__isnull=False) \
         .distinct() \
         .order_by('label').all()
 
@@ -65,7 +65,7 @@ def counties(request):
 @decorate_view(cache_page(settings.CACHE_SECONDS))
 def towns(request):
     return Town.objects.select_related('county', 'county__nation') \
-        .filter(parishes__latitude__isnull=False) \
+        .filter(parishes__geom_point__isnull=False) \
         .distinct() \
         .order_by('label').all()
 
@@ -74,7 +74,7 @@ def towns(request):
 @decorate_view(cache_page(settings.CACHE_SECONDS))
 def provinces(request):
     return Province.objects.prefetch_related('nation') \
-        .filter(dioceses__archdeaconries__parishes__latitude__isnull=False) \
+        .filter(dioceses__archdeaconries__parishes__geom_point__isnull=False) \
         .distinct() \
         .order_by('label').all()
 
@@ -83,7 +83,7 @@ def provinces(request):
 @decorate_view(cache_page(settings.CACHE_SECONDS))
 def dioceses(request):
     return Diocese.objects.select_related('province', 'province__nation') \
-        .filter(archdeaconries__parishes__latitude__isnull=False) \
+        .filter(archdeaconries__parishes__geom_point__isnull=False) \
         .distinct() \
         .order_by('label').all()
 
@@ -92,7 +92,7 @@ def dioceses(request):
 @decorate_view(cache_page(settings.CACHE_SECONDS))
 def archdeaconries(request):
     return Archdeaconry.objects.select_related('diocese', 'diocese__province', 'diocese__province__nation') \
-        .filter(parishes__latitude__isnull=False) \
+        .filter(parishes__geom_point__isnull=False) \
         .distinct() \
         .order_by('label').all()
 
@@ -104,6 +104,5 @@ def parishes(request):
         'archdeaconry', 'archdeaconry__diocese', 'archdeaconry__diocese__province', 'archdeaconry__diocese__province__nation',
         'town', 'town__county',  'town__county__nation',
     ) \
-        .filter(latitude__isnull=False) \
-        .filter(longitude__isnull=False) \
+        .filter(geom_point__isnull=False) \
         .order_by('label').all()

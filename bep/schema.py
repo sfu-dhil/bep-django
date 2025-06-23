@@ -136,8 +136,4 @@ class ParishSchema(ModelSchema):
 
     @staticmethod
     def resolve_coordinates(obj):
-        if obj.latitude and obj.longitude:
-            try:
-                return [float(obj.longitude), float(obj.latitude)]
-            except ValueError:
-                return None
+        return obj.geom_point.coords if obj.geom_point else None

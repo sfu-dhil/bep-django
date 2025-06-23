@@ -1,6 +1,6 @@
 from django.db import models
 from django_advance_thumbnail import AdvanceThumbnailField
-from django.contrib.gis.db.models.fields import MultiPolygonField
+from django.contrib.gis.db.models.fields import MultiPolygonField, PointField
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.search import SearchVector, SearchVectorField
 from django.contrib.postgres.indexes import GinIndex
@@ -281,8 +281,7 @@ class Archdeaconry(models.Model):
 class Parish(models.Model):
     label = models.CharField(unique=True)
     description = models.TextField(blank=True)
-    latitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
-    longitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    geom_point = PointField(verbose_name='Geo Point', geography=True, null=True, blank=True)
     address = models.TextField(blank=True)
     links = ArrayField(models.URLField(max_length=None), blank=True)
 
