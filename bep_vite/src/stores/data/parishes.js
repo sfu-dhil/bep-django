@@ -12,7 +12,7 @@ export const useParishesStore = defineStore('data-parishes', {
     storage: sessionStorage,
     afterHydrate: (ctx) => {
       if (0 === ctx.store.$state.parishes.length) {
-        _getPaginatedApiResources('parishes').then((results) => ctx.store.$state.parishes = results)
+        _getPaginatedApiResources('/api/parishes').then((results) => ctx.store.$state.parishes = results)
       }
     }
   },

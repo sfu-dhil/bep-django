@@ -25,5 +25,8 @@ gunicorn==23.0.0
 # image manipulation
 Pillow==11.2.1
 
+# faster django-ninja json (for geojson)
+orjson==3.10.18
+
 # Dataabse (psycopg[binary] cannot be locked to specific version number)
 psycopg[binary]

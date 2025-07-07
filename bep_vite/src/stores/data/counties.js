@@ -12,7 +12,7 @@ export const useCountiesStore = defineStore('data-counties', {
     storage: sessionStorage,
     afterHydrate: (ctx) => {
       if (0 === ctx.store.$state.counties.length) {
-        _getPaginatedApiResources('counties').then((results) => ctx.store.$state.counties = results)
+        _getPaginatedApiResources('/api/counties').then((results) => ctx.store.$state.counties = results)
       }
     }
   },

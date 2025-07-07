@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useTransactionsStore } from '../../stores/data/transactions.js'
 import { useInventoriesStore } from '../../stores/data/inventories.js'
 import { useHoldingsStore } from '../../stores/data/holdings.js'
@@ -27,18 +27,31 @@ const formattedDateRange = (objects) => {
     return `${startDate.toLocaleString('en-CA', { year: 'numeric', month: 'long' })}`
   }
 }
-const inventories = computed(() => useInventoriesStore().getParishInventories(props.parish.id))
+const isLoadingData = ref(true)
+const inventories = ref([])
+const transactions = ref([])
+const holdings = ref([])
+
 const inventoriesUniqueBooks = computed(() => [...inventories.value.reduce((result, o) => result.union(new Set(o.books)), new Set())])
 const inventoriesDateRange = computed(() => formattedDateRange(inventories.value))
-const transactions = computed(() => useTransactionsStore().getParishTransactions(props.parish.id))
 const transactionsUniqueBooks = computed(() => [...transactions.value.reduce((result, o) => result.union(new Set(o.books)), new Set())])
 const transactionsDateRange = computed(() => formattedDateRange(transactions.value))
-const holdings = computed(() => useHoldingsStore().getParishHoldings(props.parish.id))
 const holdingsUniqueBooks = computed(() => [...holdings.value.reduce((result, o) => result.union(new Set(o.books)), new Set())])
 const holdingsDateRange = computed(() => formattedDateRange(holdings.value))
 const allUniqueBooks = computed(() => [...new Set([...inventoriesUniqueBooks.value, ...transactionsUniqueBooks.value, ...holdingsUniqueBooks.value])])
 
-const isLoadingData = computed(() => useInventoriesStore().inventoriesMap.size === 0 || useTransactionsStore().transactionsMap.size === 0 || useHoldingsStore().holdingsMap.size === 0)
+const updateDataAsync = async () => {
+  inventories.value = props.parish?.id ? await useInventoriesStore().getInventoriesByParishId(props.parish.id) : []
+  transactions.value = props.parish?.id ? await useTransactionsStore().getTransactionsByParishId(props.parish.id) : []
+  holdings.value = props.parish?.id ? await useHoldingsStore().getHoldingsByParishId(props.parish.id) : []
+  isLoadingData.value = false
+}
+watch(() => props.parish, (newValue, oldValue) => {
+  if (newValue !== oldValue) { updateDataAsync() }
+})
+onMounted(() => {
+  updateDataAsync()
+})
 </script>
 
 <template>

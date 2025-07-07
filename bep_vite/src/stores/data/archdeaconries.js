@@ -12,7 +12,7 @@ export const useArchdeaconriesStore = defineStore('data-archdeaconries', {
     storage: sessionStorage,
     afterHydrate: (ctx) => {
       if (0 === ctx.store.$state.archdeaconries.length) {
-        _getPaginatedApiResources('archdeaconries').then((results) => ctx.store.$state.archdeaconries = results)
+        _getPaginatedApiResources('/api/archdeaconries').then((results) => ctx.store.$state.archdeaconries = results)
       }
     }
   },

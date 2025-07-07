@@ -1,10 +1,7 @@
 from functools import reduce
 from operator import or_
-from hashlib import md5
 import re
 
-from django.core.cache import cache
-from django.views.decorators.cache import cache_page
 from django.views.generic import TemplateView, DetailView, ListView
 from django.db.models import F
 from django.contrib.postgres.search import SearchHeadline, SearchQuery, SearchRank
@@ -13,7 +10,8 @@ from vectortiles.views import MVTView
 
 from .models import Parish, Book
 from .schema import ParishSchema
-from .vector_layers import DiocesePre1541VL, DiocesePost1541VL
+from .vector_layers import DiocesePre1541VectorLayer, DiocesePre1541LabelVectorLayer, \
+    DiocesePost1541VectorLayer, DiocesePost1541LabelVectorLayer
 
 class HomeView(TemplateView):
     template_name = 'home.html'
@@ -91,7 +89,7 @@ class BookDetailsView(DetailView):
     template_name = 'bookDetails.html'
 
 class DiocesePre1541TileView(MVTView):
-    layer_classes = [DiocesePre1541VL]
+    layer_classes = [DiocesePre1541VectorLayer, DiocesePre1541LabelVectorLayer]
 
 class DiocesePost1541TileView(MVTView):
-    layer_classes = [DiocesePost1541VL]
+    layer_classes = [DiocesePost1541VectorLayer, DiocesePost1541LabelVectorLayer]

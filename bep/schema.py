@@ -1,4 +1,4 @@
-from ninja import ModelSchema, Field
+from ninja import Schema, ModelSchema, Field
 from typing import List, Optional
 
 from .models import Parish, Transaction, Inventory, Holding, \
@@ -6,8 +6,8 @@ from .models import Parish, Transaction, Inventory, Holding, \
     Nation, County, Town, Province, Diocese, Archdeaconry
 
 class TransactionSchema(ModelSchema):
-    parish_id: int = Field(None, alias="parish.id")
-    monarch_id: int = Field(None, alias="monarch.id")
+    parish_id: Optional[int] = None
+    monarch_id: Optional[int] = None
     books: List[int] = []
 
     class Meta:
@@ -23,8 +23,8 @@ class TransactionSchema(ModelSchema):
          return [book.id for book in obj.books.all()]
 
 class InventorySchema(ModelSchema):
-    parish_id: int = Field(None, alias="parish.id")
-    monarch_id: int = Field(None, alias="monarch.id")
+    parish_id: Optional[int] = None
+    monarch_id: Optional[int] = None
     books: List[int] = []
 
     class Meta:
@@ -40,7 +40,7 @@ class InventorySchema(ModelSchema):
          return [book.id for book in obj.books.all()]
 
 class HoldingSchema(ModelSchema):
-    parish_id: int = Field(None, alias="parish.id")
+    parish_id: Optional[int] = None
     books: List[int] = []
 
     class Meta:
@@ -56,7 +56,7 @@ class HoldingSchema(ModelSchema):
          return [book.id for book in obj.books.all()]
 
 class BookSchema(ModelSchema):
-    monarch_id: int = Field(None, alias="monarch.id")
+    monarch_id: Optional[int] = None
 
     class Meta:
         model = Book
@@ -73,51 +73,51 @@ class NationSchema(ModelSchema):
         fields = ['id', 'label']
 
 class CountySchema(ModelSchema):
-    nation_id: int = Field(None, alias="nation.id")
+    nation_id: Optional[int] = None
 
     class Meta:
         model = County
         fields = ['id', 'label']
 
 class TownSchema(ModelSchema):
-    nation_id: int = Field(None, alias='county.nation.id')
-    county_id: int = Field(None, alias='county.id')
+    nation_id: Optional[int] = None
+    county_id: Optional[int] = None
 
     class Meta:
         model = Town
         fields = ['id', 'label']
 
 class ProvinceSchema(ModelSchema):
-    nation_id: int = Field(None, alias="nation.id")
+    nation_id: Optional[int] = None
 
     class Meta:
         model = Province
         fields = ['id', 'label']
 
 class DioceseSchema(ModelSchema):
-    nation_id: int = Field(None, alias='province.nation.id')
-    province_id: int = Field(None, alias='province.id')
+    nation_id: Optional[int] = None
+    province_id: Optional[int] = None
 
     class Meta:
         model = Diocese
         fields = ['id', 'label']
 
 class ArchdeaconrySchema(ModelSchema):
-    nation_id: int = Field(None, alias='diocese.province.nation.id')
-    province_id: int = Field(None, alias='diocese.province.id')
-    diocese_id: int = Field(None, alias='diocese.id')
+    nation_id: Optional[int] = None
+    province_id: Optional[int] = None
+    diocese_id: Optional[int] = None
 
     class Meta:
         model = Archdeaconry
         fields = ['id', 'label']
 
 class ParishSchema(ModelSchema):
-    nation_id: int = None
-    province_id: int = Field(None, alias='archdeaconry.diocese.province.id')
-    diocese_id: int = Field(None, alias='archdeaconry.diocese.id')
-    archdeaconry_id: int = Field(None, alias='archdeaconry.id')
-    county_id: int = Field(None, alias='town.county.id')
-    town_id: int = Field(None, alias='town.id')
+    nation_id: Optional[int] = None
+    province_id: Optional[int] = None
+    diocese_id: Optional[int] = None
+    archdeaconry_id: Optional[int] = None
+    county_id: Optional[int] = None
+    town_id: Optional[int] = None
     coordinates: Optional[List[float]] = None
 
     class Meta:
@@ -127,13 +127,26 @@ class ParishSchema(ModelSchema):
         ]
 
     @staticmethod
-    def resolve_nation_id(obj):
-        if obj.archdeaconry.diocese.province.nation.id:
-            return obj.archdeaconry.diocese.province.nation.id
-        # fall back on town->county->nation if there is a break in the archdeaconry chain
-        if obj.town.county.nation.id:
-            return obj.town.county.nation.id
-
-    @staticmethod
     def resolve_coordinates(obj):
         return obj.geom_point.coords if obj.geom_point else None
+
+class PointGeometrySchema(Schema):
+    type: str = 'Point'
+    coordinates: List[float]
+
+class ParishFeaturePropertiesSchema(Schema):
+    label: Optional[str] = None
+    nation_id: Optional[int] = None
+    province_id: Optional[int] = None
+    diocese_id: Optional[int] = None
+    archdeaconry_id: Optional[int] = None
+
+class ParishFeatureGeoJsonSchema(Schema):
+    id: int
+    type: str = 'Feature'
+    geometry: PointGeometrySchema
+    properties: ParishFeaturePropertiesSchema
+
+class ParishFeatureCollectionGeoJsonSchema(Schema):
+    type: str = 'FeatureCollection'
+    features: List[ParishFeatureGeoJsonSchema]

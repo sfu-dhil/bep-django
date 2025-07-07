@@ -14,6 +14,6 @@ urlpatterns = [
     path("books/", views.BookListView.as_view(), name="book-list"),
     path("books/<int:pk>/", views.BookDetailsView.as_view(), name="book-details"),
     path("api/", api.urls),
-    path("dioceses/tiles/pre1541/<int:z>/<int:x>/<int:y>", cache_page(settings.CACHE_SECONDS)(views.DiocesePre1541TileView.as_view()), name="book-details"),
-    path("dioceses/tiles/post1541/<int:z>/<int:x>/<int:y>", cache_page(settings.CACHE_SECONDS)(views.DiocesePost1541TileView.as_view()), name="book-details"),
+    path("api/geo/dioceses/pre1541/tiles/<int:z>/<int:x>/<int:y>", cache_page(settings.CACHE_SECONDS)(views.DiocesePre1541TileView.as_view()), name="diocese-pre1541-tiles"),
+    path("api/geo/dioceses/post1541/tiles/<int:z>/<int:x>/<int:y>", cache_page(settings.CACHE_SECONDS)(views.DiocesePost1541TileView.as_view()), name="diocese-post1541-tiles"),
 ]

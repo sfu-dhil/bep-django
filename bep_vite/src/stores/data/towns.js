@@ -12,7 +12,7 @@ export const useTownsStore = defineStore('data-towns', {
     storage: sessionStorage,
     afterHydrate: (ctx) => {
       if (0 === ctx.store.$state.towns.length) {
-        _getPaginatedApiResources('towns').then((results) => ctx.store.$state.towns = results)
+        _getPaginatedApiResources('/api/towns').then((results) => ctx.store.$state.towns = results)
       }
     }
   },

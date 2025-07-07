@@ -12,7 +12,7 @@ export const useProvincesStore = defineStore('data-provinces', {
     storage: sessionStorage,
     afterHydrate: (ctx) => {
       if (0 === ctx.store.$state.provinces.length) {
-        _getPaginatedApiResources('provinces').then((results) => ctx.store.$state.provinces = results)
+        _getPaginatedApiResources('/api/provinces').then((results) => ctx.store.$state.provinces = results)
       }
     }
   },

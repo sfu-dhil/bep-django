@@ -12,7 +12,7 @@ export const useMonarchsStore = defineStore('data-monarchs', {
     storage: sessionStorage,
     afterHydrate: (ctx) => {
       if (0 === ctx.store.$state.monarchs.length) {
-        _getPaginatedApiResources('monarchs').then((results) => ctx.store.$state.monarchs = results)
+        _getPaginatedApiResources('/api/monarchs').then((results) => ctx.store.$state.monarchs = results)
       }
     }
   },

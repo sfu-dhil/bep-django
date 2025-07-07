@@ -12,7 +12,7 @@ export const useNationsStore = defineStore('data-nations', {
     storage: sessionStorage,
     afterHydrate: (ctx) => {
       if (0 === ctx.store.$state.nations.length) {
-        _getPaginatedApiResources('nations').then((results) => ctx.store.$state.nations = results)
+        _getPaginatedApiResources('/api/nations').then((results) => ctx.store.$state.nations = results)
       }
     }
   },

@@ -12,7 +12,7 @@ export const useDiocesesStore = defineStore('data-dioceses', {
     storage: sessionStorage,
     afterHydrate: (ctx) => {
       if (0 === ctx.store.$state.dioceses.length) {
-        _getPaginatedApiResources('dioceses').then((results) => ctx.store.$state.dioceses = results)
+        _getPaginatedApiResources('/api/dioceses').then((results) => ctx.store.$state.dioceses = results)
       }
     }
   },
