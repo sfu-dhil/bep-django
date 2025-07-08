@@ -23,7 +23,7 @@ python-dotenv==1.1.0
 gunicorn==23.0.0
 
 # image manipulation
-Pillow==11.2.1
+Pillow==11.3.0
 
 # faster django-ninja json (for geojson)
 orjson==3.10.18
