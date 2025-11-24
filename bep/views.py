@@ -19,9 +19,6 @@ class HomeView(TemplateView):
 class AboutView(TemplateView):
     template_name = 'about.html'
 
-class PrivacyView(TemplateView):
-    template_name = 'privacy.html'
-
 class ParishListView(ListView):
     paginate_by = 10
     model = Parish
