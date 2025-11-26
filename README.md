@@ -1,3 +1,6 @@
+[![Docker Image Latest Badge](https://ghcr-badge.egpl.dev/sfu-dhil/bep-django/latest_tag?trim=major&label=latest)](https://github.com/sfu-dhil/bep-django/pkgs/container/bep-django)
+[![Docker Image Size badge](https://ghcr-badge.egpl.dev/sfu-dhil/bep-django/size)](https://github.com/sfu-dhil/bep-django/pkgs/container/bep-django)
+
 # Books in English Parishes
 
 [Books in English Parishes](https://dhil.lib.sfu.ca/bep) (affectionately known as BEP) is a Python application written using the [Django](https://www.djangoproject.com/) framework. It is a digital tool for collecting data and metadata

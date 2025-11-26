@@ -54,7 +54,7 @@ services:
 
   app:
     container_name: bep_app
-    # image: dhil/bep
+    # image: ghcr.io/sfu-dhil/bep-django
     build:
       context: .
       target: bep
