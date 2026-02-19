@@ -9,6 +9,7 @@ import { createEmpty, extend } from 'ol/extent.js'
 import { MVT, GeoJSON } from 'ol/format.js'
 import { useLocationMapStore } from '../stores/map/location.js'
 import { useInfoModalStore } from '../stores/info_modals.js'
+import { useParishesStore } from '../stores/data/parishes.js'
 import FilterSingleSelect from './FilterSingleSelect.vue'
 import LoadingDots from './LoadingDots.vue'
 
@@ -25,16 +26,19 @@ const {
 } = store
 const {
   projection,
-  parishFeatures,
-  listedNations,
-  listedProvinces,
-  listedDioceses,
-  listedArchdeaconries,
+  // listedNations,
+  // listedProvinces,
+  // listedDioceses,
+  // listedArchdeaconries,
+  listedCounties,
+  // listedTowns,
   listedParishes,
-  selectedNationId,
-  selectedProvinceId,
-  selectedDioceseId,
-  selectedArchdeaconryId,
+  // selectedNationId,
+  // selectedProvinceId,
+  // selectedDioceseId,
+  // selectedArchdeaconryId,
+  selectedCountyId,
+  // selectedTownId,
   selectedParishId,
 } = storeToRefs(store)
 const infoModalStore = useInfoModalStore()
@@ -67,10 +71,14 @@ const clickCluster = (event) => {
 }
 const overrideGeometryFunction = (feature) => {
   if (selectedParishId.value && selectedParishId.value != feature.getId()) { return null }
+  if (selectedCountyId.value && selectedCountyId.value != feature.get('county_id')) { return null }
+  /*
+  if (selectedTownId.value && selectedTownId.value != feature.get('town_id')) { return null }
   if (selectedArchdeaconryId.value && selectedArchdeaconryId.value != feature.get('archdeaconry_id')) { return null }
   if (selectedDioceseId.value && selectedDioceseId.value != feature.get('diocese_id')) { return null }
   if (selectedProvinceId.value && selectedProvinceId.value != feature.get('province_id')) { return null }
   if (selectedNationId.value && selectedNationId.value != feature.get('nation_id')) { return null }
+  */
   return feature.getGeometry()
 }
 const clusterGroupingStyle = (features, active) => {
@@ -134,7 +142,9 @@ const overrideSelectedClusterStyle = (feature) => {
   return new Style()
 }
 const dioceseRegionStyle = (feature) => {
-  const active = selectedDioceseId.value && selectedDioceseId.value == feature.get('id')
+  // const active = selectedDioceseId.value && selectedDioceseId.value == feature.get('id')
+  // const active = selectedParishId.value && useParishesStore().parishesMap.get(selectedParishId.value).diocese_id == feature.get('id')
+  const active = false
   const activeFill = new Fill({
     color: 'rgba(0, 0, 255, 0.1)',
   })
@@ -178,6 +188,7 @@ useGeographic()
 const updateFilters = async () => {
   nextTick(() => parishSourceVectorRef.value?.source.changed())
 }
+/*
 watch(selectedNationId, (newValue, oldValue) => {
   if (newValue !== oldValue) {
     selectedProvinceId.value = null
@@ -219,8 +230,27 @@ watch(selectedArchdeaconryId, (newValue, oldValue) => {
     updateFilters()
   }
 })
+*/
+watch(selectedCountyId, (newValue, oldValue) => {
+  if (newValue !== oldValue) {
+    selectedParishId.value = null
+    updateFilters()
+  }
+})
 watch(selectedParishId, (newValue, oldValue) => {
-  if (newValue !== oldValue) { updateFilters() }
+  if (newValue !== oldValue) {
+    // nextTick(() => {
+    //   // hack to reset styles (using vectorTileLayer.getSource().changed() causes blinking)
+    //   const resetStyle = (layer) => {
+    //     const currentStyle = layer.getStyle()
+    //     layer.setStyle(new Style())
+    //     layer.setStyle(currentStyle)
+    //   }
+    //   resetStyle(diocesePre1541TileLayerRef.value?.vectorTileLayer)
+    //   resetStyle(diocesePost1541TileLayerRef.value?.vectorTileLayer)
+    // })
+    updateFilters()
+  }
 })
 </script>
 
@@ -297,7 +327,7 @@ watch(selectedParishId, (newValue, oldValue) => {
       />
       <ol-attribution-control :collapsible="true" :collapsed="true" />
     </ol-map>
-    <FilterSingleSelect
+    <!-- <FilterSingleSelect
       v-model:selected="selectedNationId"
       v-model:listed="listedNations"
       placeholder="Select a Nation"
@@ -330,6 +360,19 @@ watch(selectedParishId, (newValue, oldValue) => {
       placeholder="Select a Parish"
       class="position-absolute filter select-parish"
       v-if="selectedNationId && selectedProvinceId && selectedDioceseId && selectedArchdeaconryId"
+    ></FilterSingleSelect> -->
+    <FilterSingleSelect
+      v-model:selected="selectedCountyId"
+      v-model:listed="listedCounties"
+      placeholder="Select a County"
+      class="position-absolute filter select-county"
+    ></FilterSingleSelect>
+    <FilterSingleSelect
+      v-model:selected="selectedParishId"
+      v-model:listed="listedParishes"
+      placeholder="Select a Parish"
+      class="position-absolute filter select-parish"
+      v-if="selectedCountyId"
     ></FilterSingleSelect>
     <LoadingDots :show="isLoadingData"></LoadingDots>
   </div>
@@ -341,7 +384,7 @@ watch(selectedParishId, (newValue, oldValue) => {
   position: absolute !important;
   width: fit-content !important;
 }
-.select-nation {
+/* .select-nation {
   top: 4.0em;
 }
 .select-province {
@@ -355,5 +398,11 @@ watch(selectedParishId, (newValue, oldValue) => {
 }
 .select-parish {
   top: 16.0em;
+} */
+.select-county {
+  top: 4.0em;
+}
+.select-parish {
+  top: 7em;
 }
 </style>

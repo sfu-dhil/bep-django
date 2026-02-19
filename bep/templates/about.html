@@ -54,7 +54,7 @@
     {% endfor %}
     <section class="py-5 {% if about_page.content_blocks.all|length|divisibleby:'2' %}bg-dark{% endif %}">
         <div class="container">
-            <h2 class="fw-bolder text-center">Project Contributors</h2>
+            <h2 class="fw-bolder text-center pb-5">Team Members</h2>
 
             <div class="row gx-5 row-cols-1 row-cols-sm-2 row-cols-xl-4">
                 {% for team_member in about_page.team_members.all %}

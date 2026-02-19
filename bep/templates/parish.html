@@ -50,14 +50,14 @@
                                 <a target="_blank" href='https://www.openstreetmap.org/search?query={{ object.address }}'>OpenStreetMap</a>
                             {% endif %}
                         </li>
+                        {% if object.geom_point and object.geom_point.coords %}
                         <li class="list-group-item list-group-item-action">
                             <div class="fw-bold">Geocoordinates</div>
-                            {% if object.latitude and object.longitude %}
-                                {{ object.latitude }}, {{ object.longitude }}<br>
-                                <a target="_blank" href="https://maps.google.com/?q={{ object.latitude }},{{ object.longitude }}">Google Maps</a>
-                                <a target="_blank" href='https://www.openstreetmap.org/?mlat={{ object.latitude }}&mlon={{ object.longitude }}&zoom=15'>OpenStreetMap</a>
-                            {% endif %}
+                            {{ object.geom_point.y }}, {{ object.geom_point.x }}<br>
+                            <a target="_blank" href="https://maps.google.com/?q={{ object.geom_point.y }},{{ object.geom_point.x }}">Google Maps</a>
+                            <a target="_blank" href='https://www.openstreetmap.org/?mlat={{ object.geom_point.y }}&mlon={{ object.geom_point.x }}&zoom=15'>OpenStreetMap</a>
                         </li>
+                        {% endif %}
                         <li class="list-group-item list-group-item-action">
                             <div class="row">
                                 <dl class="col-auto">

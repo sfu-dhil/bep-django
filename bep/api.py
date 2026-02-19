@@ -163,9 +163,10 @@ def book(request, book_id: int):
 def get_my_geojson(request):
     features = []
     parishes = Parish.objects.annotate(
-        nation_id=F('archdeaconry__diocese__province__nation_id'),
-        province_id=F('archdeaconry__diocese__province_id'),
-        diocese_id=F('archdeaconry__diocese_id'),
+        county_id=F('town__county_id'),
+        # nation_id=F('archdeaconry__diocese__province__nation_id'),
+        # province_id=F('archdeaconry__diocese__province_id'),
+        # diocese_id=F('archdeaconry__diocese_id'),
     ).filter(geom_point__isnull=False).all()
     for parish in parishes:
         feature = ParishFeatureGeoJsonSchema(
@@ -173,10 +174,11 @@ def get_my_geojson(request):
             geometry=PointGeometrySchema(coordinates=parish.geom_point.coords),
             properties=ParishFeaturePropertiesSchema(
                 label=parish.label,
-                nation_id=parish.nation_id,
-                province_id=parish.province_id,
-                diocese_id=parish.diocese_id,
-                archdeaconry_id=parish.archdeaconry_id,
+                county_id=parish.county_id,
+                # nation_id=parish.nation_id,
+                # province_id=parish.province_id,
+                # diocese_id=parish.diocese_id,
+                # archdeaconry_id=parish.archdeaconry_id,
             )
         )
         features.append(feature)

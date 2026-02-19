@@ -1,4 +1,3 @@
-import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 import { Popover } from 'bootstrap/dist/js/bootstrap.esm'
 
 import './assets/bep.css'

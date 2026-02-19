@@ -136,10 +136,11 @@ class PointGeometrySchema(Schema):
 
 class ParishFeaturePropertiesSchema(Schema):
     label: Optional[str] = None
-    nation_id: Optional[int] = None
-    province_id: Optional[int] = None
-    diocese_id: Optional[int] = None
-    archdeaconry_id: Optional[int] = None
+    county_id: Optional[int] = None
+    # nation_id: Optional[int] = None
+    # province_id: Optional[int] = None
+    # diocese_id: Optional[int] = None
+    # archdeaconry_id: Optional[int] = None
 
 class ParishFeatureGeoJsonSchema(Schema):
     id: int

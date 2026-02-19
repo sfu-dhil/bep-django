@@ -3,6 +3,7 @@ import { watch, ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useInfoModalStore } from '../../stores/info_modals.js'
 import ParishDetailModal from './ParishDetailModal.vue'
+import { Modal } from 'bootstrap/dist/js/bootstrap.esm'
 
 const store = useInfoModalStore()
 const {
@@ -42,7 +43,7 @@ onMounted(() => {
     const modalEl = document.getElementById('info-modal')
     modalEl.addEventListener('hidden.bs.modal', modalHidden)
     modalEl.addEventListener('shown.bs.modal', modalShown)
-    modal.value = new bootstrap.Modal(modalEl)
+    modal.value = new Modal(modalEl)
     if (open.value) { modal.value.show() }
   })
 })
