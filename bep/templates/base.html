@@ -12,21 +12,14 @@
         <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
 
         {% vite_hmr_client %}
-        <link rel="stylesheet" href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" />
-        <link rel="stylesheet" href="{% static 'bootstrap-icons/font/bootstrap-icons.css' %}" />
-        <link rel="stylesheet" href="{% static '@fortawesome/fontawesome-free/css/fontawesome.min.css' %}" />
-        <link rel="stylesheet" href="{% static '@fortawesome/fontawesome-free/css/solid.min.css' %}" />
-        <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+        {% vite_asset 'bep.js' crossorigin="" %}
         {% block styles %}
         {% endblock %}
-
-        <script src="{% static 'bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
-        <script src="{% static 'js/base.js' %}"></script>
     </head>
     <body class="d-flex flex-column h-100">
         <header>
             <nav class="navbar navbar-expand-lg flex-shrink-0">
-                <div class="container px-5">
+                <div class="container">
                     <a class="navbar-brand" href="{% url 'home' %}">Books in English Parishes</a>
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
@@ -34,7 +27,7 @@
                     <div id="navbarSupportedContent" class="collapse navbar-collapse">
                         <ul class="navbar-nav mb-2 mb-lg-0">
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'parish-list' %}">Parishes</a>
+                                <a class="nav-link" href="{% url 'parishes' %}">Parishes</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'book-list' %}">Books</a>
@@ -49,14 +42,14 @@
                 </div>
             </nav>
         </header>
-        <main class="flex-grow-1 bg-secondary-subtle py-5">
+        <main class="flex-grow-1 bg-secondary-subtle pt-5">
             {% bootstrap_messages %}
 
             {% block content %}
             {% endblock %}
         </main>
         <footer class="py-4 flex-shrink-0">
-            <div class="container px-5">
+            <div class="container">
                 <div class="row align-items-center justify-content-between flex-column flex-sm-row">
                     <div class="col-auto">
                         <div class="small m-0 text-white">Books in English Parishes</div>

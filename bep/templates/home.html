@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load django_vite %}
+{% load solo_tags %}
 
 {% block styles %}
 {% endblock %}
@@ -9,19 +10,22 @@
 {% endblock %}
 
 {% block content %}
-    <div class="container">
+    {% get_solo 'bep_config.HomePage' as home_page %}
+    <div class="container pb-5">
         <div class="row align-items-stretch gx-5 justify-content-center">
             <div class="col-lg-12 col-xl-5">
                 <div class="my-5 text-center text-xl-start">
-                    <h1 class="display-5 fw-bolder mb-2">{% lorem 7 w random %}</h1>
-                    <p class="lead fw-normal mb-4">{% lorem 2 %}</p>
+                    <h1 class="display-5 fw-bolder mb-2">{{ home_page.heading }}</h1>
+                    <div class="lead fw-normal mb-4" styles="min-height: 500px">
+                        {{ home_page.content|safe }}
+                    </div>
                     <div class="d-grid gap-3 d-sm-flex justify-content-sm-center justify-content-xl-start">
-                        <a class="btn btn-primary btn-lg px-4 me-sm-3" href="">{% lorem 2 w random %}</a>
-                        <a class="btn btn-outline-light btn-lg px-4" href="">{% lorem 2 w random %}</a>
+                        <a class="btn btn-primary btn-lg px-4 me-sm-3" href="">Search Transactions</a>
+                        <a class="btn btn-outline-light btn-lg px-4" href="{% url 'about' %}">About the Project</a>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-12 col-xl-7 min-vh-100-lg">
+            <div class="col-lg-12 col-xl-7" style="min-height: 700px">
                 <div id="location-map-app" class="h-100"></div>
             </div>
         </div>

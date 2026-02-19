@@ -22,4 +22,7 @@ def getDirExtraFiles(dir):
         str(path) for path in list((dir / 'static/').rglob('*.*')) + list((dir / 'templates/').rglob('*.*'))
     ]
 BASE_DIR = Path(__file__).parent
-reload_extra_files = getDirExtraFiles(BASE_DIR / 'bep/') + getDirExtraFiles(BASE_DIR / 'bep_app/') if reload else []
+reload_extra_files = getDirExtraFiles(BASE_DIR / 'bep/') + \
+    getDirExtraFiles(BASE_DIR / 'bep_app/') + \
+    getDirExtraFiles(BASE_DIR / 'bep_config/') \
+    if reload else []

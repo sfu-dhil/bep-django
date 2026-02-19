@@ -4,9 +4,9 @@ from django.utils.safestring import mark_safe
 from django.contrib.admin import ModelAdmin, TabularInline, StackedInline
 from tinymce.widgets import TinyMCE
 from modelclone import ClonableModelAdmin
-from bep.widgets import Select2TagArrayWidget
 from leaflet.admin import LeafletGeoAdmin
 
+from .widgets import Select2TagArrayWidget
 from .models import Archdeaconry, Archive, Book, Holding, ManuscriptSource, Parish, \
     Injunction, Transaction, Inventory, County, Town, Diocese, InventoryImage, HoldingImage, \
     Monarch, Nation, Province, PrintSource, Format, SourceCategory, TransactionCategory
@@ -291,6 +291,9 @@ class InventoryAdmin(BepAdminDefaults):
         InventoryImageInline,
     ]
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related('books')
+
     def _id(self, obj):
         return f"{obj.id:05d}"
     _id.short_description = 'ID'
@@ -419,6 +422,9 @@ class TransactionAdmin(ClonableModelAdmin, BepAdminDefaults):
         'books',
     ]
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related('books')
+
     def _id(self, obj):
         return f"{obj.id:05d}"
     _id.short_description = 'ID'
@@ -458,6 +464,9 @@ class HoldingAdmin(BepAdminDefaults):
     inlines = [
         HoldingImageInline,
     ]
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related('books')
 
     def _date(self, obj):
         if obj.start_date and obj.end_date:

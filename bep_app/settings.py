@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 from environ import FileAwareEnv
 from dotenv import load_dotenv, find_dotenv
+from glob import glob
 import warnings
 
 env = FileAwareEnv()
@@ -28,9 +29,6 @@ MEDIA_ROOT = '/media'
 STATIC_ROOT = BASE_DIR / 'static/'
 
 STATICFILES_DIRS = [
-    ('bootstrap', BASE_DIR / "node_modules/bootstrap"),
-    ('bootstrap-icons', BASE_DIR / "node_modules/bootstrap-icons"),
-    ('@fortawesome', BASE_DIR / "node_modules/@fortawesome"),
     '/static-vite',
 ]
 
@@ -50,16 +48,19 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 INSTALLED_APPS = [
     'bep.apps.BepConfig',
+    'bep_config.apps.BepConfig',
     'admin_interface',
     'colorfield',
     'tinymce',
+    'solo',
+    'adminsortable2',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    "django.contrib.gis",
+    'django.contrib.gis',
     'django.contrib.postgres',
     'health_check',
     'django_select2',
@@ -67,8 +68,8 @@ INSTALLED_APPS = [
     'cache_cleaner',
     'modelclone',
     'django_vite',
-    'ninja_extra',
     'django_bootstrap5',
+    'ninja_extra',
     'leaflet',
 ]
 
@@ -155,7 +156,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en'
 
 TIME_ZONE = 'America/Vancouver'
 
@@ -239,5 +240,5 @@ NINJA_EXTRA={
 
 # GDAL & GEOS paths
 # (alphine installs it in `/usr/lib/` with a major version number or full version number)
-GDAL_LIBRARY_PATH = '/usr/lib/libgdal.so.36'
-GEOS_LIBRARY_PATH = '/usr/lib/libgeos_c.so.1'
+GDAL_LIBRARY_PATH = glob('/usr/lib/libgdal.so.*')[0]
+GEOS_LIBRARY_PATH = glob('/usr/lib/libgeos_c.so.*')[0]

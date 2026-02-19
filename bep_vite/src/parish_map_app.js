@@ -4,9 +4,6 @@ import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import OpenLayersMap from 'vue3-openlayers'
 import ParishMapApp from './ParishMapApp.vue'
 
-import 'vue3-openlayers/styles.css'
-import './assets/base.css'
-
 const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate)
 

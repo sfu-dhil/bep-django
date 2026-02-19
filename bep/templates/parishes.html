@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block content %}
-    <div class="container">
+    <div class="container pb-5">
         <figure>
             <blockquote class="blockquote"><h1>Parishes</h1></blockquote>
             <figcaption class="blockquote-footer">{% include "_partials/pagination_label.html" with page_obj=page_obj %}</figcaption>
@@ -33,7 +33,7 @@
                         {{ object.rank|floatformat:"0" }}%
                     </span>
                 {% endif %}
-                <a href="{% url 'parish-details' pk=object.pk %}" class="stretched-link"></a>
+                <a href="{% url 'parish' pk=object.pk %}" class="stretched-link"></a>
             </div>
         {% endfor %}
         {% if page_obj.paginator.num_pages > 1 %}
