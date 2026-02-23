@@ -132,7 +132,7 @@ class Monarch(models.Model):
         db_table = 'bep_monarch'
 
     def __str__(self):
-        return mark_safe(f"{self.label} ({self.start_date} - {self.end_date})" if self.start_date and self.end_date else f"{self.label}")
+        return mark_safe(self.label)
 
 class Format(models.Model):
     label = models.CharField(unique=True)
@@ -720,7 +720,7 @@ class Transaction(models.Model):
         db_table = 'bep_transaction'
 
     def __str__(self):
-        return f"{self.id:05d}"
+        return f'{self.id:05d}'
 
     @staticmethod
     def get_lsd(total_pence):

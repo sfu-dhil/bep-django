@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+
+{% block styles %}
+{% endblock %}
+
+{% block javascript %}
+{% endblock %}
+
+{% block content %}
+    <div class="container pb-5">
+        <figure>
+            <blockquote class="blockquote"><h1>Transactions</h1></blockquote>
+            <figcaption class="blockquote-footer">{% include "_partials/pagination_label.html" with page_obj=page_obj %}</figcaption>
+        </figure>
+
+        <form method="get" action="{% url 'transactions' %}" role="search">
+            <div class="input-group pb-2">
+                {% if show_help %}
+                    {% include "_partials/search_help_btn.html" %}
+                {% endif %}
+                {{ form.q }}
+                <button class="btn btn-primary" type="submit">
+                    <i class="bi bi-search" aria-hidden="true"></i> Search
+                </button>
+            </div>
+            <hr />
+            <div class="row">
+                <div class="col-3">
+                    <div class="input-group">
+                        {% for field in form %}
+                            {% if field.name != 'q' %}
+                                {% bootstrap_field field show_label=False wrapper_class='flex-grow-1 pb-2' %}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="col-9">
+                    {% for object in object_list %}
+                        {{ object }}
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                {% if request.GET.q %}
+                                    {{ object.title_headline|safe }}
+                                {% else %}
+                                    {{ object.title|safe }}
+                                {% endif %}
+                            </div>
+                            {% comment %} {% if request.GET.q %}
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary" title="Matching Score">
+                                    {{ object.rank|floatformat:"0" }}%
+                                </span>
+                            {% endif %} {% endcomment %}
+                            {% comment %} <a href="{% url 'transaction' pk=object.pk %}" class="stretched-link"></a> {% endcomment %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </form>
+        {% if page_obj.paginator.num_pages > 1 %}
+            {% bootstrap_pagination page_obj url=request.get_full_path justify_content='center' %}
+        {% endif %}
+    </div>
+{% endblock %}

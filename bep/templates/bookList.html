@@ -36,7 +36,7 @@
                         {{ object.rank|floatformat:"0" }}%
                     </span>
                 {% endif %}
-                <a href="{% url 'book-details' pk=object.pk %}" class="stretched-link"></a>
+                {% comment %} <a href="{% url 'transaction' pk=object.pk %}" class="stretched-link"></a> {% endcomment %}
             </div>
         {% endfor %}
         {% if page_obj.paginator.num_pages > 1 %}
