@@ -1,11 +1,15 @@
 <script setup>
 import LocationMap from './components/LocationMap.vue'
-import InfoModal from './components/modals/InfoModal.vue'
+import LoadingDots from './components/LoadingDots.vue'
 </script>
 
 <template>
-  <LocationMap></LocationMap>
-  <InfoModal></InfoModal>
+  <Suspense>
+    <LocationMap></LocationMap>
+    <template #fallback>
+      <LoadingDots :show="true"></LoadingDots>
+    </template>
+  </Suspense>
 </template>
 
 <style scoped>

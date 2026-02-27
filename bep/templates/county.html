@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container pb-5">
+        <h1>{{ object.label }}</h1>
+        <hr />
+
+        <div class="card mb-5">
+            <details id="county-details" class="card-body" open>
+                <summary class="card-title h5">County Details <hr class="mt-4" /></summary>
+                <dl class="row gy-3 m-0 row-cols-1 row-cols-lg-2 mb-2">
+                    {% include '_partials/item_detail.html' with label="Description" value=object.description %}
+                    {% if object.links|length > 0 %}
+                        <dt class="col col-lg-2 px-0">Links</dt>
+                        <dd class="col col-lg-10 px-0">
+                            {% for link in object.links %}
+                                <a target="_blank" href="{{ link }}">{{ link }}</a><br />
+                            {% endfor %}
+                        </dd>
+                    {% endif %}
+                    {% comment %} {% include '_partials/item_detail_info_modals.html' with label="Nation" object_type="nation" item=nation %} {% endcomment %}
+                    <dt class="col col-lg-2 px-0"><div class="pt-2">Parishes</div></dt>
+                    <dd class="col col-lg-10 px-0">
+                        <div class="list-group">
+                            <a href="{% url 'parishes' %}?county={{ object.id }}" class="list-group-item list-group-item-action">
+                                <i class="bi bi-link"></i> View all parishes in this county
+                            </a>
+                        </div>
+                    </dd>
+                    <dt class="col col-lg-2 px-0"><div class="pt-2">Transactions</div></dt>
+                    <dd class="col col-lg-10 px-0">
+                        <div class="list-group">
+                            <a href="{% url 'transactions' %}?county={{ object.id }}" class="list-group-item list-group-item-action">
+                                <i class="bi bi-link"></i> View all transactions in this county
+                            </a>
+                        </div>
+                    </dd>
+                </dl>
+            </details>
+        </div>
+
+        <div class="card mb-5">
+            <details id="county-visualizations" class="card-body" open>
+                <summary class="card-title h5">Timelines / Visualizations <hr class="mt-4" /></summary>
+                TODO: Visualizations
+            </details>
+        </div>
+    </div>
+{% endblock %}

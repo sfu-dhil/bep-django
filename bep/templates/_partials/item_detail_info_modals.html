@@ -1,0 +1,14 @@
+{% if item or items|length > 0 %}
+    <dt class="col col-lg-{{ col_label|default:2 }} px-0"><div class="pt-2">{{ label|safe }}{% if show_book_warning %} {% include '_partials/book_info_warning_btn.html' %}{% endif %}</div></dt>
+    <dd class="col col-lg-{{ col_value|default:10 }} px-0">
+        <div class="list-group">
+            {% if items|length > 0 %}
+                {% for item in items %}
+                    <button type="button" class="info-modal-toggle-app list-group-item list-group-item-action" data-object-type="{{ object_type }}" data-object-id="{{ item.id }}" data-label="<i class='bi bi-info-circle'></i> {{ item }}"></button>
+                {% endfor %}
+            {% else %}
+                <button type="button" class="info-modal-toggle-app list-group-item list-group-item-action" data-object-type="{{ object_type }}" data-object-id="{{ item.id }}" data-label="<i class='bi bi-info-circle'></i> {{ item }}"></button>
+            {% endif %}
+        </div>
+    </dd>
+{% endif %}

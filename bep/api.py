@@ -83,68 +83,35 @@ def parishes(request):
         county_id=F('town__county_id'),
     ).order_by('label').all()
 
-@api.get("/books/{book_id}/transactions", response=PaginatedResponseSchema[TransactionSchema], url_name='book-transactions')
-@paginate
-@decorate_view(cache_page(settings.CACHE_SECONDS))
-def book_transactions(request, book_id: int):
-    return Transaction.objects.prefetch_related(
-        'books'
-    ).filter(books__id=book_id).order_by('start_date').all()
 @api.get("/parishes/{parish_id}/transactions", response=PaginatedResponseSchema[TransactionSchema], url_name='parish-transactions')
 @paginate
 @decorate_view(cache_page(settings.CACHE_SECONDS))
 def parishes_transactions(request, parish_id: int):
-    return Transaction.objects.prefetch_related(
-        'books'
-    ).filter(parish_id=parish_id).order_by('start_date').all()
+    return Transaction.objects.filter(parish_id=parish_id).order_by('start_date').all()
 @api.get("/transactions/{transaction_id}", response=TransactionSchema, url_name='transaction')
 @decorate_view(cache_page(settings.CACHE_SECONDS))
 def transaction(request, transaction_id: int):
-    return Transaction.objects.prefetch_related(
-        'books'
-    ).get(pk=transaction_id)
+    return Transaction.objects.get(pk=transaction_id)
 
-@api.get("/books/{book_id}/inventories", response=PaginatedResponseSchema[InventorySchema], url_name='book-inventories')
-@paginate
-@decorate_view(cache_page(settings.CACHE_SECONDS))
-def book_inventories(request, book_id: int):
-    return Inventory.objects.prefetch_related(
-        'books'
-    ).filter(books__id=book_id).order_by('start_date').all()
 @api.get("/parishes/{parish_id}/inventories", response=PaginatedResponseSchema[InventorySchema], url_name='parish-inventories')
 @paginate
 @decorate_view(cache_page(settings.CACHE_SECONDS))
 def parishes_inventories(request, parish_id: int):
-    return Inventory.objects.prefetch_related(
-        'books'
-    ).filter(parish_id=parish_id).order_by('start_date').all()
+    return Inventory.objects.filter(parish_id=parish_id).order_by('start_date').all()
 @api.get("/inventories/{inventory_id}", response=InventorySchema, url_name='inventory')
 @decorate_view(cache_page(settings.CACHE_SECONDS))
 def inventories(request, inventory_id: int):
-    return Inventory.objects.prefetch_related(
-        'books'
-    ).get(pk=inventory_id)
+    return Inventory.objects.get(pk=inventory_id)
 
-@api.get("/books/{book_id}/holdings", response=PaginatedResponseSchema[HoldingSchema], url_name='book-holdings')
-@paginate
-@decorate_view(cache_page(settings.CACHE_SECONDS))
-def book_holdings(request, book_id: int):
-    return Holding.objects.prefetch_related(
-        'books'
-    ).filter(books__id=book_id).order_by('start_date').all()
 @api.get("/parishes/{parish_id}/holdings", response=PaginatedResponseSchema[HoldingSchema], url_name='parish-holdings')
 @paginate
 @decorate_view(cache_page(settings.CACHE_SECONDS))
 def parishes_holdings(request, parish_id: int):
-    return Holding.objects.prefetch_related(
-        'books'
-    ).filter(parish_id=parish_id).order_by('start_date').all()
+    return Holding.objects.filter(parish_id=parish_id).order_by('start_date').all()
 @api.get("/holdings/{holding_id}", response=HoldingSchema, url_name='holding')
 @decorate_view(cache_page(settings.CACHE_SECONDS))
 def holding(request, holding_id: int):
-    return Holding.objects.prefetch_related(
-        'books'
-    ).get(pk=holding_id)
+    return Holding.objects.get(pk=holding_id)
 
 @api.get("/books", response=PaginatedResponseSchema[BookSchema], url_name='books')
 @paginate

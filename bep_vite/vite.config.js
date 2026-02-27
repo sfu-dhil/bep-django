@@ -22,8 +22,6 @@ export default defineConfig({
     rollupOptions: {
       input: {
         bep: resolve('./src/bep.js'),
-        parish_map_app: resolve('./src/parish_map_app.js'),
-        location_map_app: resolve('./src/location_map_app.js'),
       },
     },
   },

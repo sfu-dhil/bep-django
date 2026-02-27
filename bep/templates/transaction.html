@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container pb-5">
+        <h1>Transaction {{ object }}</h1>
+        <hr />
+
+        <div class="card mb-5">
+            <details id="transaction-details" class="card-body" open>
+                <summary class="card-title h5">Transaction Details <hr class="mt-4" /></summary>
+                <dl class="row gy-3 m-0 row-cols-1 row-cols-lg-2">
+                    {% include '_partials/item_detail_info_modals.html' with label="Categories" object_type="transaction_category" items=transaction_categories %}
+                    {% if object.value %}
+                        {% include '_partials/item_detail.html' with label="Transaction Value" value=object.get_value_lsd_str %}
+                    {% endif %}
+                    {% if object.shipping %}
+                        {% include '_partials/item_detail.html' with label="Shipping Value" value=object.get_shipping_lsd_str %}
+                    {% endif %}
+                    {% include '_partials/item_detail.html' with label="Copies" value=object.copies %}
+                    {% include '_partials/item_detail.html' with label="Page" value=object.page %}
+                    {% if object.written_date %}
+                        {% include '_partials/item_detail.html' with label="Date" value=object.written_date %}
+                    {% elif object.start_date %}
+                        {% include '_partials/item_detail.html' with label="Date" value=object.start_date|date:"Y" %}
+                    {% endif %}
+                    {% include '_partials/item_detail.html' with label="Location" value=object.location %}
+                    {% include '_partials/item_detail.html' with label="Transcription" value=object.transcription %}
+                    {% include '_partials/item_detail.html' with label="Modern Transcription" value=object.modern_transcription %}
+                    {% include '_partials/item_detail.html' with label="Notes" value=object.public_notes %}
+                    {% include '_partials/item_detail_info_modals.html' with label="Books" object_type="book" items=books show_book_warning=True %}
+                </dl>
+            </details>
+        </div>
+
+        <div class="card mb-5">
+            <details id="transaction-source-details" class="card-body" open>
+                <summary class="card-title h5">Source Details <hr class="mt-4" /></summary>
+                <dl class="row gy-3 m-0 row-cols-1 row-cols-lg-2">
+                    {% include '_partials/item_detail_info_modals.html' with label="Manuscript Source" object_type="manuscript_source" item=manuscript_source %}
+                    {% include '_partials/item_detail_info_modals.html' with label="Print Source" object_type="print_source" item=print_source %}
+                    {% include '_partials/item_detail_info_modals.html' with label="Monarch" object_type="monarch" item=monarch %}
+                    {% include '_partials/item_detail_info_modals.html' with label="Injunction" object_type="injunction" item=injunction %}
+                </dl>
+            </details>
+        </div>
+
+        <div class="card mb-5">
+            <details id="transaction-parish-details" class="card-body" open>
+                <summary class="card-title h5">Parish Details <hr class="mt-4" /></summary>
+                <dl class="row gy-1 m-0 row-cols-1 row-cols-lg-2">
+                    {% include '_partials/item_detail_info_links.html' with label="Parish" link_name="parish" item=parish %}
+                    {% comment %} {% include '_partials/item_detail_info_modals.html' with label="Nation" object_type="nation" item=nation %} {% endcomment %}
+                    {% include '_partials/item_detail_info_modals.html' with label="Province" object_type="province" item=province %}
+                    {% include '_partials/item_detail_info_links.html' with label="Diocese" link_name="diocese" item=diocese %}
+                    {% include '_partials/item_detail_info_modals.html' with label="Archdeaconry <br />or Peculiar Court" object_type="archdeaconry" item=archdeaconry %}
+                    {% include '_partials/item_detail_info_links.html' with label="County" link_name="county" item=county %}
+                    {% include '_partials/item_detail_info_modals.html' with label="Town" object_type="town" item=town %}
+                </dl>
+            </details>
+        </div>
+    </div>
+{% endblock %}

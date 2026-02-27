@@ -8,7 +8,6 @@ from .models import Parish, Transaction, Inventory, Holding, \
 class TransactionSchema(ModelSchema):
     parish_id: Optional[int] = None
     monarch_id: Optional[int] = None
-    books: List[int] = []
 
     class Meta:
         model = Transaction
@@ -18,14 +17,9 @@ class TransactionSchema(ModelSchema):
             # 'injunction_id', 'monarch_id', 'manuscript_source_id', 'print_source_id'
         ]
 
-    @staticmethod
-    def resolve_books(obj):
-         return [book.id for book in obj.books.all()]
-
 class InventorySchema(ModelSchema):
     parish_id: Optional[int] = None
     monarch_id: Optional[int] = None
-    books: List[int] = []
 
     class Meta:
         model = Inventory
@@ -35,13 +29,8 @@ class InventorySchema(ModelSchema):
             # 'injunction_id', 'monarch_id', 'manuscript_source_id', 'print_source_id'
         ]
 
-    @staticmethod
-    def resolve_books(obj):
-         return [book.id for book in obj.books.all()]
-
 class HoldingSchema(ModelSchema):
     parish_id: Optional[int] = None
-    books: List[int] = []
 
     class Meta:
         model = Holding
@@ -50,10 +39,6 @@ class HoldingSchema(ModelSchema):
             'description',
             # 'archive_id'
         ]
-
-    @staticmethod
-    def resolve_books(obj):
-         return [book.id for book in obj.books.all()]
 
 class BookSchema(ModelSchema):
     monarch_id: Optional[int] = None
@@ -65,19 +50,19 @@ class BookSchema(ModelSchema):
 class MonarchSchema(ModelSchema):
     class Meta:
         model = Monarch
-        fields = ['id', 'label', 'start_date', 'end_date']
+        fields = ['id', 'label', 'description', 'start_date', 'end_date']
 
 class NationSchema(ModelSchema):
     class Meta:
         model = Nation
-        fields = ['id', 'label']
+        fields = ['id', 'label', 'description']
 
 class CountySchema(ModelSchema):
     nation_id: Optional[int] = None
 
     class Meta:
         model = County
-        fields = ['id', 'label']
+        fields = ['id', 'label', 'description']
 
 class TownSchema(ModelSchema):
     nation_id: Optional[int] = None
@@ -85,14 +70,14 @@ class TownSchema(ModelSchema):
 
     class Meta:
         model = Town
-        fields = ['id', 'label']
+        fields = ['id', 'label', 'description']
 
 class ProvinceSchema(ModelSchema):
     nation_id: Optional[int] = None
 
     class Meta:
         model = Province
-        fields = ['id', 'label']
+        fields = ['id', 'label', 'description']
 
 class DioceseSchema(ModelSchema):
     nation_id: Optional[int] = None
@@ -100,7 +85,7 @@ class DioceseSchema(ModelSchema):
 
     class Meta:
         model = Diocese
-        fields = ['id', 'label']
+        fields = ['id', 'label', 'description']
 
 class ArchdeaconrySchema(ModelSchema):
     nation_id: Optional[int] = None
@@ -109,7 +94,7 @@ class ArchdeaconrySchema(ModelSchema):
 
     class Meta:
         model = Archdeaconry
-        fields = ['id', 'label']
+        fields = ['id', 'label', 'description']
 
 class ParishSchema(ModelSchema):
     nation_id: Optional[int] = None

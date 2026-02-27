@@ -3,7 +3,10 @@
 @import '@fortawesome/fontawesome-free/css/fontawesome.min.css';
 @import '@fortawesome/fontawesome-free/css/solid.min.css';
 
-@import 'vue3-openlayers/styles.css';
+@import 'select2/dist/css/select2.css';
+@import 'select2-bootstrap-5-theme/dist/select2-bootstrap-5-theme.css';
+@import './select2-bootstrap-dark-theme.css';
+
 @import 'vue-multiselect/dist/vue-multiselect.min.css';
 
 html,
@@ -89,4 +92,37 @@ a[href^="https://"]::after {
   to {
     clip-path: inset(0)
   }
+}
+.parish-map-app {
+    min-height: 200px;
+}
+.diocese-map-app {
+    min-height: 400px;
+}
+
+/* support slightly fancy details */
+details>summary {
+  list-style: none;
+  cursor: pointer;
+  position: relative;
+}
+summary::-webkit-details-marker {
+  display: none
+}
+summary::after {
+  content: ' \F285';
+  font-family: "bootstrap-icons";
+  position: absolute;
+  right: 0.25em;
+  top: 0;
+  font-weight: bold;
+}
+details[open] summary::after {
+  content: ' \F282';
+}
+details summary hr {
+  display: none;
+}
+details[open] summary hr {
+  display: inherit;
 }

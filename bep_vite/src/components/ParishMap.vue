@@ -1,10 +1,8 @@
-
-
 <script setup>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { Style, Text, Fill, Stroke } from "ol/style"
 import { useGeographic } from 'ol/proj.js'
-import { useParishesStore } from '../stores/data/parishes'
+import { useParishesStore } from '../stores/data.js'
 
 const props = defineProps({
   parishId: {
@@ -12,14 +10,11 @@ const props = defineProps({
     required: true,
   },
 })
-const parish = computed(() => useParishesStore().parishesMap.get(props.parishId))
-const center = ref(parish.value?.coordinates || [0, 52.5])
+const parish = await useParishesStore().getById(props.parishId)
+const center = ref(parish.coordinates || [-2, 53])
 const zoom = ref(7.5)
 const projection = ref('EPSG:3857')
 const rotation = ref(0)
-
-const mapRef = ref(null)
-const viewRef = ref(null)
 
 const overrideFeatureStyle = (feature) => {
   return [
@@ -28,14 +23,14 @@ const overrideFeatureStyle = (feature) => {
           text: '\uf041',
           scale: 1,
           textBaseline: 'bottom',
-          font: 'bold 1em "Font Awesome 6 Free"',
+          font: 'bold 1em "Font Awesome 7 Free"',
           fill: new Fill({ color: '#7cb341' }),
           stroke: new Stroke({ color: 'black', width: 3 }),
       }),
     }),
     new Style({
       text: new Text({
-          text: `${parish.value?.label}`,
+          text: `${parish.label}`,
           textBaseline: 'top',
           font: 'bold 0.6em system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans","Liberation Sans",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"',
           fill: new Fill({ color: 'black' }),
@@ -51,14 +46,12 @@ useGeographic()
 <template>
   <div class="w-100 h-100 position-relative overflow-hidden">
     <ol-map
-      ref="mapRef"
       class="w-100 h-100 position-absolute z-0"
       :loadTilesWhileAnimating="true"
       :loadTilesWhileInteracting="true"
       :controls="[]"
     >
       <ol-view
-        ref="viewRef"
         :center="center"
         :rotation="rotation"
         :zoom="zoom"
@@ -78,11 +71,11 @@ useGeographic()
         </ol-source-vector>
       </ol-vector-layer>
 
-      <ol-interaction-dragrotatezoom />
+      <ol-interaction-drag-rotate-and-zoom  />
       <ol-zoom-control />
       <ol-rotate-control :autoHide="true" />
-      <ol-fullscreen-control />
-      <ol-scaleline-control />
+      <ol-full-screen-control />
+      <ol-scale-line-control />
       <ol-attribution-control :collapsible="true" :collapsed="true" />
     </ol-map>
   </div>

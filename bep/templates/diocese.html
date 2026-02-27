@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container pb-5">
+        <h1>{{ object.label }}</h1>
+        <hr />
+
+        <div class="card mb-5">
+            <details id="diocese-details" class="card-body" open>
+                <summary class="card-title h5">Diocese Details <hr class="mt-4" /></summary>
+                <dl class="row gy-3 m-0 row-cols-1 row-cols-lg-2 mb-2">
+                    {% include '_partials/item_detail.html' with label="Description" value=object.description %}
+                    {% if object.links|length > 0 %}
+                        <dt class="col col-lg-2 px-0">Links</dt>
+                        <dd class="col col-lg-10 px-0">
+                            {% for link in object.links %}
+                                <a target="_blank" href="{{ link }}">{{ link }}</a><br />
+                            {% endfor %}
+                        </dd>
+                    {% endif %}
+                    {% comment %} {% include '_partials/item_detail_info_modals.html' with label="Nation" object_type="nation" item=nation %} {% endcomment %}
+                    {% include '_partials/item_detail_info_modals.html' with label="Province" object_type="province" item=province %}
+                    <dt class="col col-lg-2 px-0"><div class="pt-2">Parishes</div></dt>
+                    <dd class="col col-lg-10 px-0">
+                        <div class="list-group">
+                            <a href="{% url 'parishes' %}?diocese={{ object.id }}" class="list-group-item list-group-item-action">
+                                <i class="bi bi-link"></i> View all parishes in this diocese
+                            </a>
+                        </div>
+                    </dd>
+                    <dt class="col col-lg-2 px-0"><div class="pt-2">Transactions</div></dt>
+                    <dd class="col col-lg-10 px-0">
+                        <div class="list-group">
+                            <a href="{% url 'transactions' %}?diocese={{ object.id }}" class="list-group-item list-group-item-action">
+                                <i class="bi bi-link"></i> View all transactions in this diocese
+                            </a>
+                        </div>
+                    </dd>
+                </dl>
+                {% with geom_pre_1541=object.geom_pre_1541 geom_post_1541=object.geom_pre_1541 %}
+                    {% if geom_pre_1541 or geom_post_1541 %}
+                        <div class="row align-items-stretch gx-1">
+                            {% if geom_pre_1541 %}
+                                <div class="{% if geom_post_1541 %}col-lg-6{% endif %}">
+                                    <figure class="figure h-100 w-100 m-0 d-flex flex-column">
+                                        <div class="diocese-map-app" data-diocese-id="{{ object.id }}" data-view="pre_1541"></div>
+                                        <figcaption class="figure-caption text-center">Boundaries before 1541</figcaption>
+                                    </figure>
+                                </div>
+                            {% endif %}
+                            {% if geom_post_1541 %}
+                                <div class="{% if geom_pre_1541 %}col-lg-6{% endif %}">
+                                    <figure class="figure h-100 w-100 m-0 d-flex flex-column">
+                                        <div class="diocese-map-app" data-diocese-id="{{ object.id }}" data-view="post_1541"></div>
+                                        <figcaption class="figure-caption text-center">Boundaries for 1541 and after</figcaption>
+                                    </figure>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+            </details>
+        </div>
+
+        <div class="card mb-5">
+            <details id="diocese-visualizations" class="card-body" open>
+                <summary class="card-title h5">Timelines / Visualizations <hr class="mt-4" /></summary>
+                TODO: Visualizations
+            </details>
+        </div>
+    </div>
+{% endblock %}

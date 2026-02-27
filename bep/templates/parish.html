@@ -1,137 +1,67 @@
 {% extends "base.html" %}
-{% load django_vite %}
-
-{% block styles %}
-<style>
-    #parish-map-app {
-        min-height: 300px;
-    }
-</style>
-{% endblock %}
-
-{% block javascript %}
-    {{ parish_data|json_script:'bep-parish-data' }}
-    {% vite_asset 'parish_map_app.js' crossorigin="" %}
-{% endblock %}
 
 {% block content %}
     <div class="container pb-5">
         <h1>{{ object.label }}</h1>
         <hr />
+        {% with geom_point=object.geom_point %}
+            <div class="card mb-5">
+                <details id="parish-details" class="card-body" open>
+                    <summary class="card-title h5">Parish Details <hr class="mt-4" /></summary>
 
-        <div class="card mb-5">
-            <div class="card-header">Parish Details</div>
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item list-group-item-action">
-                    <div class="fw-bold">Description</div>
-                    {% if object.description %}
-                        {{ object.description|safe }}
-                    {% endif %}
-                </li>
-                <li class="list-group-item list-group-item-action">
-                    <div class="fw-bold">Links</div>
-                    {% for link in object.links %}
-                        <a target="_blank" href="{{ link }}">{{ link }}</a><br />
-                    {% endfor %}
-                </li>
-            </ul>
-        </div>
-
-        <div class="card mb-5">
-            <div class="card-header">Location Details</div>
-            <div class="row align-items-stretch gx-0">
-                <div class="col-lg-12 col-xl-7">
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item list-group-item-action">
-                            <div class="fw-bold">Street Address</div>
-                            {% if object.address %}
-                                {{ object.address }}<br>
-                                <a target="_blank" href="https://maps.google.com/?q={{ object.address }}">Google Maps</a>
-                                <a target="_blank" href='https://www.openstreetmap.org/search?query={{ object.address }}'>OpenStreetMap</a>
-                            {% endif %}
-                        </li>
-                        {% if object.geom_point and object.geom_point.coords %}
-                        <li class="list-group-item list-group-item-action">
-                            <div class="fw-bold">Geocoordinates</div>
-                            {{ object.geom_point.y }}, {{ object.geom_point.x }}<br>
-                            <a target="_blank" href="https://maps.google.com/?q={{ object.geom_point.y }},{{ object.geom_point.x }}">Google Maps</a>
-                            <a target="_blank" href='https://www.openstreetmap.org/?mlat={{ object.geom_point.y }}&mlon={{ object.geom_point.x }}&zoom=15'>OpenStreetMap</a>
-                        </li>
-                        {% endif %}
-                        <li class="list-group-item list-group-item-action">
-                            <div class="row">
-                                <dl class="col-auto">
-                                    <dt>Nation</dt>
-                                    <dd>
-                                        {% if nation %}
-                                            <span role="button" class="badge text-bg-primary" onClick="showNationModal({{ nation.id }})">{{ nation.label }}</span>
-                                        {% else %}
-                                            <span class="badge text-bg-secondary">N/A</span>
-                                        {% endif %}
+                    <div class="row align-items-stretch gx-1">
+                        <div class="{% if geom_point %}col-xl-6{% endif %}">
+                            <dl class="row gy-3 m-0 row-cols-1 row-cols-lg-2">
+                                {% if object.address %}
+                                    <dt class="col col-lg-2 col-xl-4 px-0">Street Address</dt>
+                                    <dd class="col col-lg-10 col-xl-8 px-0">
+                                        {{ object.address|safe }}<br>
+                                        <a target="_blank" href="https://maps.google.com/?q={{ object.address|escape }}">Google Maps</a>
+                                        <a target="_blank" href="https://www.openstreetmap.org/search?query={{ object.address|escape }}">OpenStreetMap</a>
                                     </dd>
-                                    <dt>Province</dt>
-                                    <dd>
-                                        {% if province %}
-                                            <span role="button" class="badge text-bg-primary" onClick="showProvinceModal({{ province.id }})">{{ province.label }}</span>
-                                        {% else %}
-                                            <span class="badge text-bg-secondary">N/A</span>
-                                        {% endif %}
+                                {% endif %}
+                                {% if geom_point %}
+                                    <dt class="col col-lg-2 col-xl-4 px-0">Geocoordinates</dt>
+                                    <dd class="col col-lg-10 col-xl-8 px-0">
+                                        {{ object.geom_point.y }}, {{ object.geom_point.x }}<br>
+                                        <a target="_blank" href="https://maps.google.com/?q={{ object.geom_point.y }},{{ object.geom_point.x }}">Google Maps</a>
+                                        <a target="_blank" href="https://www.openstreetmap.org/?mlat={{ object.geom_point.y }}&mlon={{ object.geom_point.x }}&zoom=15">OpenStreetMap</a>
                                     </dd>
-                                </dl>
-                                <dl class="col-auto">
-                                    <dt>County</dt>
-                                    <dd>
-                                        {% if county %}
-                                            <span role="button" class="badge text-bg-primary" onClick="showCountyModal({{ county.id }})">{{ county.label }}</span>
-                                        {% else %}
-                                            <span class="badge text-bg-secondary">N/A</span>
-                                        {% endif %}
-                                    </dd>
-                                    <dt>Diocese</dt>
-                                    <dd>
-                                        {% if diocese %}
-                                            <span role="button" class="badge text-bg-primary" onClick="showDioceseModal({{ diocese.id }})">{{ diocese.label }}</span>
-                                        {% else %}
-                                            <span class="badge text-bg-secondary">N/A</span>
-                                        {% endif %}
-                                    </dd>
-                                </dl>
-                                <dl class="col-auto">
-                                    <dt>Town</dt>
-                                    <dd>
-                                        {% if town %}
-                                            <span role="button" class="badge text-bg-primary" onClick="showTownModal({{ town.id }})">{{ town.label }}</span>
-                                        {% else %}
-                                            <span class="badge text-bg-secondary">N/A</span>
-                                        {% endif %}
-                                    </dd>
-                                    <dt>Archdeaconry or Peculiar Court</dt>
-                                    <dd>
-                                        {% if archdeaconry %}
-                                            <span role="button" class="badge text-bg-primary" onClick="showArchdeaconryModal({{ archdeaconry.id }})">{{ archdeaconry.label }}</span>
-                                        {% else %}
-                                            <span class="badge text-bg-secondary">N/A</span>
-                                        {% endif %}
-                                    </dd>
-                                </dl>
+                                {% endif %}
+                            </dl>
+                        </div>
+                        {% if geom_point %}
+                            <div class="col-xl-6 py-1">
+                                <div class="parish-map-app h-100" data-parish-id="{{ object.id }}"></div>
                             </div>
-                        </li>
-                    </ul>
-                </div>
-                <div class="col-lg-12 col-xl-5">
-                    <div class="parish-map-app h-100" data-parish-id="{{ object.id }}"></div>
-                </div>
+                        {% endif %}
+                    </div>
+                    <dl class="row gy-3 m-0 row-cols-1 row-cols-lg-2">
+                        {% include '_partials/item_detail.html' with label="Description" value=object.description %}
+                        {% if object.links|length > 0 %}
+                            <dt class="col col-lg-2 px-0">Links</dt>
+                            <dd class="col col-lg-10 px-0">
+                                {% for link in object.links %}
+                                    <a target="_blank" href="{{ link }}">{{ link }}</a><br />
+                                {% endfor %}
+                            </dd>
+                        {% endif %}
+                        {% comment %} {% include '_partials/item_detail_info_modals.html' with label="Nation" object_type="nation" item=nation %} {% endcomment %}
+                        {% include '_partials/item_detail_info_modals.html' with label="Province" object_type="province" item=province %}
+                        {% include '_partials/item_detail_info_links.html' with label="Diocese" link_name="diocese" item=diocese %}
+                        {% include '_partials/item_detail_info_modals.html' with label="Archdeaconry <br />or Peculiar Court" object_type="archdeaconry" item=archdeaconry %}
+                        {% include '_partials/item_detail_info_links.html' with label="County" link_name="county" item=county %}
+                        {% include '_partials/item_detail_info_modals.html' with label="Town" object_type="town" item=town %}
+                    </dl>
+                </details>
             </div>
-        </div>
+        {% endwith %}
 
         <div class="card mb-5">
-            <div class="card-header">Book Details</div>
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item list-group-item-action">
-                    Timeline? (transactions/Inventories/Holding)<br />
-                    Lists?
-                </li>
-            </ul>
+            <details id="parish-visualizations" class="card-body" open>
+                <summary class="card-title h5">Timelines / Visualizations <hr class="mt-4" /></summary>
+                TODO: Visualizations
+            </details>
         </div>
     </div>
 {% endblock %}

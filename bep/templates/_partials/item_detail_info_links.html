@@ -1,0 +1,18 @@
+{% if item or items|length > 0 %}
+    <dt class="col col-lg-{{ col_label|default:2 }} px-0"><div class="pt-2">{{ label|safe }}</div></dt>
+    <dd class="col col-lg-{{ col_value|default:10 }} px-0">
+        <div class="list-group">
+            {% if items|length > 0 %}
+                {% for item in items %}
+                    <a href="{% url link_name pk=object.pk %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-link"></i> {{ item }}
+                    </a>
+                {% endfor %}
+            {% else %}
+                <a href="{% url link_name pk=object.pk %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-link"></i> {{ item }}
+                </a>
+            {% endif %}
+        </div>
+    </dd>
+{% endif %}

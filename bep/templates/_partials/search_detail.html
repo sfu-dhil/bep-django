@@ -1,12 +1,11 @@
-{% if value_headline and '<mark>' in value_headline %}
-    <li class="list-group-item list-group-item-action">
-        <div class="fw-bold">{{ label }}</div>
-        {{ value_headline|safe }}
-    </li>
-{% elif value %}
-    <li class="list-group-item list-group-item-action">
-        <div class="fw-bold">{{ label }}</div>
-        {{ value|striptags|safe }}
-    </li>
+{% if value_headline or value %}
+    <dt class="col col-lg-{{ col_label|default:2 }} px-0">{{ label }}</dt>
+    <dd class="col col-lg-{{ col_value|default:10 }} px-0">
+        {% if value_headline and '<mark>' in value_headline %}
+            {{ value_headline|safe }}
+        {% elif value %}
+            {{ value|safe }}
+        {% endif %}
+    </dd>
 {% endif %}
 

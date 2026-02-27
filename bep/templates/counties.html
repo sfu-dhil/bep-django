@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+
+{% block styles %}
+{% endblock %}
+
+{% block javascript %}
+{% endblock %}
+
+{% block content %}
+    <div class="container pb-5">
+        <figure>
+            <blockquote class="blockquote"><h1>Counties</h1></blockquote>
+            <figcaption class="blockquote-footer">{% include "_partials/pagination_label.html" with page_obj=page_obj %}</figcaption>
+        </figure>
+
+        <form method="get" action="{% url 'counties' %}" role="search">
+            <div class="input-group pb-2">
+                {% include "_partials/search_help_btn.html" %}
+                {{ form.q }}
+                <button class="btn btn-primary" type="submit">
+                    <i class="bi bi-search" aria-hidden="true"></i> Search
+                </button>
+            </div>
+        </form>
+        <hr />
+        {% for object in object_list %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        {% if request.GET.q %}
+                            {{ object.label_headline|safe }}
+                        {% else %}
+                            {{ object.label|safe }}
+                        {% endif %}
+                    </h5>
+                    {% if request.GET.q %}
+                        {{ object.description_headline|safe }}
+                    {% else %}
+                        {{ object.description|safe }}
+                    {% endif %}
+                    {% comment %} {% include '_partials/search_tag.html' with category='Town' label=object.town.label %} {% endcomment %}
+                    {% comment %} {% include '_partials/search_tag.html' with category='Nation' label=object.nation.label %} {% endcomment %}
+                </div>
+                {% if request.GET.q %}
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary" title="Matching Score">
+                        {{ object.rank|floatformat:"0" }}%
+                    </span>
+                {% endif %}
+                <a href="{% url 'county' pk=object.pk %}" class="stretched-link"></a>
+            </div>
+        {% empty %}
+            <div class="alert alert-warning" role="alert">No records found. Try adjusting your search terms or filters.</div>
+        {% endfor %}
+        {% if page_obj.paginator.num_pages > 1 %}
+            {% bootstrap_pagination page_obj url=request.get_full_path justify_content='center' %}
+        {% endif %}
+    </div>
+{% endblock %}
