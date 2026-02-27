@@ -1,16 +1,10 @@
 
 
 <script setup>
-const props = defineProps({
-  show: {
-    type: Boolean,
-    required: true,
-  },
-})
 </script>
 
 <template>
-  <div v-if="show" class="position-absolute top-0 start-0 bottom-0 end-0 bg-black bg-opacity-75">
+  <div class="position-absolute top-0 start-0 bottom-0 end-0 bg-black bg-opacity-75">
     <div class="position-absolute top-50 start-50 translate-middle text-center">
       <div class="spinner-border"></div>
       <div class="fw-bold loading-dots" role="status">Loading...</div>

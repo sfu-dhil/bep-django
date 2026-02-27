@@ -1,5 +1,3 @@
-
-
 <script setup>
 import { ref, watch, inject, nextTick, computed, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
@@ -7,32 +5,40 @@ import { Style, Text, Fill, Stroke, Circle } from "ol/style"
 import { useGeographic } from 'ol/proj.js'
 import { createEmpty, extend } from 'ol/extent.js'
 import { MVT, GeoJSON } from 'ol/format.js'
-import { useLocationMapStore } from '../stores/map/location.js'
-import { useInfoModalStore } from '../stores/info_modals.js'
-import { useParishesStore } from '../stores/data/parishes.js'
+import { useLocationMapStore } from '../stores/location.js'
+import { useInfoModalStore } from '../stores/info_modal.js'
 import FilterSingleSelect from './FilterSingleSelect.vue'
-import LoadingDots from './LoadingDots.vue'
+import {
+  // useNationsStore,
+  // useProvincesStore,
+  // useDiocesesStore,
+  // useArchdeaconriesStore,
+  useCountiesStore,
+  // useTownsStore,
+  useParishesStore,
+} from '../stores/data.js'
+import {
+    // filterByNationId,
+    // filterByProvinceId,
+    // filterByDioceseId,
+    // filterByArchdeaconryId,
+    filterByCountyId,
+    // filterByTownId,
+} from '../helpers/utils.js'
 
 const mvt = new MVT()
 const geoJson = new GeoJSON()
 
-const store = useLocationMapStore()
+const locationStore = useLocationMapStore()
 const {
   center,
   zoom,
   rotation,
   diocesePre1541Visible,
   diocesePost1541Visible,
-} = store
+} = locationStore
 const {
   projection,
-  // listedNations,
-  // listedProvinces,
-  // listedDioceses,
-  // listedArchdeaconries,
-  listedCounties,
-  // listedTowns,
-  listedParishes,
   // selectedNationId,
   // selectedProvinceId,
   // selectedDioceseId,
@@ -40,8 +46,7 @@ const {
   selectedCountyId,
   // selectedTownId,
   selectedParishId,
-} = storeToRefs(store)
-const infoModalStore = useInfoModalStore()
+} = storeToRefs(locationStore)
 
 const mapRef = ref(null)
 const viewRef = ref(null)
@@ -49,8 +54,24 @@ const parishSourceClusterRef = ref(null)
 const parishSourceVectorRef = ref(null)
 const diocesePre1541TileLayerRef = ref(null)
 const diocesePost1541TileLayerRef = ref(null)
+const websiteOrigin = window.location.origin
 
-const isLoadingData = computed(() => listedParishes.value.length === 0)
+// const nations = await useNationsStore().getAll()
+// const listedNations = computed(() => nations)
+// const provinces = await useProvincesStore().getAll()
+// const listedProvinces = computed(() => provinces.filter(filterByNationId(selectedNationId.value)))
+// const dioceses = await useDiocesesStore().getAll()
+// const listedDioceses = computed(() => dioceses.filter((o) => filterByNationId(selectedNationId.value)(o) && filterByProvinceId(selectedProvinceId.value)(o)))
+// const archdeaconries = await useArchdeaconriesStore().getAll()
+// const listedArchdeaconries = computed(() => archdeaconries.filter((o) => filterByNationId(selectedNationId.value)(o) && filterByProvinceId(selectedProvinceId.value)(o) && filterByDioceseId(selectedDioceseId.value)(o)))
+const counties = await useCountiesStore().getAll()
+// const listedCounties = computed(() => counties.filter(filterByNationId(selectedNationId.value)))
+const listedCounties = computed(() => counties)
+// const towns = await useTownsStore().getAll()
+// const listedTowns = computed(() => towns.filter((o) => filterByNationId(selectedNationId.value)(o) && filterByCountyId(selectedCountyId.value)(o)))
+const parishes = await useParishesStore().getAll()
+const listedParishes = computed(() => parishes.filter(filterByCountyId(selectedCountyId.value)))
+
 const isCluster = (feature) => !!feature.get('features')
 const isRegion = (feature) => !isCluster(feature)
 const clickCluster = (event) => {
@@ -65,20 +86,18 @@ const clickCluster = (event) => {
       const paddingY = mapRef.value?.map.getSize()[1]/10
       viewRef.value?.view.fit(extent, {duration: 500, nearest: true, padding: [paddingY, paddingX, paddingY, paddingX]})
     } else if (features.length == 1) {
-      infoModalStore.showModal('parish', features[0].getId())
+      useInfoModalStore().showModal('parish', features[0].getId())
     }
   }
 }
 const overrideGeometryFunction = (feature) => {
   if (selectedParishId.value && selectedParishId.value != feature.getId()) { return null }
   if (selectedCountyId.value && selectedCountyId.value != feature.get('county_id')) { return null }
-  /*
-  if (selectedTownId.value && selectedTownId.value != feature.get('town_id')) { return null }
-  if (selectedArchdeaconryId.value && selectedArchdeaconryId.value != feature.get('archdeaconry_id')) { return null }
-  if (selectedDioceseId.value && selectedDioceseId.value != feature.get('diocese_id')) { return null }
-  if (selectedProvinceId.value && selectedProvinceId.value != feature.get('province_id')) { return null }
-  if (selectedNationId.value && selectedNationId.value != feature.get('nation_id')) { return null }
-  */
+  // if (selectedTownId.value && selectedTownId.value != feature.get('town_id')) { return null }
+  // if (selectedArchdeaconryId.value && selectedArchdeaconryId.value != feature.get('archdeaconry_id')) { return null }
+  // if (selectedDioceseId.value && selectedDioceseId.value != feature.get('diocese_id')) { return null }
+  // if (selectedProvinceId.value && selectedProvinceId.value != feature.get('province_id')) { return null }
+  // if (selectedNationId.value && selectedNationId.value != feature.get('nation_id')) { return null }
   return feature.getGeometry()
 }
 const clusterGroupingStyle = (features, active) => {
@@ -104,7 +123,7 @@ const clusterPointStyle = (feature, active) => {
         text: '\uf041',
         scale: 1,
         textBaseline: 'bottom',
-        font: 'bold 1em "Font Awesome 6 Free"',
+        font: 'bold 1em "Font Awesome 7 Free"',
         fill: new Fill({ color: active ? 'red' : '#7cb341' }),
         stroke: new Stroke({ color: 'black', width: 3 }),
       }),
@@ -123,7 +142,6 @@ const clusterPointStyle = (feature, active) => {
   ]
 }
 const overrideClusterStyle = (feature) => {
-  // console.log('overrideClusterStyle', feature)
   const features = feature.get('features')
   if (features.length > 1) {
     return clusterGroupingStyle(features, false)
@@ -167,18 +185,18 @@ const dioceseRegionStyle = (feature) => {
 
 const layerSwitcherChange = (layer) => {
   if (diocesePre1541TileLayerRef.value?.vectorTileLayer === layer) {
-    store.diocesePre1541Visible = layer.getVisible()
+    locationStore.diocesePre1541Visible = layer.getVisible()
   } else if (diocesePost1541TileLayerRef.value?.vectorTileLayer === layer) {
-    store.diocesePost1541Visible = layer.getVisible()
+    locationStore.diocesePost1541Visible = layer.getVisible()
   }
 }
 const layerSwitcherDisplayLayer = (layer) => {
   return diocesePre1541TileLayerRef.value?.vectorTileLayer === layer || diocesePost1541TileLayerRef.value?.vectorTileLayer === layer
 }
 
-const updateCenter = (event) => store.center = event.target.getCenter()
-const updateZoom = (event) => store.zoom = event.target.getZoom()
-const updateRotation = (event) => store.rotation = event.target.getRotation()
+const updateCenter = (event) => locationStore.center = event.target.getCenter()
+const updateZoom = (event) => locationStore.zoom = event.target.getZoom()
+const updateRotation = (event) => locationStore.rotation = event.target.getRotation()
 const {
   pointerMove: pointerMoveCondition,
   click: clickCondition,
@@ -295,14 +313,14 @@ watch(selectedParishId, (newValue, oldValue) => {
       <ol-vector-tile-layer ref="diocesePre1541TileLayerRef"
           :renderMode="'vector'" :updateWhileAnimating="true" :updateWhileInteracting="true" :visible="diocesePre1541Visible"
           :properties="{ 'name': 'Dioceses before 1541' }">
-        <ol-source-vector-tile :url="'api/geo/dioceses/pre1541/tiles/{z}/{x}/{y}'" :format="mvt">
+        <ol-source-vector-tile :url="websiteOrigin+'/api/geo/dioceses/pre1541/tiles/{z}/{x}/{y}'" :format="mvt">
           <ol-style :overrideStyleFunction="dioceseRegionStyle"></ol-style>
         </ol-source-vector-tile>
       </ol-vector-tile-layer>
       <ol-vector-tile-layer ref="diocesePost1541TileLayerRef"
           :renderMode="'vector'" :updateWhileAnimating="true" :updateWhileInteracting="true" :visible="diocesePost1541Visible"
           :properties="{ 'name': 'Dioceses 1541 and after' }">
-        <ol-source-vector-tile :url="'api/geo/dioceses/post1541/tiles/{z}/{x}/{y}'" :format="mvt">
+        <ol-source-vector-tile :url="websiteOrigin+'/api/geo/dioceses/post1541/tiles/{z}/{x}/{y}'" :format="mvt">
           <ol-style :overrideStyleFunction="dioceseRegionStyle"></ol-style>
         </ol-source-vector-tile>
       </ol-vector-tile-layer>
@@ -316,11 +334,11 @@ watch(selectedParishId, (newValue, oldValue) => {
         </ol-source-cluster>
       </ol-vector-layer>
 
-      <ol-interaction-dragrotatezoom />
+      <ol-interaction-drag-rotate-and-zoom  />
       <ol-zoom-control />
       <ol-rotate-control :autoHide="true" />
-      <ol-fullscreen-control />
-      <ol-scaleline-control />
+      <ol-full-screen-control />
+      <ol-scale-line-control />
       <ol-layerswitcher-control
         :collapsed="false" :reordering="false" :trash="false" :noScroll="true"
         :displayInLayerSwitcher="layerSwitcherDisplayLayer" :onchangeCheck="layerSwitcherChange"
@@ -374,7 +392,6 @@ watch(selectedParishId, (newValue, oldValue) => {
       class="position-absolute filter select-parish"
       v-if="selectedCountyId"
     ></FilterSingleSelect>
-    <LoadingDots :show="isLoadingData"></LoadingDots>
   </div>
 </template>
 

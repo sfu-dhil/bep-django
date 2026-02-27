@@ -1,16 +1,17 @@
 import orjson
 from ninja_extra import NinjaExtraAPI
 from ninja_extra.pagination import paginate, PaginatedResponseSchema
-from ninja.decorators import decorate_view
 from ninja.renderers import BaseRenderer
+from ninja.decorators import decorate_view
 from django.views.decorators.cache import cache_page
 from django.conf import settings
 from django.db.models import F
 
 from .schema import *
-from .models import Parish, Transaction, Inventory, Holding, \
+from .models import Parish, Transaction, Inventory, Holding, Injunction, \
     Book, Monarch, \
-    Nation, County, Town, Province, Diocese, Archdeaconry
+    Nation, County, Town, Province, Diocese, Archdeaconry, \
+    TransactionCategory, PrintSource, ManuscriptSource, SourceCategory, Archive
 
 class ORJSONRenderer(BaseRenderer):
     media_type = "application/json"
@@ -23,139 +24,201 @@ api = NinjaExtraAPI(
     renderer=ORJSONRenderer()
 )
 
-@api.get("/monarchs", response=PaginatedResponseSchema[MonarchSchema], url_name='monarchs')
-@paginate
+
+
+@api.get("/monarchs/{pk}", response=MonarchSchema)
 @decorate_view(cache_page(settings.CACHE_SECONDS))
+def monarch(request, pk: int):
+    return Monarch.objects.prefetch_related('books').get(pk=pk)
+@api.get("/monarchs", response=PaginatedResponseSchema[MonarchSchema])
+@decorate_view(cache_page(settings.CACHE_SECONDS))
+@paginate
 def monarchs(request):
-    return Monarch.objects.order_by('start_date').all()
+    return Monarch.objects.prefetch_related('books').order_by('start_date').all()
 
-@api.get("/nations", response=PaginatedResponseSchema[NationSchema], url_name='nations')
-@paginate
+
+
+@api.get("/transaction/categories/{pk}", response=TransactionCategorySchema)
 @decorate_view(cache_page(settings.CACHE_SECONDS))
+def transaction_category(request, pk: int):
+    return TransactionCategory.objects.get(pk=pk)
+@api.get("/transaction/categories", response=PaginatedResponseSchema[TransactionCategorySchema])
+@decorate_view(cache_page(settings.CACHE_SECONDS))
+@paginate
+def transaction_categories(request):
+    return TransactionCategory.objects.order_by('label').all()
+
+
+
+@api.get("/archives/{pk}", response=ArchiveSchema)
+@decorate_view(cache_page(settings.CACHE_SECONDS))
+def archive(request, pk: int):
+    return Archive.objects.get(pk=pk)
+@api.get("archives", response=PaginatedResponseSchema[ArchiveSchema])
+@decorate_view(cache_page(settings.CACHE_SECONDS))
+@paginate
+def archives(request):
+    return Archive.objects.order_by('label').all()
+
+
+
+@api.get("/print/sources/{pk}", response=PrintSourceSchema)
+@decorate_view(cache_page(settings.CACHE_SECONDS))
+def print_source(request, pk: int):
+    return PrintSource.objects.prefetch_related('source_category').get(pk=pk)
+@api.get("/print/sources", response=PaginatedResponseSchema[PrintSourceSchema])
+@decorate_view(cache_page(settings.CACHE_SECONDS))
+@paginate
+def print_sources(request):
+    return PrintSource.objects.prefetch_related('source_category').order_by('title').all()
+
+
+
+@api.get("/manuscript/sources/{pk}", response=ManuscriptSourceSchema)
+@decorate_view(cache_page(settings.CACHE_SECONDS))
+def manuscript_source(request, pk: int):
+    return ManuscriptSource.objects.prefetch_related('archive', 'source_category').get(pk=pk)
+@api.get("/manuscript/sources", response=PaginatedResponseSchema[ManuscriptSourceSchema])
+@decorate_view(cache_page(settings.CACHE_SECONDS))
+@paginate
+def manuscript_sources(request):
+    return ManuscriptSource.objects.prefetch_related('archive', 'source_category').order_by('label').all()
+
+
+
+@api.get("/source/categories/{pk}", response=SourceCategorySchema)
+@decorate_view(cache_page(settings.CACHE_SECONDS))
+def source_category(request, pk: int):
+    return SourceCategory.objects.prefetch_related('manuscript_sources', 'print_sources').get(pk=pk)
+@api.get("/source/categories", response=PaginatedResponseSchema[SourceCategorySchema])
+@decorate_view(cache_page(settings.CACHE_SECONDS))
+@paginate
+def source_categories(request):
+    return SourceCategory.objects.prefetch_related('manuscript_sources', 'print_sources').order_by('label').all()
+
+
+
+@api.get("/nations/{pk}", response=NationSchema)
+@decorate_view(cache_page(settings.CACHE_SECONDS))
+def nation(request, pk: int):
+    return Nation.objects.prefetch_related('provinces', 'counties', 'injunctions').get(pk=pk)
+@api.get("/nations", response=PaginatedResponseSchema[NationSchema])
+@decorate_view(cache_page(settings.CACHE_SECONDS))
+@paginate
 def nations(request):
-    return Nation.objects.order_by('label').all()
+    return Nation.objects.prefetch_related('provinces', 'counties', 'injunctions').order_by('label').all()
 
-@api.get("provinces", response=PaginatedResponseSchema[ProvinceSchema], url_name='provinces')
-@paginate
+
+@api.get("provinces/{pk}", response=ProvinceSchema)
 @decorate_view(cache_page(settings.CACHE_SECONDS))
+def province(request, pk: int):
+    return Province.objects.prefetch_related('nation', 'dioceses', 'injunctions').get(pk=pk)
+@api.get("provinces", response=PaginatedResponseSchema[ProvinceSchema])
+@decorate_view(cache_page(settings.CACHE_SECONDS))
+@paginate
 def provinces(request):
-    return Province.objects.order_by('label').all()
+    return Province.objects.prefetch_related('nation', 'dioceses', 'injunctions').order_by('label').all()
 
-@api.get("/dioceses", response=PaginatedResponseSchema[DioceseSchema], url_name='dioceses')
-@paginate
+
+@api.get("/dioceses/{pk}", response=DioceseSchema)
 @decorate_view(cache_page(settings.CACHE_SECONDS))
+def diocese(request, pk: int):
+    return Diocese.objects.prefetch_related('province', 'province__nation').get(pk=pk)
+@api.get("/dioceses", response=PaginatedResponseSchema[DioceseSchema])
+@decorate_view(cache_page(settings.CACHE_SECONDS))
+@paginate
 def dioceses(request):
-    return Diocese.objects.annotate(
-        nation_id=F('province__nation_id'),
-    ).order_by('label').all()
+    return Diocese.objects.prefetch_related('province', 'province__nation').order_by('label').all()
 
-@api.get("/archdeaconries", response=PaginatedResponseSchema[ArchdeaconrySchema], url_name='archdeaconries')
-@paginate
+
+@api.get("/archdeaconries/{pk}", response=ArchdeaconrySchema)
 @decorate_view(cache_page(settings.CACHE_SECONDS))
+def archdeaconry(request, pk: int):
+    return Archdeaconry.objects.prefetch_related('parishes', 'injunctions', 'diocese', 'diocese__province', 'diocese__province__nation').get(pk=pk)
+@api.get("/archdeaconries", response=PaginatedResponseSchema[ArchdeaconrySchema])
+@decorate_view(cache_page(settings.CACHE_SECONDS))
+@paginate
 def archdeaconries(request):
-    return Archdeaconry.objects.annotate(
-        nation_id=F('diocese__province__nation_id'),
-        province_id=F('diocese__province_id'),
-    ).order_by('label').all()
+    return Archdeaconry.objects.prefetch_related('parishes', 'injunctions', 'diocese', 'diocese__province', 'diocese__province__nation').order_by('label').all()
 
-@api.get("/counties", response=PaginatedResponseSchema[CountySchema], url_name='counties')
-@paginate
+
+@api.get("/counties/{pk}", response=CountySchema)
 @decorate_view(cache_page(settings.CACHE_SECONDS))
+def county(request, pk: int):
+    return County.objects.prefetch_related('nation').get(pk=pk)
+@api.get("/counties", response=PaginatedResponseSchema[CountySchema])
+@decorate_view(cache_page(settings.CACHE_SECONDS))
+@paginate
 def counties(request):
-    return County.objects.order_by('label').all()
+    return County.objects.prefetch_related('nation').order_by('label').all()
 
-@api.get("/towns", response=PaginatedResponseSchema[TownSchema], url_name='towns')
-@paginate
+
+
+@api.get("/towns/{pk}", response=TownSchema)
 @decorate_view(cache_page(settings.CACHE_SECONDS))
+def town(request, pk: int):
+    return Town.objects.prefetch_related('parishes', 'county', 'county__nation').get(pk=pk)
+@api.get("/towns", response=PaginatedResponseSchema[TownSchema])
+@decorate_view(cache_page(settings.CACHE_SECONDS))
+@paginate
 def towns(request):
-    return Town.objects.annotate(
-        nation_id=F('county__nation_id'),
-    ).order_by('label').all()
+    return Town.objects.prefetch_related('parishes', 'county', 'county__nation').order_by('label').all()
 
-@api.get("/parishes", response=PaginatedResponseSchema[ParishSchema], url_name='parishes')
+
+
+@api.get("/parishes/{pk}", response=ParishSchema)
+@decorate_view(cache_page(settings.CACHE_SECONDS))
+def parish(request, pk: int):
+    return Parish.objects.prefetch_related(
+        'archdeaconry', 'archdeaconry__diocese', 'archdeaconry__diocese__province', 'archdeaconry__diocese__province__nation',
+        'town', 'town__county', 'town__county__nation',
+    ).get(pk=pk)
+@api.get("/parishes", response=PaginatedResponseSchema[ParishSchema])
+@decorate_view(cache_page(settings.CACHE_SECONDS))
 @paginate(page_size=500)
-@decorate_view(cache_page(settings.CACHE_SECONDS))
 def parishes(request):
-    return Parish.objects.annotate(
-        nation_id=F('archdeaconry__diocese__province__nation_id'),
-        province_id=F('archdeaconry__diocese__province_id'),
-        diocese_id=F('archdeaconry__diocese_id'),
-        county_id=F('town__county_id'),
+    return Parish.objects.prefetch_related(
+        'archdeaconry', 'archdeaconry__diocese', 'archdeaconry__diocese__province', 'archdeaconry__diocese__province__nation',
+        'town', 'town__county', 'town__county__nation',
     ).order_by('label').all()
-
-@api.get("/books/{book_id}/transactions", response=PaginatedResponseSchema[TransactionSchema], url_name='book-transactions')
-@paginate
+@api.get("/parishes/{parish_id}/transactions", response=PaginatedResponseSchema[ParishTransactionStubSchema])
 @decorate_view(cache_page(settings.CACHE_SECONDS))
-def book_transactions(request, book_id: int):
-    return Transaction.objects.prefetch_related(
-        'books'
-    ).filter(books__id=book_id).order_by('start_date').all()
-@api.get("/parishes/{parish_id}/transactions", response=PaginatedResponseSchema[TransactionSchema], url_name='parish-transactions')
 @paginate
-@decorate_view(cache_page(settings.CACHE_SECONDS))
 def parishes_transactions(request, parish_id: int):
-    return Transaction.objects.prefetch_related(
-        'books'
-    ).filter(parish_id=parish_id).order_by('start_date').all()
-@api.get("/transactions/{transaction_id}", response=TransactionSchema, url_name='transaction')
+    return Transaction.objects.filter(parish_id=parish_id).order_by('start_date').all()
+@api.get("/parishes/{parish_id}/inventories", response=PaginatedResponseSchema[ParishInventoryStubSchema])
 @decorate_view(cache_page(settings.CACHE_SECONDS))
-def transaction(request, transaction_id: int):
-    return Transaction.objects.prefetch_related(
-        'books'
-    ).get(pk=transaction_id)
-
-@api.get("/books/{book_id}/inventories", response=PaginatedResponseSchema[InventorySchema], url_name='book-inventories')
 @paginate
-@decorate_view(cache_page(settings.CACHE_SECONDS))
-def book_inventories(request, book_id: int):
-    return Inventory.objects.prefetch_related(
-        'books'
-    ).filter(books__id=book_id).order_by('start_date').all()
-@api.get("/parishes/{parish_id}/inventories", response=PaginatedResponseSchema[InventorySchema], url_name='parish-inventories')
-@paginate
-@decorate_view(cache_page(settings.CACHE_SECONDS))
 def parishes_inventories(request, parish_id: int):
-    return Inventory.objects.prefetch_related(
-        'books'
-    ).filter(parish_id=parish_id).order_by('start_date').all()
-@api.get("/inventories/{inventory_id}", response=InventorySchema, url_name='inventory')
+    return Inventory.objects.filter(parish_id=parish_id).order_by('start_date').all()
+@api.get("/parishes/{parish_id}/holdings", response=PaginatedResponseSchema[ParishHoldingStubSchema])
 @decorate_view(cache_page(settings.CACHE_SECONDS))
-def inventories(request, inventory_id: int):
-    return Inventory.objects.prefetch_related(
-        'books'
-    ).get(pk=inventory_id)
-
-@api.get("/books/{book_id}/holdings", response=PaginatedResponseSchema[HoldingSchema], url_name='book-holdings')
 @paginate
-@decorate_view(cache_page(settings.CACHE_SECONDS))
-def book_holdings(request, book_id: int):
-    return Holding.objects.prefetch_related(
-        'books'
-    ).filter(books__id=book_id).order_by('start_date').all()
-@api.get("/parishes/{parish_id}/holdings", response=PaginatedResponseSchema[HoldingSchema], url_name='parish-holdings')
-@paginate
-@decorate_view(cache_page(settings.CACHE_SECONDS))
 def parishes_holdings(request, parish_id: int):
-    return Holding.objects.prefetch_related(
-        'books'
-    ).filter(parish_id=parish_id).order_by('start_date').all()
-@api.get("/holdings/{holding_id}", response=HoldingSchema, url_name='holding')
-@decorate_view(cache_page(settings.CACHE_SECONDS))
-def holding(request, holding_id: int):
-    return Holding.objects.prefetch_related(
-        'books'
-    ).get(pk=holding_id)
+    return Holding.objects.filter(parish_id=parish_id).order_by('start_date').all()
 
-@api.get("/books", response=PaginatedResponseSchema[BookSchema], url_name='books')
-@paginate
+
+@api.get("/transactions/{pk}", response=TransactionSchema)
 @decorate_view(cache_page(settings.CACHE_SECONDS))
-def books(request):
-    return Book.objects.order_by('title', 'date').all()
-@api.get("/books/{book_id}", response=PaginatedResponseSchema[BookSchema], url_name='book')
-@paginate
+def transaction(request, pk: int):
+    return Transaction.objects.get(pk=pk)
+@api.get("/inventories/{pk}", response=InventorySchema)
 @decorate_view(cache_page(settings.CACHE_SECONDS))
-def book(request, book_id: int):
-    return Book.objects.get(pk=book_id)
+def inventory(request, pk: int):
+    return Inventory.objects.get(pk=pk)
+@api.get("/holdings/{pk}", response=HoldingSchema)
+@decorate_view(cache_page(settings.CACHE_SECONDS))
+def holding(request, pk: int):
+    return Holding.objects.get(pk=pk)
+@api.get("/injunctions/{pk}", response=InjunctionSchema)
+@decorate_view(cache_page(settings.CACHE_SECONDS))
+def injunction(request, pk: int):
+    return Injunction.objects.prefetch_related('monarch', 'archdeaconry', 'diocese', 'province', 'nation').get(pk=pk)
+@api.get("/books/{pk}", response=BookSchema)
+@decorate_view(cache_page(settings.CACHE_SECONDS))
+def book(request, pk: int):
+    return Book.objects.prefetch_related('monarch').get(pk=pk)
+
 
 
 @api.get("/geo/parishes", response=ParishFeatureCollectionGeoJsonSchema)

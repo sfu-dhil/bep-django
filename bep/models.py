@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.functions import LPad, Cast
 from django_advance_thumbnail import AdvanceThumbnailField
 from django.contrib.gis.db.models.fields import MultiPolygonField, PointField
 from django.contrib.postgres.fields import ArrayField
@@ -160,6 +161,13 @@ class County(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    search_vector = models.GeneratedField(
+        expression=SearchVector("label", config="english", weight="A") +
+            SearchVector("description", config="english", weight="B"),
+        output_field=SearchVectorField(),
+        db_persist=True,
+    )
+
     # relationships
     nation = models.ForeignKey(
         Nation,
@@ -172,6 +180,9 @@ class County(models.Model):
     class Meta:
         db_table = 'bep_county'
         verbose_name_plural = 'counties'
+        indexes = [
+            GinIndex(fields=["search_vector"]),
+        ]
 
     def __str__(self):
         return mark_safe(f"{self.label}")
@@ -237,6 +248,13 @@ class Diocese(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    search_vector = models.GeneratedField(
+        expression=SearchVector("label", config="english", weight="A") +
+            SearchVector("description", config="english", weight="B"),
+        output_field=SearchVectorField(),
+        db_persist=True,
+    )
+
     # relationships
     province = models.ForeignKey(
         Province,
@@ -249,6 +267,9 @@ class Diocese(models.Model):
 
     class Meta:
         db_table = 'bep_diocese'
+        indexes = [
+            GinIndex(fields=["search_vector"]),
+        ]
 
     def __str__(self):
         return mark_safe(f"{self.label}")
@@ -716,11 +737,31 @@ class Transaction(models.Model):
         related_name='transactions',
     )
 
+    search_vector = models.GeneratedField(
+        expression=SearchVector('id', config='english', weight='A') +
+            SearchVector(LPad(Cast('id', output_field=models.CharField()), 5, models.Value('0')), config='english', weight='A') +
+            SearchVector('transcription', config='english', weight='B') +
+            SearchVector('modern_transcription', config='english', weight='B') +
+            SearchVector('public_notes', config='english', weight='C') +
+            SearchVector('location', config='english', weight='C'),
+        output_field=SearchVectorField(),
+        db_persist=True,
+    )
+
     class Meta:
         db_table = 'bep_transaction'
+        indexes = [
+            GinIndex(fields=["search_vector"]),
+        ]
 
     def __str__(self):
         return f'{self.id:05d}'
+
+    def get_value_lsd_str(self):
+        return Transaction.get_lsd_short_str(self.value)
+
+    def get_shipping_lsd_str(self):
+        return Transaction.get_lsd_short_str(self.shipping)
 
     @staticmethod
     def get_lsd(total_pence):
@@ -738,3 +779,26 @@ class Transaction(models.Model):
     def get_lsd_str(total_pence):
         l, s, d = Transaction.get_lsd(total_pence)
         return f"£{l}. {s}s. {d}d"
+
+    @staticmethod
+    def get_lsd_short_str(total_pence):
+        l, s, d = Transaction.get_lsd(total_pence)
+        lsd_parts = []
+        if l > 0:
+            lsd_parts.append(f'£{l}')
+        if s > 0:
+            lsd_parts.append(f'{s}s')
+        if d > 0:
+            lsd_parts.append(f'{d}d')
+        if l == 0 and s == 0 and d == 0:
+            lsd_parts.append(f'0d')
+        return '. '.join(lsd_parts)
+        # total_str = f' (totalling {total_pence}d)' if l > 0 or s > 0 else ''
+        # return '. '.join(lsd_parts) + total_str
+
+    @staticmethod
+    def get_total_from_lsd(l, s, d):
+        l = 0 if l is None else l
+        s = 0 if s is None else s
+        d = 0 if d is None else d
+        return (240 * l) + (12 * s) + d

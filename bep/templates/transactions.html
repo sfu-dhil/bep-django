@@ -16,9 +16,7 @@
 
         <form method="get" action="{% url 'transactions' %}" role="search">
             <div class="input-group pb-2">
-                {% if show_help %}
-                    {% include "_partials/search_help_btn.html" %}
-                {% endif %}
+                {% include "_partials/search_help_btn.html" %}
                 {{ form.q }}
                 <button class="btn btn-primary" type="submit">
                     <i class="bi bi-search" aria-hidden="true"></i> Search
@@ -28,31 +26,106 @@
             <div class="row">
                 <div class="col-3">
                     <div class="input-group">
-                        {% for field in form %}
-                            {% if field.name != 'q' %}
-                                {% bootstrap_field field show_label=False wrapper_class='flex-grow-1 pb-2' %}
-                            {% endif %}
-                        {% endfor %}
+                        <label class="form-label mb-0">Minimum transaction value</label>
+                        <div class="input-group pb-3">
+                            <label class="input-group-text" for="value_l_min" title="Pounds">£</label>
+                            <input type="number" id="value_l_min" name="value_l_min" min="0" class="form-control" placeholder="" title="Pounds" value="{{ form.value_l_min.value }}">
+                            <label class="input-group-text" for="value_s_min" title="Shillings">s</label>
+                            <input type="number" id="value_s_min" name="value_s_min" min="0" class="form-control" placeholder="" title="Shillings" value="{{ form.value_s_min.value }}">
+                            <label class="input-group-text" for="value_d_min" title="Pence">d</label>
+                            <input type="number" id="value_d_min" name="value_d_min" min="0" class="form-control" placeholder="" title="Pence" value="{{ form.value_d_min.value }}">
+                        </div>
+                        <label class="form-label mb-0">Maximum transaction value</label>
+                        <div class="input-group pb-3">
+                            <label class="input-group-text" for="value_l_max" title="Pounds">£</label>
+                            <input type="number" id="value_l_max" name="value_l_max" min="0" class="form-control" placeholder="" title="Pounds" value="{{ form.value_l_max.value }}">
+                            <label class="input-group-text" for="value_s_max" title="Shillings">s</label>
+                            <input type="number" id="value_s_max" name="value_s_max" min="0" class="form-control" placeholder="" title="Shillings" value="{{ form.value_s_max.value }}">
+                            <label class="input-group-text" for="value_d_max" title="Pence">d</label>
+                            <input type="number" id="value_d_max" name="value_d_max" min="0" class="form-control" placeholder="" title="Pence" value="{{ form.value_d_max.value }}">
+                        </div>
+                        <label class="form-label mb-0">Minimum shipping value</label>
+                        <div class="input-group pb-3">
+                            <label class="input-group-text" for="shipping_l_min" title="Pounds">£</label>
+                            <input type="number" id="shipping_l_min" name="shipping_l_min" min="0" class="form-control" placeholder="" title="Pounds" value="{{ form.shipping_l_min.value }}">
+                            <label class="input-group-text" for="shipping_s_min" title="Shillings">s</label>
+                            <input type="number" id="shipping_s_min" name="shipping_s_min" min="0" class="form-control" placeholder="" title="Shillings" value="{{ form.shipping_s_min.value }}">
+                            <label class="input-group-text" for="shipping_d_min" title="Pence">d</label>
+                            <input type="number" id="shipping_d_min" name="shipping_d_min" min="0" class="form-control" placeholder="" title="Pence" value="{{ form.shipping_d_min.value }}">
+                        </div>
+                        <label class="form-label mb-0">Maximum shipping value</label>
+                        <div class="input-group pb-3">
+                            <label class="input-group-text" for="shipping_l_max" title="Pounds">£</label>
+                            <input type="number" id="shipping_l_max" name="shipping_l_max" min="0" class="form-control" placeholder="" title="Pounds" value="{{ form.shipping_l_max.value }}">
+                            <label class="input-group-text" for="shipping_s_max" title="Shillings">s</label>
+                            <input type="number" id="shipping_s_max" name="shipping_s_max" min="0" class="form-control" placeholder="" title="Shillings" value="{{ form.shipping_s_max.value }}">
+                            <label class="input-group-text" for="shipping_d_max" title="Pence">d</label>
+                            <input type="number" id="shipping_d_max" name="shipping_d_max" min="0" class="form-control" placeholder="" title="Pence" value="{{ form.shipping_d_max.value }}">
+                        </div>
+
+                        {% bootstrap_field form.transaction_category wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
+                        {% bootstrap_field form.monarch wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
+                        {% bootstrap_field form.diocese wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
+                        {% bootstrap_field form.county wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
+                        {% bootstrap_field form.parish wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
+                        {% bootstrap_field form.book wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
+                        {% bootstrap_field form.manuscript_source wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
+                        {% bootstrap_field form.print_source wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
+                        {% bootstrap_field form.injunction wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
                     </div>
                 </div>
                 <div class="col-9">
                     {% for object in object_list %}
-                        {{ object }}
                         <div class="card mb-3">
-                            <div class="card-header">
-                                {% if request.GET.q %}
-                                    {{ object.title_headline|safe }}
-                                {% else %}
-                                    {{ object.title|safe }}
-                                {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    Transaction
+                                    {% if request.GET.q %}
+                                        {{ object.searchable_id_headline|safe }}
+                                    {% else %}
+                                        {{ object.searchable_id|safe }}
+                                    {% endif %}
+                                </h5>
+                                <dl class="row gy-3 m-0 mb-3 row-cols-1 row-cols-lg-2">
+                                    {% if object.value %}
+                                        {% include '_partials/search_detail.html' with label="Transaction Value" value=object.get_value_lsd_str %}
+                                    {% endif %}
+                                    {% if object.shipping %}
+                                        {% include '_partials/search_detail.html' with label="Shipping Value" value=object.get_shipping_lsd_str %}
+                                    {% endif %}
+                                    {% include '_partials/search_detail.html' with label="Location" value=object.location value_headline=object.location_headline %}
+                                    {% include '_partials/search_detail.html' with label="Transcription" value=object.transcription value_headline=object.transcription_headline %}
+                                    {% include '_partials/search_detail.html' with label="Modern Transcription" value=object.modern_transcription value_headline=object.modern_transcription_headline %}
+                                    {% include '_partials/search_detail.html' with label="Notes" value=object.public_notes value_headline=object.public_notes_headline %}
+                                </dl>
+                                {% for transaction_category in object.transaction_categories.all %}
+                                    {% include '_partials/search_tag.html' with category='Transaction Category' label=transaction_category.label value=transaction_category.id search_value=form.transaction_category.value %}
+                                {% endfor %}
+                                {% include '_partials/search_tag.html' with category='Manuscript Source' label=object.manuscript_source.label value=object.manuscript_source.id search_value=form.manuscript_source.value %}
+                                {% include '_partials/search_tag.html' with category='Print Source' label=object.print_source.title value=object.print_source.id search_value=form.print_source.value %}
+                                {% include '_partials/search_tag.html' with category='Monarch' label=object.monarch.label value=object.monarch.id search_value=form.monarch.value %}
+                                {% include '_partials/search_tag.html' with category='Parish' label=object.parish.label value=object.parish.id search_value=form.parish.value %}
+                                {% comment %} {% include '_partials/search_tag.html' with category='Archdeaconry' label=object.parish.archdeaconry.label %} {% endcomment %}
+                                {% include '_partials/search_tag.html' with category='Diocese' label=object.parish.archdeaconry.diocese.label value=object.parish.archdeaconry.diocese.id search_value=form.diocese.value %}
+                                {% comment %} {% include '_partials/search_tag.html' with category='Province' label=object.parish.archdeaconry.diocese.province.label %} {% endcomment %}
+                                {% comment %} {% include '_partials/search_tag.html' with category='Town' label=object.parish.town.label %} {% endcomment %}
+                                {% include '_partials/search_tag.html' with category='County' label=object.parish.town.county.label value=object.parish.town.county.id search_value=form.county.value %}
+
+                                {% comment %} {% if object.parish.town.county.nation %}
+                                    {% include '_partials/search_tag.html' with category='Nation' label=object.parish.town.county.nation.label %}
+                                {% elif object.parish.archdeaconry.diocese.province.nation %}
+                                    {% include '_partials/search_tag.html' with category='Nation' label=object.parish.archdeaconry.diocese.province.nation.label %}
+                                {% endif %} {% endcomment %}
                             </div>
-                            {% comment %} {% if request.GET.q %}
+                            {% if request.GET.q %}
                                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary" title="Matching Score">
                                     {{ object.rank|floatformat:"0" }}%
                                 </span>
-                            {% endif %} {% endcomment %}
-                            {% comment %} <a href="{% url 'transaction' pk=object.pk %}" class="stretched-link"></a> {% endcomment %}
+                            {% endif %}
+                            <a href="{% url 'transaction' pk=object.pk %}" class="stretched-link"></a>
                         </div>
+                    {% empty %}
+                        <div class="alert alert-warning" role="alert">No records found. Try adjusting your search terms or filters.</div>
                     {% endfor %}
                 </div>
             </div>

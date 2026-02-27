@@ -1,5 +1,6 @@
 <script setup>
 import ParishMap from './components/ParishMap.vue'
+import LoadingDots from './components/LoadingDots.vue'
 
 const props = defineProps({
   parishId: {
@@ -10,7 +11,10 @@ const props = defineProps({
 </script>
 
 <template>
-  <ParishMap :parish-id="parseInt(parishId)"></ParishMap>
+  <Suspense v-if="parishId">
+    <ParishMap :parishId="parseInt(parishId)"></ParishMap>
+    <template #fallback><LoadingDots /></template>
+  </Suspense>
 </template>
 
 <style scoped>
