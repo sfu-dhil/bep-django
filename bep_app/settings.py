@@ -105,7 +105,7 @@ TEMPLATES = [
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': '/django_cache',
+        'LOCATION': '/django-cache',
     }
 }
 ONE_MINUTE = 60

@@ -13,6 +13,7 @@ workers = min(cpu_count(), 4) # don't hog system resources
 errorlog = '-'
 loglevel = 'info' if env.bool('DEBUG', default=False) else 'error'
 capture_output = True
+control_socket_disable = True
 
 # handle dev reloading
 reload = env.bool('GUNICORN_RELOAD', default=False)
