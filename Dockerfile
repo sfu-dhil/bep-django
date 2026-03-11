@@ -38,7 +38,6 @@ COPY . /app
 
 # add prod assets
 COPY --from=bep-vite-prod /app/dist /static-vite/dist
-COPY --from=bep-vite-prod /app/node_modules /app/node_modules
 
 # collect static assets for production
 RUN python manage.py collectstatic --noinput

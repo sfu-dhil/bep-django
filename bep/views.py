@@ -40,8 +40,8 @@ class TransactionsView(ListView):
         if form.is_valid():
             data = form.cleaned_data
 
-            if data['q']:
-                query = SearchQuery(data['q'], config='english', search_type='websearch')
+            if data.get('q'):
+                query = SearchQuery(data.get('q'), config='english', search_type='websearch')
                 queryset = queryset \
                     .filter(search_vector=query) \
                     .annotate(rank=SearchRank(F('search_vector'), query) * 100) \
@@ -52,36 +52,36 @@ class TransactionsView(ListView):
                     .annotate(location_headline=SearchHeadline('location', query, start_sel='<mark>', stop_sel='</mark>', highlight_all=True)) \
                     .order_by('-rank', *self.get_ordering())
 
-            if data['value_l_min'] or data['value_s_min'] or data['value_d_min']:
-                queryset = queryset.filter(value__gte=Transaction.get_total_from_lsd(data['value_l_min'], data['value_s_min'], data['value_d_min']))
-            if data['value_l_max'] or data['value_s_max'] or data['value_d_max']:
-                queryset = queryset.filter(value__lte=Transaction.get_total_from_lsd(data['value_l_max'], data['value_s_max'], data['value_d_max']))
-            if data['shipping_l_min'] or data['shipping_s_min'] or data['shipping_d_min']:
-                queryset = queryset.filter(shipping__gte=Transaction.get_total_from_lsd(data['shipping_l_min'], data['shipping_s_min'], data['shipping_d_min']))
-            if data['shipping_l_max'] or data['shipping_s_max'] or data['shipping_d_max']:
-                queryset = queryset.filter(shipping__lte=Transaction.get_total_from_lsd(data['shipping_l_max'], data['shipping_s_max'], data['shipping_d_max']))
-            if data['year_min']:
-                queryset = queryset.filter(start_date__year__gte=data['year_min'])
-            if data['year_max']:
-                queryset = queryset.filter(start_date__year__lte=data['year_max'])
-            if data['transaction_category']:
-                queryset = queryset.filter(transaction_categories=data['transaction_category'])
-            if data['monarch']:
-                queryset = queryset.filter(monarch=data['monarch'])
-            if data['diocese']:
-                queryset = queryset.filter(parish__archdeaconry__diocese=data['diocese'])
-            if data['county']:
-                queryset = queryset.filter(parish__town__county=data['county'])
-            if data['parish']:
-                queryset = queryset.filter(parish=data['parish'])
-            if data['book']:
-                queryset = queryset.filter(books=data['book'])
-            if data['manuscript_source']:
-                queryset = queryset.filter(manuscript_source=data['manuscript_source'])
-            if data['print_source']:
-                queryset = queryset.filter(print_source=data['print_source'])
-            if data['injunction']:
-                queryset = queryset.filter(injunction=data['injunction'])
+            if data.get('value_l_min') or data.get('value_s_min') or data.get('value_d_min'):
+                queryset = queryset.filter(value__gte=Transaction.get_total_from_lsd(data.get('value_l_min'), data.get('value_s_min'), data.get('value_d_min')))
+            if data.get('value_l_max') or data.get('value_s_max') or data.get('value_d_max'):
+                queryset = queryset.filter(value__lte=Transaction.get_total_from_lsd(data.get('value_l_max'), data.get('value_s_max'), data.get('value_d_max')))
+            if data.get('shipping_l_min') or data.get('shipping_s_min') or data.get('shipping_d_min'):
+                queryset = queryset.filter(shipping__gte=Transaction.get_total_from_lsd(data.get('shipping_l_min'), data.get('shipping_s_min'), data.get('shipping_d_min')))
+            if data.get('shipping_l_max') or data.get('shipping_s_max') or data.get('shipping_d_max'):
+                queryset = queryset.filter(shipping__lte=Transaction.get_total_from_lsd(data.get('shipping_l_max'), data.get('shipping_s_max'), data.get('shipping_d_max')))
+            if data.get('year_min'):
+                queryset = queryset.filter(start_date__year__gte=data.get('year_min'))
+            if data.get('year_max'):
+                queryset = queryset.filter(start_date__year__lte=data.get('year_max'))
+            if data.get('transaction_category'):
+                queryset = queryset.filter(transaction_categories=data.get('transaction_category'))
+            if data.get('monarch'):
+                queryset = queryset.filter(monarch=data.get('monarch'))
+            if data.get('diocese'):
+                queryset = queryset.filter(parish__archdeaconry__diocese=data.get('diocese'))
+            if data.get('county'):
+                queryset = queryset.filter(parish__town__county=data.get('county'))
+            if data.get('parish'):
+                queryset = queryset.filter(parish=data.get('parish'))
+            if data.get('book'):
+                queryset = queryset.filter(books=data.get('book'))
+            if data.get('manuscript_source'):
+                queryset = queryset.filter(manuscript_source=data.get('manuscript_source'))
+            if data.get('print_source'):
+                queryset = queryset.filter(print_source=data.get('print_source'))
+            if data.get('injunction'):
+                queryset = queryset.filter(injunction=data.get('injunction'))
 
         return queryset
 
@@ -144,8 +144,8 @@ class ParishesView(ListView):
         if form.is_valid():
             data = form.cleaned_data
 
-            if data['q']:
-                query = SearchQuery(data['q'], config='english', search_type='websearch')
+            if data.get('q'):
+                query = SearchQuery(data.get('q'), config='english', search_type='websearch')
                 queryset = queryset \
                     .filter(search_vector=query) \
                     .annotate(rank=SearchRank(F('search_vector'), query) * 100) \
@@ -154,10 +154,10 @@ class ParishesView(ListView):
                     .annotate(address_headline=SearchHeadline('address', query, start_sel='<mark>', stop_sel='</mark>', highlight_all=True)) \
                     .order_by('-rank', *self.get_ordering())
 
-            if data['diocese']:
-                queryset = queryset.filter(archdeaconry__diocese=data['diocese'])
-            if data['county']:
-                queryset = queryset.filter(town__county=data['county'])
+            if data.get('diocese'):
+                queryset = queryset.filter(archdeaconry__diocese=data.get('diocese'))
+            if data.get('county'):
+                queryset = queryset.filter(town__county=data.get('county'))
 
         return queryset
 
@@ -209,8 +209,8 @@ class DiocesesView(ListView):
         if form.is_valid():
             data = form.cleaned_data
 
-            if data['q']:
-                query = SearchQuery(data['q'], config='english', search_type='websearch')
+            if data.get('q'):
+                query = SearchQuery(data.get('q'), config='english', search_type='websearch')
                 queryset = queryset \
                     .filter(search_vector=query) \
                     .annotate(rank=SearchRank(F('search_vector'), query) * 100) \
@@ -259,8 +259,8 @@ class CountiesView(ListView):
         if form.is_valid():
             data = form.cleaned_data
 
-            if data['q']:
-                query = SearchQuery(data['q'], config='english', search_type='websearch')
+            if data.get('q'):
+                query = SearchQuery(data.get('q'), config='english', search_type='websearch')
                 queryset = queryset \
                     .filter(search_vector=query) \
                     .annotate(rank=SearchRank(F('search_vector'), query) * 100) \

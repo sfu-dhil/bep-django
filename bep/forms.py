@@ -69,63 +69,63 @@ class TransactionSearchForm(forms.Form):
         widget=Select2Widget(attrs={
             'data-theme': 'bootstrap-5',
         }),
-        queryset=TransactionCategory.objects.order_by('label').all(),
+        queryset=TransactionCategory.objects.order_by('label'),
         required=False,
     )
     monarch = forms.ModelChoiceField(
         widget=Select2Widget(attrs={
             'data-theme': 'bootstrap-5',
         }),
-        queryset=Monarch.objects.order_by('start_date', 'label').all(),
+        queryset=Monarch.objects.order_by('start_date', 'label'),
         required=False,
     )
     diocese = forms.ModelChoiceField(
         widget=Select2Widget(attrs={
             'data-theme': 'bootstrap-5',
         }),
-        queryset=Diocese.objects.order_by('label').all(),
+        queryset=Diocese.objects.order_by('label'),
         required=False,
     )
     county = forms.ModelChoiceField(
         widget=Select2Widget(attrs={
             'data-theme': 'bootstrap-5',
         }),
-        queryset=County.objects.order_by('label').all(),
+        queryset=County.objects.order_by('label'),
         required=False,
     )
     parish = forms.ModelChoiceField(
         widget=Select2Widget(attrs={
             'data-theme': 'bootstrap-5',
         }),
-        queryset=Parish.objects.order_by('label').all(),
+        queryset=Parish.objects.order_by('label'),
         required=False,
     )
     book = forms.ModelChoiceField(
         widget=Select2Widget(attrs={
             'data-theme': 'bootstrap-5',
         }),
-        queryset=Book.objects.order_by('title').all(),
+        queryset=Book.objects.order_by('title'),
         required=False,
     )
     manuscript_source = forms.ModelChoiceField(
         widget=Select2Widget(attrs={
             'data-theme': 'bootstrap-5',
         }),
-        queryset=ManuscriptSource.objects.order_by('label').all(),
+        queryset=ManuscriptSource.objects.order_by('label'),
         required=False,
     )
     print_source = forms.ModelChoiceField(
         widget=Select2Widget(attrs={
             'data-theme': 'bootstrap-5',
         }),
-        queryset=PrintSource.objects.order_by('title').all(),
+        queryset=PrintSource.objects.order_by('title'),
         required=False,
     )
     injunction = forms.ModelChoiceField(
         widget=Select2Widget(attrs={
             'data-theme': 'bootstrap-5',
         }),
-        queryset=Injunction.objects.order_by('title').all(),
+        queryset=Injunction.objects.order_by('title'),
         required=False,
     )
 
@@ -143,14 +143,14 @@ class ParishSearchForm(forms.Form):
         widget=Select2Widget(attrs={
             'data-theme': 'bootstrap-5',
         }),
-        queryset=Diocese.objects.order_by('label').all(),
+        queryset=Diocese.objects.order_by('label'),
         required=False,
     )
     county = forms.ModelChoiceField(
         widget=Select2Widget(attrs={
             'data-theme': 'bootstrap-5',
         }),
-        queryset=County.objects.order_by('label').all(),
+        queryset=County.objects.order_by('label'),
         required=False,
     )
 

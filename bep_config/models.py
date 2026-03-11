@@ -63,6 +63,7 @@ class AboutContentBlock(models.Model):
         default=0,
         blank=False,
         null=False,
+        db_index=True,
     )
 
     # relationships
@@ -103,6 +104,7 @@ class TeamMember(models.Model):
         default=0,
         blank=False,
         null=False,
+        db_index=True,
     )
 
     # relationships
