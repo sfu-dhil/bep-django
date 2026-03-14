@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load cache %}
 {% load django_bootstrap5 %}
 
 {% block styles %}
@@ -25,30 +26,32 @@
         </form>
         <hr />
         {% for object in object_list %}
-            <div class="card mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">
+            {% cache 600 counties_list_object object.pk form.q %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            {% if request.GET.q %}
+                                {{ object.label_headline|safe }}
+                            {% else %}
+                                {{ object.label|safe }}
+                            {% endif %}
+                        </h5>
                         {% if request.GET.q %}
-                            {{ object.label_headline|safe }}
+                            {{ object.description_headline|safe }}
                         {% else %}
-                            {{ object.label|safe }}
+                            {{ object.description|safe }}
                         {% endif %}
-                    </h5>
+                        {% comment %} {% include '_partials/search_tag.html' with category='Town' label=object.town.label %} {% endcomment %}
+                        {% comment %} {% include '_partials/search_tag.html' with category='Nation' label=object.nation.label %} {% endcomment %}
+                    </div>
                     {% if request.GET.q %}
-                        {{ object.description_headline|safe }}
-                    {% else %}
-                        {{ object.description|safe }}
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary" title="Matching Score">
+                            {{ object.rank|floatformat:"0" }}%
+                        </span>
                     {% endif %}
-                    {% comment %} {% include '_partials/search_tag.html' with category='Town' label=object.town.label %} {% endcomment %}
-                    {% comment %} {% include '_partials/search_tag.html' with category='Nation' label=object.nation.label %} {% endcomment %}
+                    <a href="{% url 'county' pk=object.pk %}" class="stretched-link"></a>
                 </div>
-                {% if request.GET.q %}
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary" title="Matching Score">
-                        {{ object.rank|floatformat:"0" }}%
-                    </span>
-                {% endif %}
-                <a href="{% url 'county' pk=object.pk %}" class="stretched-link"></a>
-            </div>
+            {% endcache %}
         {% empty %}
             <div class="alert alert-warning" role="alert">No records found. Try adjusting your search terms or filters.</div>
         {% endfor %}

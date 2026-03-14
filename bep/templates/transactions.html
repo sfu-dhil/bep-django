@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load cache %}
 {% load django_bootstrap5 %}
 
 {% block styles %}
@@ -63,67 +64,87 @@
                             <input type="number" id="shipping_d_max" name="shipping_d_max" min="0" class="form-control" placeholder="" title="Pence" value="{{ form.shipping_d_max.value }}">
                         </div>
 
-                        {% bootstrap_field form.transaction_category wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
-                        {% bootstrap_field form.monarch wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
-                        {% bootstrap_field form.diocese wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
-                        {% bootstrap_field form.county wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
-                        {% bootstrap_field form.parish wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
-                        {% bootstrap_field form.book wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
-                        {% bootstrap_field form.manuscript_source wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
-                        {% bootstrap_field form.print_source wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
-                        {% bootstrap_field form.injunction wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
+                        {% cache 600 transactions_form_transaction_category form.transaction_category.value  %}
+                            {% bootstrap_field form.transaction_category wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
+                        {% endcache %}
+                        {% cache 600 transactions_form_monarch form.monarch.value  %}
+                            {% bootstrap_field form.monarch wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
+                        {% endcache %}
+                        {% cache 600 transactions_form_diocese form.diocese.value  %}
+                            {% bootstrap_field form.diocese wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
+                        {% endcache %}
+                        {% cache 600 transactions_form_county form.county.value  %}
+                            {% bootstrap_field form.county wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
+                        {% endcache %}
+                        {% cache 600 transactions_form_parish form.parish.value  %}
+                            {% bootstrap_field form.parish wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
+                        {% endcache %}
+                        {% cache 600 transactions_form_book form.book.value  %}
+                            {% bootstrap_field form.book wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
+                        {% endcache %}
+                        {% cache 600 transactions_form_manuscript_source form.manuscript_source.value  %}
+                            {% bootstrap_field form.manuscript_source wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
+                        {% endcache %}
+                        {% cache 600 transactions_form_print_source form.print_source.value  %}
+                            {% bootstrap_field form.print_source wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
+                        {% endcache %}
+                        {% cache 600 transactions_form_injunction form.injunction.value  %}
+                            {% bootstrap_field form.injunction wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
+                        {% endcache %}
                     </div>
                 </div>
                 <div class="col-9">
                     {% for object in object_list %}
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                <h5 class="card-title">
-                                    Transaction
-                                    {% if request.GET.q %}
-                                        {{ object.searchable_id_headline|safe }}
-                                    {% else %}
-                                        {{ object.searchable_id|safe }}
-                                    {% endif %}
-                                </h5>
-                                <dl class="row gy-3 m-0 mb-3 row-cols-1 row-cols-lg-2">
-                                    {% if object.value %}
-                                        {% include '_partials/search_detail.html' with label="Transaction Value" value=object.get_value_lsd_str %}
-                                    {% endif %}
-                                    {% if object.shipping %}
-                                        {% include '_partials/search_detail.html' with label="Shipping Value" value=object.get_shipping_lsd_str %}
-                                    {% endif %}
-                                    {% include '_partials/search_detail.html' with label="Location" value=object.location value_headline=object.location_headline %}
-                                    {% include '_partials/search_detail.html' with label="Transcription" value=object.transcription value_headline=object.transcription_headline %}
-                                    {% include '_partials/search_detail.html' with label="Modern Transcription" value=object.modern_transcription value_headline=object.modern_transcription_headline %}
-                                    {% include '_partials/search_detail.html' with label="Notes" value=object.public_notes value_headline=object.public_notes_headline %}
-                                </dl>
-                                {% for transaction_category in object.transaction_categories.all %}
-                                    {% include '_partials/search_tag.html' with category='Transaction Category' label=transaction_category.label value=transaction_category.id search_value=form.transaction_category.value %}
-                                {% endfor %}
-                                {% include '_partials/search_tag.html' with category='Manuscript Source' label=object.manuscript_source.label value=object.manuscript_source.id search_value=form.manuscript_source.value %}
-                                {% include '_partials/search_tag.html' with category='Print Source' label=object.print_source.title value=object.print_source.id search_value=form.print_source.value %}
-                                {% include '_partials/search_tag.html' with category='Monarch' label=object.monarch.label value=object.monarch.id search_value=form.monarch.value %}
-                                {% include '_partials/search_tag.html' with category='Parish' label=object.parish.label value=object.parish.id search_value=form.parish.value %}
-                                {% comment %} {% include '_partials/search_tag.html' with category='Archdeaconry' label=object.parish.archdeaconry.label %} {% endcomment %}
-                                {% include '_partials/search_tag.html' with category='Diocese' label=object.parish.archdeaconry.diocese.label value=object.parish.archdeaconry.diocese.id search_value=form.diocese.value %}
-                                {% comment %} {% include '_partials/search_tag.html' with category='Province' label=object.parish.archdeaconry.diocese.province.label %} {% endcomment %}
-                                {% comment %} {% include '_partials/search_tag.html' with category='Town' label=object.parish.town.label %} {% endcomment %}
-                                {% include '_partials/search_tag.html' with category='County' label=object.parish.town.county.label value=object.parish.town.county.id search_value=form.county.value %}
+                        {% cache 600 transactions_list_object object.pk form.q %}
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        Transaction
+                                        {% if request.GET.q %}
+                                            {{ object.searchable_id_headline|safe }}
+                                        {% else %}
+                                            {{ object.searchable_id|safe }}
+                                        {% endif %}
+                                    </h5>
+                                    <dl class="row gy-3 m-0 mb-3 row-cols-1 row-cols-lg-2">
+                                        {% if object.value %}
+                                            {% include '_partials/search_detail.html' with label="Transaction Value" value=object.get_value_lsd_str %}
+                                        {% endif %}
+                                        {% if object.shipping %}
+                                            {% include '_partials/search_detail.html' with label="Shipping Value" value=object.get_shipping_lsd_str %}
+                                        {% endif %}
+                                        {% include '_partials/search_detail.html' with label="Location" value=object.location value_headline=object.location_headline %}
+                                        {% include '_partials/search_detail.html' with label="Transcription" value=object.transcription value_headline=object.transcription_headline %}
+                                        {% include '_partials/search_detail.html' with label="Modern Transcription" value=object.modern_transcription value_headline=object.modern_transcription_headline %}
+                                        {% include '_partials/search_detail.html' with label="Notes" value=object.public_notes value_headline=object.public_notes_headline %}
+                                    </dl>
+                                    {% for transaction_category in object.transaction_categories.all %}
+                                        {% include '_partials/search_tag.html' with category='Transaction Category' label=transaction_category.label value=transaction_category.id %}
+                                    {% endfor %}
+                                    {% include '_partials/search_tag.html' with category='Manuscript Source' label=object.manuscript_source.label value=object.manuscript_source.id %}
+                                    {% include '_partials/search_tag.html' with category='Print Source' label=object.print_source.title value=object.print_source.id %}
+                                    {% include '_partials/search_tag.html' with category='Monarch' label=object.monarch.label value=object.monarch.id %}
+                                    {% include '_partials/search_tag.html' with category='Parish' label=object.parish.label value=object.parish.id %}
+                                    {% comment %} {% include '_partials/search_tag.html' with category='Archdeaconry' label=object.parish.archdeaconry.label %} {% endcomment %}
+                                    {% include '_partials/search_tag.html' with category='Diocese' label=object.parish.archdeaconry.diocese.label value=object.parish.archdeaconry.diocese.id %}
+                                    {% comment %} {% include '_partials/search_tag.html' with category='Province' label=object.parish.archdeaconry.diocese.province.label %} {% endcomment %}
+                                    {% comment %} {% include '_partials/search_tag.html' with category='Town' label=object.parish.town.label %} {% endcomment %}
+                                    {% include '_partials/search_tag.html' with category='County' label=object.parish.town.county.label value=object.parish.town.county.id %}
 
-                                {% comment %} {% if object.parish.town.county.nation %}
-                                    {% include '_partials/search_tag.html' with category='Nation' label=object.parish.town.county.nation.label %}
-                                {% elif object.parish.archdeaconry.diocese.province.nation %}
-                                    {% include '_partials/search_tag.html' with category='Nation' label=object.parish.archdeaconry.diocese.province.nation.label %}
-                                {% endif %} {% endcomment %}
+                                    {% comment %} {% if object.parish.town.county.nation %}
+                                        {% include '_partials/search_tag.html' with category='Nation' label=object.parish.town.county.nation.label %}
+                                    {% elif object.parish.archdeaconry.diocese.province.nation %}
+                                        {% include '_partials/search_tag.html' with category='Nation' label=object.parish.archdeaconry.diocese.province.nation.label %}
+                                    {% endif %} {% endcomment %}
+                                </div>
+                                {% if request.GET.q %}
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary" title="Matching Score">
+                                        {{ object.rank|floatformat:"0" }}%
+                                    </span>
+                                {% endif %}
+                                <a href="{% url 'transaction' pk=object.pk %}" class="stretched-link"></a>
                             </div>
-                            {% if request.GET.q %}
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary" title="Matching Score">
-                                    {{ object.rank|floatformat:"0" }}%
-                                </span>
-                            {% endif %}
-                            <a href="{% url 'transaction' pk=object.pk %}" class="stretched-link"></a>
-                        </div>
+                        {% endcache %}
                     {% empty %}
                         <div class="alert alert-warning" role="alert">No records found. Try adjusting your search terms or filters.</div>
                     {% endfor %}

@@ -28,13 +28,7 @@ class TransactionsView(ListView):
 
     def get_queryset(self):
         queryset = super().get_queryset() \
-            .annotate(searchable_id=LPad(Cast('id', output_field=CharField()), 5, Value('0'))) \
-            .prefetch_related(
-                'parish',
-                'parish__town', 'parish__town__county', 'parish__town__county__nation',
-                'parish__archdeaconry', 'parish__archdeaconry__diocese', 'parish__archdeaconry__diocese__province', 'parish__archdeaconry__diocese__province__nation',
-                'manuscript_source', 'print_source', 'monarch', 'transaction_categories', 'books',
-            )
+            .annotate(searchable_id=LPad(Cast('id', output_field=CharField()), 5, Value('0')))
 
         form = TransactionSearchForm(self.request.GET)
         if form.is_valid():
@@ -90,13 +84,7 @@ class TransactionView(DetailView):
     template_name = 'transaction.html'
 
     def get_queryset(self):
-        return super().get_queryset() \
-            .prefetch_related(
-                'parish',
-                'parish__town', 'parish__town__county', 'parish__town__county__nation',
-                'parish__archdeaconry', 'parish__archdeaconry__diocese', 'parish__archdeaconry__diocese__province', 'parish__archdeaconry__diocese__province__nation',
-                'manuscript_source', 'print_source', 'monarch', 'transaction_categories', 'books',
-            )
+        return super().get_queryset()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -134,11 +122,7 @@ class ParishesView(ListView):
 
     def get_queryset(self):
         queryset = super().get_queryset() \
-            .annotate(searchable_id=LPad(Cast('id', output_field=CharField()), 5, Value('0'))) \
-            .prefetch_related(
-                'town', 'town__county', 'town__county__nation',
-                'archdeaconry', 'archdeaconry__diocese', 'archdeaconry__diocese__province', 'archdeaconry__diocese__province__nation',
-            )
+            .annotate(searchable_id=LPad(Cast('id', output_field=CharField()), 5, Value('0')))
 
         form = ParishSearchForm(self.request.GET)
         if form.is_valid():
@@ -166,11 +150,7 @@ class ParisView(DetailView):
     template_name = 'parish.html'
 
     def get_queryset(self):
-        return super().get_queryset() \
-            .prefetch_related(
-                'town', 'town__county', 'town__county__nation',
-                'archdeaconry', 'archdeaconry__diocese', 'archdeaconry__diocese__province', 'archdeaconry__diocese__province__nation',
-            )
+        return super().get_queryset()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -200,10 +180,7 @@ class DiocesesView(ListView):
 
     def get_queryset(self):
         queryset = super().get_queryset() \
-            .annotate(searchable_id=LPad(Cast('id', output_field=CharField()), 5, Value('0'))) \
-            .prefetch_related(
-                'province', 'province__nation',
-            )
+            .annotate(searchable_id=LPad(Cast('id', output_field=CharField()), 5, Value('0')))
 
         form = DioceseSearchForm(self.request.GET)
         if form.is_valid():
@@ -225,10 +202,7 @@ class DioceseView(DetailView):
     template_name = 'diocese.html'
 
     def get_queryset(self):
-        return super().get_queryset() \
-            .prefetch_related(
-                'province', 'province__nation',
-            )
+        return super().get_queryset()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -250,10 +224,7 @@ class CountiesView(ListView):
 
     def get_queryset(self):
         queryset = super().get_queryset() \
-            .annotate(searchable_id=LPad(Cast('id', output_field=CharField()), 5, Value('0'))) \
-            .prefetch_related(
-                'nation',
-            )
+            .annotate(searchable_id=LPad(Cast('id', output_field=CharField()), 5, Value('0')))
 
         form = CountySearchForm(self.request.GET)
         if form.is_valid():
@@ -275,10 +246,7 @@ class CountyView(DetailView):
     template_name = 'county.html'
 
     def get_queryset(self):
-        return super().get_queryset() \
-            .prefetch_related(
-                'nation',
-            )
+        return super().get_queryset()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load cache %}
 {% load django_bootstrap5 %}
 
 {% block styles %}
@@ -26,54 +27,60 @@
             <div class="row">
                 <div class="col-3">
                     <div class="input-group">
-                        {% bootstrap_field form.diocese wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
-                        {% bootstrap_field form.county wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
+                        {% cache 600 parishes_form_diocese form.diocese.value  %}
+                            {% bootstrap_field form.diocese wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
+                        {% endcache %}
+                        {% cache 600 parishes_form_county form.county.value  %}
+                            {% bootstrap_field form.county wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
+                        {% endcache %}
                     </div>
                 </div>
                 <div class="col-9">
                     {% for object in object_list %}
-                        {% with geom_point=object.geom_point %}
-                            <div class="card mb-3">
-                                <div class="card-body">
-                                    <h5 class="card-title">
-                                        {% if request.GET.q %}
-                                            {{ object.label_headline|safe }}
-                                        {% else %}
-                                            {{ object.label|safe }}
-                                        {% endif %}
-                                    </h5>
-                                    <div class="row align-items-stretch gx-1">
-                                        <div class="{% if geom_point %}col-xl-9{% endif %}">
-                                            <dl class="row gy-3 m-0 row-cols-1 row-cols-lg-2">
-                                                {% include '_partials/search_detail.html' with col_label=3 col_value=9 label="Street Address" value=object.address value_headline=object.address_headline %}
-                                                {% include '_partials/search_detail.html' with col_label=3 col_value=9 label="Description" value=object.description value_headline=object.description_headline %}
-                                            </dl>
-                                            {% comment %} {% include '_partials/search_tag.html' with category='Archdeaconry' label=object.archdeaconry.label %} {% endcomment %}
-                                            {% include '_partials/search_tag.html' with category='Diocese' label=object.archdeaconry.diocese.label value=object.archdeaconry.diocese.id search_value=form.diocese.value %}
-                                            {% comment %} {% include '_partials/search_tag.html' with category='Province' label=object.archdeaconry.diocese.province.label %} {% endcomment %}
-                                            {% comment %} {% include '_partials/search_tag.html' with category='Town' label=object.town.label %} {% endcomment %}
-                                            {% include '_partials/search_tag.html' with category='County' label=object.town.county.label value=object.town.county.id search_value=form.county.value %}
-                                            {% comment %} {% if object.town.county.nation %}
-                                                {% include '_partials/search_tag.html' with category='Nation' label=object.town.county.nation.label %}
-                                            {% elif object.archdeaconry.diocese.province.nation %}
-                                                {% include '_partials/search_tag.html' with category='Nation' label=object.archdeaconry.diocese.province.nation.label %}
-                                            {% endif %} {% endcomment %}
-                                        </div>
-                                        {% if geom_point %}
-                                            <div class="col-xl-3">
-                                                <div class="parish-map-app h-100 position-relative" data-parish-id="{{ object.id }}"></div>
+                        {% cache 600 parishes_list_object object.pk form.q %}
+                            {% with geom_point=object.geom_point %}
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            {% if request.GET.q %}
+                                                {{ object.label_headline|safe }}
+                                            {% else %}
+                                                {{ object.label|safe }}
+                                            {% endif %}
+                                        </h5>
+                                        <div class="row align-items-stretch gx-1">
+                                            <div class="{% if geom_point %}col-xl-9{% endif %}">
+                                                <dl class="row gy-3 m-0 row-cols-1 row-cols-lg-2">
+                                                    {% include '_partials/search_detail.html' with col_label=3 col_value=9 label="Street Address" value=object.address value_headline=object.address_headline %}
+                                                    {% include '_partials/search_detail.html' with col_label=3 col_value=9 label="Description" value=object.description value_headline=object.description_headline %}
+                                                </dl>
+                                                {% comment %} {% include '_partials/search_tag.html' with category='Archdeaconry' label=object.archdeaconry.label %} {% endcomment %}
+                                                {% include '_partials/search_tag.html' with category='Diocese' label=object.archdeaconry.diocese.label value=object.archdeaconry.diocese.id %}
+                                                {% comment %} {% include '_partials/search_tag.html' with category='Province' label=object.archdeaconry.diocese.province.label %} {% endcomment %}
+                                                {% comment %} {% include '_partials/search_tag.html' with category='Town' label=object.town.label %} {% endcomment %}
+                                                {% include '_partials/search_tag.html' with category='County' label=object.town.county.label value=object.town.county.id %}
+                                                {% comment %} {% if object.town.county.nation %}
+                                                    {% include '_partials/search_tag.html' with category='Nation' label=object.town.county.nation.label %}
+                                                {% elif object.archdeaconry.diocese.province.nation %}
+                                                    {% include '_partials/search_tag.html' with category='Nation' label=object.archdeaconry.diocese.province.nation.label %}
+                                                {% endif %} {% endcomment %}
                                             </div>
-                                        {% endif %}
+                                            {% if geom_point %}
+                                                <div class="col-xl-3">
+                                                    <div class="parish-map-app h-100 position-relative" data-parish-id="{{ object.id }}"></div>
+                                                </div>
+                                            {% endif %}
+                                        </div>
                                     </div>
+                                    {% if request.GET.q %}
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary" title="Matching Score">
+                                            {{ object.rank|floatformat:"0" }}%
+                                        </span>
+                                    {% endif %}
+                                    <a href="{% url 'parish' pk=object.pk %}" class="stretched-link"></a>
                                 </div>
-                                {% if request.GET.q %}
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary" title="Matching Score">
-                                        {{ object.rank|floatformat:"0" }}%
-                                    </span>
-                                {% endif %}
-                                <a href="{% url 'parish' pk=object.pk %}" class="stretched-link"></a>
-                            </div>
-                        {% endwith %}
+                            {% endwith %}
+                        {% endcache %}
                     {% empty %}
                         <div class="alert alert-warning" role="alert">No records found. Try adjusting your search terms or filters.</div>
                     {% endfor %}
