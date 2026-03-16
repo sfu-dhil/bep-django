@@ -159,6 +159,7 @@ class HoldingImageInline(StackedInline):
 
 # Admin Panel Items
 class BepAdminDefaults(ModelAdmin):
+    list_per_page = 10
     compressed_fields = True
 
     # all list displayed fields are display links
@@ -221,6 +222,9 @@ class BookAdmin(BepAdminDefaults):
         BookM2MHoldingReadOnlyInline,
     ]
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related('monarch')
+
     def _title(self, obj):
         return obj.title if len(obj.title) <= 100 else obj.title[:100].rsplit(' ', 1)[0] + '...'
     _title.short_description = 'Title'
@@ -269,6 +273,9 @@ class InjunctionAdmin(BepAdminDefaults):
         InventoryReadOnlyInline,
     ]
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related('monarch')
+
     def _title(self, obj):
         return mark_safe(obj.title)
     _title.short_description = 'Title'
@@ -292,7 +299,7 @@ class InventoryAdmin(BepAdminDefaults):
     ]
 
     def get_queryset(self, request):
-        return super().get_queryset(request).prefetch_related('books')
+        return super().get_queryset(request).prefetch_related('parish', 'print_source', 'books')
 
     def _id(self, obj):
         return f"{obj.id:05d}"
@@ -391,6 +398,7 @@ class TownAdmin(SimpleTermModelDefaults):
 
 @admin.register(Transaction)
 class TransactionAdmin(ClonableModelAdmin, BepAdminDefaults):
+    list_per_page = 10
     clone_verbose_name = 'Create new copy of transaction'
     form = TransactionAdminForm
     list_filter = ['transaction_categories']
@@ -423,7 +431,7 @@ class TransactionAdmin(ClonableModelAdmin, BepAdminDefaults):
     ]
 
     def get_queryset(self, request):
-        return super().get_queryset(request).prefetch_related('books')
+        return super().get_queryset(request).prefetch_related('manuscript_source', 'parish', 'books')
 
     def _id(self, obj):
         return f"{obj.id:05d}"
@@ -457,7 +465,7 @@ class TransactionAdmin(ClonableModelAdmin, BepAdminDefaults):
 
 @admin.register(Holding)
 class HoldingAdmin(BepAdminDefaults):
-    list_display = ['_date', 'parish', '_book']
+    list_display = ['_date', 'parish', '_books']
     search_fields = ['start_date', 'end_date', 'written_date', 'description']
     ordering = ['start_date']
     autocomplete_fields = ['parish', 'archive', 'books']
@@ -466,7 +474,7 @@ class HoldingAdmin(BepAdminDefaults):
     ]
 
     def get_queryset(self, request):
-        return super().get_queryset(request).prefetch_related('books')
+        return super().get_queryset(request).prefetch_related('parish', 'books')
 
     def _date(self, obj):
         if obj.start_date and obj.end_date:
@@ -483,11 +491,11 @@ class HoldingAdmin(BepAdminDefaults):
     _modern_transcription.short_description = 'Modern English'
     _modern_transcription.admin_order_field = 'modern_transcription'
 
-    def _book(self, obj):
+    def _books(self, obj):
         return mark_safe('<br>'.join(
             [str(n) for n in obj.books.all()]
         ))
-    _book.short_description = 'Book'
+    _books.short_description = 'Book'
 
 @admin.register(Format)
 class FormatAdmin(SimpleTermModelDefaults):
