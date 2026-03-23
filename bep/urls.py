@@ -10,6 +10,7 @@ urlpatterns = [
     path("about", views.AboutView.as_view(), name='about'),
     path("transactions", views.TransactionsView.as_view(), name='transactions'),
     path("transactions/<int:pk>", views.TransactionView.as_view(), name='transaction'),
+    path("inventories/<int:pk>", views.InventoryView.as_view(), name='inventory'),
     path("parishes", views.ParishesView.as_view(), name='parishes'),
     path("parishes/<int:pk>", views.ParisView.as_view(), name='parish'),
     path("dioceses", views.DiocesesView.as_view(), name='dioceses'),

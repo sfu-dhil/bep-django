@@ -5,6 +5,7 @@ export const useInfoModalStore = defineStore('info-modal', {
     objectId: null,
     objectType: null,
     open: false,
+    params: {},
     history: [],
   }),
   getters: {},
@@ -12,15 +13,16 @@ export const useInfoModalStore = defineStore('info-modal', {
     hasHistory() { return this.history.length > 0 },
     showPrevious() {
       if (!this.hasHistory()) { return }
-      const {objectType, objectId} = this.history.pop()
-      this.showModal(objectType, objectId)
+      const {objectType, objectId, params} = this.history.pop()
+      this.showModal(objectType, objectId, params, false, params)
     },
-    showModal(objectType, objectId, storeHistory) {
-      if (storeHistory && this.objectType && this.objectId && this.open) {
-        this.history.push({objectType: this.objectType, objectId: this.objectId})
+    showModal(objectType, objectId, params, storeHistory) {
+      if (storeHistory && this.objectType && this.open) {
+        this.history.push({objectType: this.objectType, objectId: this.objectId, params: this.params})
       }
       this.objectType = objectType
       this.objectId = objectId
+      this.params = params || {}
       this.open = true
     },
     reset() {

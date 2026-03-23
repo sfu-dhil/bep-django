@@ -25,7 +25,7 @@ const inventories = await useParishInventoriesStore().getByParishId(props.object
 const transactions = await useParishTransactionsStore().getByParishId(props.objectId)
 const holdings = await useParishHoldingsStore().getByParishId(props.objectId)
 
-const getDates = (objects) => objects.map((o) => o.start_date).filter((o) => o != null && o != '1000-01-01').map((date) => new Date(date))
+const getDates = (objects) => objects.map((o) => o.start_date).filter((o) => o != null).map((date) => new Date(date))
 const inventoriesDateRange = computed(() => formattedDateRange(getDates(inventories)))
 const transactionsDateRange = computed(() => formattedDateRange(getDates(transactions)))
 const holdingsDateRange = computed(() => formattedDateRange(getDates(holdings)))

@@ -9,6 +9,7 @@ import InfoModalApp from './InfoModalApp.vue'
 import InfoModalToggleApp from './InfoModalToggleApp.vue'
 import ParishMapApp from './ParishMapApp.vue'
 import DioceseMapApp from './DioceseMapApp.vue'
+import EventVisualizationApp from './EventVisualizationApp.vue'
 
 // other
 import { Popover } from 'bootstrap/dist/js/bootstrap.esm'
@@ -79,6 +80,15 @@ ready(() => {
     const app = createApp(DioceseMapApp, { ...mountEl.dataset })
     app.use(pinia)
     app.use(OpenLayersMap)
+    app.mount(mountEl)
+  })
+
+  document.querySelectorAll('.event-visualization-app').forEach((mountEl) => {
+    const app = createApp(EventVisualizationApp, {
+      // ...mountEl.dataset,
+      parishIds: JSON.parse(mountEl.dataset.parishIdsJson),
+    })
+    app.use(pinia)
     app.mount(mountEl)
   })
 })

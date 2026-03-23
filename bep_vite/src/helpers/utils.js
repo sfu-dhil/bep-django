@@ -10,7 +10,7 @@ export const filterByArchdeaconryId = (id) => _filterByObjectId('archdeaconry', 
 export const filterByParishId = (id) => _filterByObjectId('parish', id)
 
 export const formattedDateRange = (dates) => {
-  dates = dates.filter((d) => d !== null && d != '1000-01-01')
+  dates = dates.filter((d) => d !== null && d != '1000-01-01' && d != '1500-01-01')
   if (dates.length === 0) { return null }
 
   const startDate = new Date(Math.min(...dates))
@@ -23,3 +23,22 @@ export const formattedDateRange = (dates) => {
     return `${startDate.toLocaleString('en-CA', { year: 'numeric', month: 'long' })}`
   }
 }
+
+
+export const getLsd = (totalPence) => {
+  if (!totalPence) { totalPence = 0 }
+  return { l: Math.floor(totalPence/240), s: Math.floor((totalPence%240)/12), d: Math.floor((totalPence % 240) % 12) }
+}
+export const getLsdString = (totalPence, zeroLabel) => {
+  zeroLabel = zeroLabel || '0d'
+  const {l, s, d} = getLsd(totalPence)
+  if (l === 0 && s === 0 && d === 0) { return zeroLabel }
+  const lsdParts = []
+  if (l > 0) { lsdParts.push(`£${l}`) }
+  if (s > 0) { lsdParts.push(`${s}s`) }
+  if (d > 0) { lsdParts.push(`${d}d`) }
+  return lsdParts.join(' ')
+}
+
+const CUSTOM_COLOR_PALLETTE = ['#003f5c', '#2f4b7c', '#665191', '#a05195', '#d45087', '#f95d6a', '#ff7c43', '#ffa600']
+export const getColorPalletByIndex = (index) => CUSTOM_COLOR_PALLETTE[index % CUSTOM_COLOR_PALLETTE.length]

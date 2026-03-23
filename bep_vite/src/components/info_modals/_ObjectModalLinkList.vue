@@ -18,6 +18,10 @@ const props = defineProps({
     type: String,
     default: 'label',
   },
+  params: {
+    type: Object,
+    default: {},
+  },
 })
 </script>
 
@@ -28,9 +32,12 @@ const props = defineProps({
       <button
         type="button" class="list-group-item list-group-item-action"
         v-for="object in objects"
-        @click="() => useInfoModalStore().showModal(modalType, object.id, true)"
+        @click="() => useInfoModalStore().showModal(modalType, object.id, params, true)"
       >
-        <i class="bi bi-info-circle"></i> {{ object[objectLabelProperty] }}
+        <div class="row">
+          <div class="col-auto"><i class="bi bi-info-circle"></i></div>
+          <div class="col" v-html="object[objectLabelProperty]" />
+        </div>
       </button>
     </div>
   </dd>

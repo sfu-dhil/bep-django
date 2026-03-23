@@ -30,7 +30,10 @@ const props = defineProps({
         :href="linkFunction(object.id)" target="_blank"
         v-for="object in objects"
       >
-          <i class="bi bi-link"></i> {{ object[objectLabelProperty] }}
+        <div class="row">
+          <div class="col-auto"><i class="bi bi-link"></i></div>
+          <div class="col" v-html="object[objectLabelProperty]" />
+        </div>
       </a>
     </div>
   </dd>

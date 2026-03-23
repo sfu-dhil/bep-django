@@ -3,8 +3,9 @@ from django.db.models import F, Q, CharField, Value
 from django.contrib.postgres.search import SearchHeadline, SearchQuery, SearchRank
 from vectortiles.views import MVTView
 from django.db.models.functions import LPad, Cast
+import json
 
-from .models import Parish, Transaction, County, Diocese
+from .models import Parish, Transaction, County, Diocese, Inventory
 from .forms import TransactionSearchForm, ParishSearchForm, DioceseSearchForm, CountySearchForm
 from .vector_layers import DiocesePre1541VectorLayer, DiocesePre1541LabelVectorLayer, \
     DiocesePost1541VectorLayer, DiocesePost1541LabelVectorLayer
@@ -109,6 +110,37 @@ class TransactionView(DetailView):
             context['nation'] = None
         return context
 
+
+class InventoryView(DetailView):
+    model = Inventory
+    template_name = 'inventory.html'
+
+    def get_queryset(self):
+        return super().get_queryset()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['books'] = self.object.books.all()
+        context['manuscript_source'] = self.object.manuscript_source
+        context['print_source'] = self.object.print_source
+        context['monarch'] = self.object.monarch
+        context['injunction'] = self.object.injunction
+        context['inventory_images'] = self.object.images.all()
+
+        context['parish'] = self.object.parish
+        context['town'] = context['parish'].town
+        context['county'] = context['town'].county if context['town'] else None
+        context['archdeaconry'] = context['parish'].archdeaconry
+        context['diocese'] = context['archdeaconry'].diocese if context['archdeaconry'] else None
+        context['province'] = context['diocese'].province if context['diocese'] else None
+        if context['county'] and context['county'].nation:
+            context['nation'] = context['county'].nation
+        elif context['province'] and context['province'].nation:
+            context['nation'] = context['province'].nation
+        else:
+            context['nation'] = None
+        return context
+
 class ParishesView(ListView):
     paginate_by = 10
     model = Parish
@@ -165,6 +197,7 @@ class ParisView(DetailView):
             context['nation'] = context['province'].nation
         else:
             context['nation'] = None
+        context['visualization_parish_ids_json'] = json.dumps([self.object.pk])
         return context
 
 class DiocesesView(ListView):
@@ -208,6 +241,7 @@ class DioceseView(DetailView):
         context = super().get_context_data(**kwargs)
         context['province'] = self.object.province
         context['nation'] = context['province'].nation if context['province'] and context['province'].nation else None
+        context['visualization_parish_ids_json'] = json.dumps(list(Parish.objects.filter(archdeaconry__diocese_id=self.object.pk).values_list('id', flat=True)))
         return context
 
 class CountiesView(ListView):
@@ -251,6 +285,7 @@ class CountyView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['nation'] = self.object.nation
+        context['visualization_parish_ids_json'] = json.dumps(list(Parish.objects.filter(town__county_id=self.object.pk).values_list('id', flat=True)))
         return context
 
 class DiocesePre1541TileView(MVTView):

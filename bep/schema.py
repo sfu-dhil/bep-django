@@ -47,10 +47,10 @@ class ArchiveStubSchema(ModelSchema):
     class Meta:
         model = Archive
         fields = ['id', 'label']
-class ParishTransactionStubSchema(ModelSchema):
+class TransactionCategoryStubSchema(ModelSchema):
     class Meta:
-        model = Transaction
-        fields = ['id', 'start_date', 'end_date']
+        model = TransactionCategory
+        fields = ['id',  'label']
 class SourceCategoryStubSchema(ModelSchema):
     class Meta:
         model = SourceCategory
@@ -76,9 +76,21 @@ class ParishStubSchema(ModelSchema):
 # full records
 class MonarchSchema(ModelSchema):
     books: Optional[List[BookStubSchema]]
+    start_year: Optional[int]
+    end_year: Optional[int]
     class Meta:
         model = Monarch
         fields = ['id', 'label', 'description', 'start_date', 'end_date']
+    @staticmethod
+    def resolve_start_year(obj):
+        if obj.start_date is None or obj.start_date.year <= 1500:
+            return None
+        return obj.start_date.year
+    @staticmethod
+    def resolve_end_year(obj):
+        if obj.end_date is None or obj.end_date.year <= 1500:
+            return None
+        return obj.end_date.year
 
 class NationSchema(ModelSchema):
     provinces: Optional[List[ProvinceStubSchema]]
@@ -211,37 +223,67 @@ class TransactionCategorySchema(ModelSchema):
         fields = ['id',  'label', 'description']
 
 class TransactionSchema(ModelSchema):
+    parish: Optional[ParishStubSchema] = None
+    transaction_categories: Optional[List[TransactionCategoryStubSchema]] = None
+    start_year: Optional[int]
+    end_year: Optional[int]
     class Meta:
         model = Transaction
         fields = [
-            'id', 'start_date', 'end_date', 'written_date',
-            # 'value', 'shipping', 'copies', 'location', 'page', 'transcription', 'modern_transcription', 'public_notes',
+            'id', 'start_date', 'end_date', 'written_date', 'value', 'shipping', 'modern_transcription',
+            # 'copies', 'location', 'page', 'transcription', 'modern_transcription', 'public_notes',
             # 'injunction_id', 'monarch_id', 'manuscript_source_id', 'print_source_id'
         ]
+    @staticmethod
+    def resolve_start_year(obj):
+        if obj.start_date is None or obj.start_date.year <= 1500:
+            return None
+        return obj.start_date.year
+    @staticmethod
+    def resolve_end_year(obj):
+        if obj.end_date is None or obj.end_date.year <= 1500:
+            return None
+        return obj.end_date.year
 
-class ParishInventoryStubSchema(ModelSchema):
-    class Meta:
-        model = Inventory
-        fields = ['id', 'start_date', 'end_date']
 class InventorySchema(ModelSchema):
+    start_year: Optional[int]
+    end_year: Optional[int]
     class Meta:
         model = Inventory
         fields = [
-            'id',  'start_date', 'end_date', 'written_date',
-            # 'page_number', 'transcription', 'modifications', 'description',
+            'id', 'start_date', 'end_date', 'written_date', 'modifications',
+            # 'page_number', 'transcription', 'description',
             # 'injunction_id', 'monarch_id', 'manuscript_source_id', 'print_source_id'
         ]
+    @staticmethod
+    def resolve_start_year(obj):
+        if obj.start_date is None or obj.start_date.year <= 1500:
+            return None
+        return obj.start_date.year
+    @staticmethod
+    def resolve_end_year(obj):
+        if obj.end_date is None or obj.end_date.year <= 1500:
+            return None
+        return obj.end_date.year
 
-class ParishHoldingStubSchema(ModelSchema):
-    class Meta:
-        model = Holding
-        fields = ['id', 'start_date', 'end_date']
 class HoldingSchema(ModelSchema):
+    start_year: Optional[int]
+    end_year: Optional[int]
     class Meta:
         model = Holding
         fields = [
             'id', 'start_date', 'end_date', 'written_date', 'description',
         ]
+    @staticmethod
+    def resolve_start_year(obj):
+        if obj.start_date is None or obj.start_date.year <= 1500:
+            return None
+        return obj.start_date.year
+    @staticmethod
+    def resolve_end_year(obj):
+        if obj.end_date is None or obj.end_date.year <= 1500:
+            return None
+        return obj.end_date.year
 
 
 class InjunctionSchema(ModelSchema):

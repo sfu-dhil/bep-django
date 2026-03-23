@@ -14,6 +14,7 @@ import PrintSource from './components/info_modals/PrintSource.vue'
 import ManuscriptSource from './components/info_modals/ManuscriptSource.vue'
 import Archive from './components/info_modals/Archive.vue'
 import Injunction from './components/info_modals/Injunction.vue'
+import YearEvents from './components/info_modals/YearEvents.vue'
 import Book from './components/info_modals/Book.vue'
 import LoadingDots from './components/LoadingDots.vue'
 import { Modal } from 'bootstrap/dist/js/bootstrap.esm'
@@ -23,6 +24,7 @@ const {
   objectId,
   objectType,
   open,
+  params,
 } = storeToRefs(store)
 
 const bootstrapModal = ref(null)
@@ -70,7 +72,7 @@ onUnmounted(() => {
 <template>
   <div ref="modalElRef" class="modal fade" tabindex="-1">
     <div class="modal-dialog modal-fullscreen-lg-down modal-xl modal-dialog-centered modal-dialog-scrollable">
-      <div class="modal-content" v-if="objectId">
+      <div class="modal-content">
         <Suspense v-if="objectType == 'monarch'">
           <Monarch :objectId="objectId" />
           <template #fallback><LoadingDots /></template>
@@ -121,6 +123,10 @@ onUnmounted(() => {
         </Suspense>
         <Suspense v-if="objectType == 'injunction'">
           <Injunction :objectId="objectId" />
+          <template #fallback><LoadingDots /></template>
+        </Suspense>
+        <Suspense v-if="objectType == 'year_events'">
+          <YearEvents :objectId="objectId" :params="params" />
           <template #fallback><LoadingDots /></template>
         </Suspense>
       </div>

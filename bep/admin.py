@@ -222,9 +222,6 @@ class BookAdmin(BepAdminDefaults):
         BookM2MHoldingReadOnlyInline,
     ]
 
-    def get_queryset(self, request):
-        return super().get_queryset(request).prefetch_related('monarch')
-
     def _title(self, obj):
         return obj.title if len(obj.title) <= 100 else obj.title[:100].rsplit(' ', 1)[0] + '...'
     _title.short_description = 'Title'
@@ -273,9 +270,6 @@ class InjunctionAdmin(BepAdminDefaults):
         InventoryReadOnlyInline,
     ]
 
-    def get_queryset(self, request):
-        return super().get_queryset(request).prefetch_related('monarch')
-
     def _title(self, obj):
         return mark_safe(obj.title)
     _title.short_description = 'Title'
@@ -297,9 +291,6 @@ class InventoryAdmin(BepAdminDefaults):
     inlines = [
         InventoryImageInline,
     ]
-
-    def get_queryset(self, request):
-        return super().get_queryset(request).prefetch_related('parish', 'print_source', 'books')
 
     def _id(self, obj):
         return f"{obj.id:05d}"
@@ -430,9 +421,6 @@ class TransactionAdmin(ClonableModelAdmin, BepAdminDefaults):
         'books',
     ]
 
-    def get_queryset(self, request):
-        return super().get_queryset(request).prefetch_related('manuscript_source', 'parish', 'books')
-
     def _id(self, obj):
         return f"{obj.id:05d}"
     _id.short_description = 'ID'
@@ -472,9 +460,6 @@ class HoldingAdmin(BepAdminDefaults):
     inlines = [
         HoldingImageInline,
     ]
-
-    def get_queryset(self, request):
-        return super().get_queryset(request).prefetch_related('parish', 'books')
 
     def _date(self, obj):
         if obj.start_date and obj.end_date:

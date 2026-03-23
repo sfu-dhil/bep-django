@@ -12,6 +12,7 @@ export const useTransactionCategoriesStore = defineStore('data-transaction-categ
 export const usePrintSourcesStore = defineStore('data-print-sources', _generateApiResourceStore((id) => `/api/print/sources/${id}`, '/api/print/sources'))
 export const useManuscriptSourcesStore = defineStore('data-manuscript-sources', _generateApiResourceStore((id) => `/api/manuscript/sources/${id}`, '/api/manuscript/sources'))
 export const useSourceCategoriesStore = defineStore('data-source-categories', _generateApiResourceStore((id) => `/api/source/categories/${id}`, '/api/source/categories'))
+export const useInjunctionStore = defineStore('data-injunctions', _generateApiResourceStore((id) => `/api/injunctions/${id}`, '/api/injunctions'))
 
 export const useNationsStore = defineStore('data-nations', _generateApiResourceStore((id) => `/api/nations/${id}`, '/api/nations'))
 export const useProvincesStore = defineStore('data-provinces', _generateApiResourceStore((id) => `/api/provinces/${id}`, '/api/provinces'))
@@ -19,17 +20,9 @@ export const useDiocesesStore = defineStore('data-dioceses', _generateApiResourc
 export const useArchdeaconriesStore = defineStore('data-archdeaconries', _generateApiResourceStore((id) => `/api/archdeaconries/${id}`, '/api/archdeaconries'))
 export const useCountiesStore = defineStore('data-counties', _generateApiResourceStore((id) => `/api/counties/${id}`, '/api/counties'))
 export const useTownsStore = defineStore('data-towns', _generateApiResourceStore((id) => `/api/towns/${id}`, '/api/towns'))
-
 export const useParishesStore = defineStore('data-parishes', _generateApiResourceStore((id) => `/api/parishes/${id}`, '/api/parishes'))
+
 export const useParishTransactionsStore = defineStore('data-parish-transactions', _generateParishDependantApiResourceStore((id) => `/api/parishes/${id}/transactions`))
 export const useParishHoldingsStore = defineStore('data-parish-holdings', _generateParishDependantApiResourceStore((id) => `/api/parishes/${id}/holdings`))
 export const useParishInventoriesStore = defineStore('data-parish-inventories', _generateParishDependantApiResourceStore((id) => `/api/parishes/${id}/inventories`))
-
-
-export const useInjunctionStore = defineStore('data-injunctions', _generateSingleFetchApiResourceStore((id) => `/api/injunctions/${id}`))
-export const useTransactionsStore = defineStore('data-transactions', _generateSingleFetchApiResourceStore((id) => `/api/transactions/${id}`))
-export const useHoldingsStore = defineStore('data-holdings', _generateSingleFetchApiResourceStore((id) => `/api/holdings/${id}`))
-export const useInventoriesStore = defineStore('data-inventories', _generateSingleFetchApiResourceStore((id) => `/api/inventories/${id}`))
-
-
 
