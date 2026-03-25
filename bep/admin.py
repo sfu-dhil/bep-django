@@ -392,7 +392,7 @@ class TransactionAdmin(ClonableModelAdmin, BepAdminDefaults):
     list_per_page = 10
     clone_verbose_name = 'Create new copy of transaction'
     form = TransactionAdminForm
-    list_filter = ['transaction_categories']
+    list_filter = ['transaction_categories', 'parish']
     list_display = ['_id', '_date', 'manuscript_source', '_value', '_books', 'parish', '_modern_transcription']
     search_fields = ['id', 'written_date', 'value', 'modern_transcription']
     ordering = ['id']
