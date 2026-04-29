@@ -1279,10 +1279,10 @@ vite@^6.4.1:
   optionalDependencies:
     fsevents "~2.3.3"
 
-vue-echarts@^8.0.1:
-  version "8.0.1"
-  resolved "https://registry.yarnpkg.com/vue-echarts/-/vue-echarts-8.0.1.tgz#2ed7e507d223e56cd209610f4fee5e8ec9bcbb2f"
-  integrity sha512-23rJTFLu1OUEGRWjJGmdGt8fP+8+ja1gVgzMYPIPaHWpXegcO1viIAaeu2H4QHESlVeHzUAHIxKXGrwjsyXAaA==
+vue-echarts@8.1.0-beta.2:
+  version "8.1.0-beta.2"
+  resolved "https://registry.yarnpkg.com/vue-echarts/-/vue-echarts-8.1.0-beta.2.tgz#a1a54ee583e9165372701d747c002603f87bf7cc"
+  integrity sha512-E3pduI5wonT/MydIFQDZ7m/qYAxRZAT3TuIEUbHElmbR+WQMlxywyLZwBCqkxfNSIo4YLvn0cuur/QQADv37/Q==
 
 vue-multiselect@^3.4.0:
   version "3.4.0"

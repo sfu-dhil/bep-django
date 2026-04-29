@@ -11,7 +11,7 @@ from .schema import *
 from .models import Parish, Transaction, Inventory, Holding, Injunction, \
     Book, Monarch, \
     Nation, County, Town, Province, Diocese, Archdeaconry, \
-    TransactionCategory, PrintSource, ManuscriptSource, SourceCategory, Archive
+    TransactionAction, TransactionMedium, PrintSource, ManuscriptSource, SourceCategory, Archive
 
 class ORJSONRenderer(BaseRenderer):
     media_type = "application/json"
@@ -38,16 +38,25 @@ def monarchs(request):
 
 
 
-@api.get("/transaction/categories/{pk}", response=TransactionCategorySchema)
+@api.get("/transaction/actions/{pk}", response=TransactionActionSchema)
 @decorate_view(cache_page(settings.CACHE_SECONDS))
-def transaction_category(request, pk: int):
-    return TransactionCategory.objects.get(pk=pk)
-@api.get("/transaction/categories", response=PaginatedResponseSchema[TransactionCategorySchema])
+def transaction_action(request, pk: int):
+    return TransactionAction.objects.get(pk=pk)
+@api.get("/transaction/actions", response=PaginatedResponseSchema[TransactionActionSchema])
 @decorate_view(cache_page(settings.CACHE_SECONDS))
 @paginate
-def transaction_categories(request):
-    return TransactionCategory.objects.order_by('label').all()
+def transaction_actions(request):
+    return TransactionAction.objects.order_by('label').all()
 
+@api.get("/transaction/mediums/{pk}", response=TransactionMediumSchema)
+@decorate_view(cache_page(settings.CACHE_SECONDS))
+def transaction_medium(request, pk: int):
+    return TransactionMedium.objects.get(pk=pk)
+@api.get("/transaction/mediums", response=PaginatedResponseSchema[TransactionMediumSchema])
+@decorate_view(cache_page(settings.CACHE_SECONDS))
+@paginate
+def transaction_mediums(request):
+    return TransactionMedium.objects.order_by('label').all()
 
 
 @api.get("/archives/{pk}", response=ArchiveSchema)
@@ -118,7 +127,7 @@ def book(request, pk: int):
 @decorate_view(cache_page(settings.CACHE_SECONDS))
 @paginate
 def books(request):
-    return Book.objects.prefetch_related('monarch').order_by('uniform_title').all()
+    return Book.objects.prefetch_related('monarch').order_by('full_title').all()
 
 
 
@@ -211,12 +220,12 @@ def parishes(request):
 @api.get("/transactions/{pk}", response=TransactionSchema)
 @decorate_view(cache_page(settings.CACHE_SECONDS))
 def transaction(request, pk: int):
-    return Transaction.objects.prefetch_related('transaction_categories').get(pk=pk)
+    return Transaction.objects.prefetch_related('transaction_actions', 'transaction_mediums').get(pk=pk)
 @api.get("/parishes/{parish_id}/transactions", response=PaginatedResponseSchema[TransactionSchema])
 @decorate_view(cache_page(settings.CACHE_SECONDS))
 @paginate
 def parishes_transactions(request, parish_id: int):
-    return Transaction.objects.prefetch_related('transaction_categories').filter(parish_id=parish_id).order_by('start_date').all()
+    return Transaction.objects.prefetch_related('transaction_actions', 'transaction_mediums').filter(parish_id=parish_id).order_by('date').all()
 
 
 
@@ -228,7 +237,7 @@ def inventory(request, pk: int):
 @decorate_view(cache_page(settings.CACHE_SECONDS))
 @paginate
 def parishes_inventories(request, parish_id: int):
-    return Inventory.objects.filter(parish_id=parish_id).order_by('start_date').all()
+    return Inventory.objects.filter(parish_id=parish_id).order_by('date').all()
 
 
 
@@ -240,7 +249,7 @@ def holding(request, pk: int):
 @decorate_view(cache_page(settings.CACHE_SECONDS))
 @paginate
 def parishes_holdings(request, parish_id: int):
-    return Holding.objects.filter(parish_id=parish_id).order_by('start_date').all()
+    return Holding.objects.filter(parish_id=parish_id).order_by('date').all()
 
 
 

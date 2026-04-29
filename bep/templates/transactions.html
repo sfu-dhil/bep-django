@@ -64,8 +64,11 @@
                             <input type="number" id="shipping_d_max" name="shipping_d_max" min="0" class="form-control" placeholder="" title="Pence" value="{{ form.shipping_d_max.value }}">
                         </div>
 
-                        {% cache 600 transactions_form_transaction_category form.transaction_category.value  %}
-                            {% bootstrap_field form.transaction_category wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
+                        {% cache 600 transactions_form_transaction_action form.transaction_action.value  %}
+                            {% bootstrap_field form.transaction_action wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
+                        {% endcache %}
+                        {% cache 600 transactions_form_transaction_medium form.transaction_medium.value  %}
+                            {% bootstrap_field form.transaction_medium wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
                         {% endcache %}
                         {% cache 600 transactions_form_monarch form.monarch.value  %}
                             {% bootstrap_field form.monarch wrapper_class='w-100 pb-3' label_class='mb-0' success_css_class='' %}
@@ -118,8 +121,11 @@
                                         {% include '_partials/search_detail.html' with label="Modern Transcription" value=object.modern_transcription value_headline=object.modern_transcription_headline %}
                                         {% include '_partials/search_detail.html' with label="Notes" value=object.public_notes value_headline=object.public_notes_headline %}
                                     </dl>
-                                    {% for transaction_category in object.transaction_categories.all %}
-                                        {% include '_partials/search_tag.html' with category='Transaction Category' label=transaction_category.label value=transaction_category.id %}
+                                    {% for transaction_action in object.transaction_actions.all %}
+                                        {% include '_partials/search_tag.html' with category='Transaction Action' label=transaction_action.label value=transaction_action.id %}
+                                    {% endfor %}
+                                    {% for transaction_medium in object.transaction_mediums.all %}
+                                        {% include '_partials/search_tag.html' with category='Transaction Medium' label=transaction_medium.label value=transaction_medium.id %}
                                     {% endfor %}
                                     {% include '_partials/search_tag.html' with category='Manuscript Source' label=object.manuscript_source.label value=object.manuscript_source.id %}
                                     {% include '_partials/search_tag.html' with category='Print Source' label=object.print_source.title value=object.print_source.id %}

@@ -8,7 +8,8 @@ import Province from './components/info_modals/Province.vue'
 import Archdeaconry from './components/info_modals/Archdeaconry.vue'
 import Town from './components/info_modals/Town.vue'
 import Parish from './components/info_modals/Parish.vue'
-import TransactionCategory from './components/info_modals/TransactionCategory.vue'
+import TransactionAction from './components/info_modals/TransactionAction.vue'
+import TransactionMedium from './components/info_modals/TransactionMedium.vue'
 import SourceCategory from './components/info_modals/SourceCategory.vue'
 import PrintSource from './components/info_modals/PrintSource.vue'
 import ManuscriptSource from './components/info_modals/ManuscriptSource.vue'
@@ -97,8 +98,12 @@ onUnmounted(() => {
           <Parish :objectId="objectId" />
           <template #fallback><LoadingDots /></template>
         </Suspense>
-        <Suspense v-if="objectType == 'transaction_category'">
-          <TransactionCategory :objectId="objectId" />
+        <Suspense v-if="objectType == 'transaction_action'">
+          <TransactionAction :objectId="objectId" />
+          <template #fallback><LoadingDots /></template>
+        </Suspense>
+        <Suspense v-if="objectType == 'transaction_medium'">
+          <TransactionMedium :objectId="objectId" />
           <template #fallback><LoadingDots /></template>
         </Suspense>
         <Suspense v-if="objectType == 'book'">

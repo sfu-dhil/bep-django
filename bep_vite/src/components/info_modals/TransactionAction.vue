@@ -1,5 +1,5 @@
 <script setup>
-import { useTransactionCategoriesStore } from '../../stores/data.js'
+import { useTransactionActionsStore } from '../../stores/data.js'
 import { useInfoModalStore } from '../../stores/info_modal.js'
 import ObjectLinkList from './_ObjectLinkList.vue'
 import ObjectModalLinkList from './_ObjectModalLinkList.vue'
@@ -13,7 +13,7 @@ const props = defineProps({
   },
 })
 
-const object = await useTransactionCategoriesStore().getById(props.objectId)
+const object = await useTransactionActionsStore().getById(props.objectId)
 </script>
 
 <template>
@@ -32,7 +32,7 @@ const object = await useTransactionCategoriesStore().getById(props.objectId)
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-secondary me-auto" v-if="useInfoModalStore().hasHistory()" @click="() => useInfoModalStore().showPrevious()">Back</button>
-    <a :href="`/transactions?transaction_category=${object.id}`" class="btn btn-primary ms-auto">View All Transactions</a>
+    <a :href="`/transactions?transaction_action=${object.id}`" class="btn btn-primary ms-auto">View All Transactions</a>
   </div>
 </template>
 

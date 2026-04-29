@@ -24,7 +24,7 @@ const props = defineProps({
 // setup onload data
 const monarchs = await useMonarchsStore().getAll()
 const injunctionsByYearMap = [...await useInjunctionStore().getAll()].reduce((result, injunction) => {
-  const axis = !injunction.date || isNaN(parseInt(injunction.date)) ? null : parseInt(injunction.date)
+  const axis = injunction.sort_year ? `${injunction.sort_year}` : 'Unknown'
   if (!result.has(axis)) { result.set(axis, []) }
   result.get(axis).push(injunction)
   return result
@@ -32,24 +32,31 @@ const injunctionsByYearMap = [...await useInjunctionStore().getAll()].reduce((re
 const parishMap = new Map()
 const inventoriesByYearMap = new Map()
 const transactionsByYearMap = new Map()
-const transactionCategoriesMap = new Map()
+const transactionActionsMap = new Map()
+const transactionMediumMap = new Map()
 for (let index = 0; index < props.parishIds.length; ++index) {
   // load parish
   parishMap.set(props.parishIds[index], await useParishesStore().getById(props.parishIds[index]))
   // load parish transactions
   const transactions = await useParishTransactionsStore().getByParishId(props.parishIds[index])
   transactions.forEach((transaction) => {
-    if (!transactionsByYearMap.has(transaction.start_year)) { transactionsByYearMap.set(transaction.start_year, []) }
-    transactionsByYearMap.get(transaction.start_year).push(transaction)
-    transaction.transaction_categories.forEach(({id, label}) => {
-      if (!transactionCategoriesMap.has(id)) { transactionCategoriesMap.set(id, {label, count: 0}) }
-      ++transactionCategoriesMap.get(id).count
+    if (!transactionsByYearMap.has(transaction.sort_year)) { transactionsByYearMap.set(transaction.sort_year, []) }
+    transactionsByYearMap.get(transaction.sort_year).push(transaction)
+    transaction.transaction_actions.forEach(({id, label}) => {
+      if (!transactionActionsMap.has(id)) { transactionActionsMap.set(id, {label, count: 0}) }
+      ++transactionActionsMap.get(id).count
+    })
+    // filter out basic book mediums?
+    // .filter(({id, label}) => label != 'Book')
+    transaction.transaction_mediums.forEach(({id, label}) => {
+      if (!transactionMediumMap.has(id)) { transactionMediumMap.set(id, {label, count: 0}) }
+      ++transactionMediumMap.get(id).count
     })
   })
   const inventories = await useParishInventoriesStore().getByParishId(props.parishIds[index])
   inventories.forEach((inventory) => {
-    if (!inventoriesByYearMap.has(inventory.start_year)) { inventoriesByYearMap.set(inventory.start_year, []) }
-    inventoriesByYearMap.get(inventory.start_year).push(inventory)
+    if (!inventoriesByYearMap.has(inventory.sort_year)) { inventoriesByYearMap.set(inventory.sort_year, []) }
+    inventoriesByYearMap.get(inventory.sort_year).push(inventory)
   })
 }
 
@@ -100,26 +107,55 @@ DATASET_LIST[DATASET_INJUNCTION_TOTALS_INDEX] = {
     .sort(([yearA, _A], [yearB, _B]) => yearA - yearB)
     .map(([year, objects]) => ({year: year ? `${year}` : 'Unknown', total: objects.length}))
 }
-const DATASET_TRANSACTION_VALUES_TOTALS_INDEX = datasetListIndexSetter++
-DATASET_LIST[DATASET_TRANSACTION_VALUES_TOTALS_INDEX] = {
+const DATASET_TRANSACTION_EXPENSES_TOTAL_INDEX = datasetListIndexSetter++
+DATASET_LIST[DATASET_TRANSACTION_EXPENSES_TOTAL_INDEX] = {
   dimensions: ['year', 'total'],
   source: [...transactionsByYearMap]
     .sort(([yearA, _A], [yearB, _B]) => yearA - yearB)
-    .map(([year, objects]) => ({year: year ? `${year}` : 'Unknown', total: objects.reduce((sum, transaction) => sum + transaction.value, 0)}))
+    .map(([year, objects]) => ({year: year ? `${year}` : 'Unknown', total: objects.reduce((sum, transaction) => sum + (transaction.is_expense ? transaction.value : -transaction.value) + (transaction.is_expense ? transaction.shipping : -transaction.shipping), 0)}))
     .filter(({year, total}) => total > 0)
 }
-const DATASET_TRANSACTION_SHIPPING_TOTALS_INDEX = datasetListIndexSetter++
-DATASET_LIST[DATASET_TRANSACTION_SHIPPING_TOTALS_INDEX] = {
+const DATASET_TRANSACTION_VALUES_EXPENSES_INDEX = datasetListIndexSetter++
+DATASET_LIST[DATASET_TRANSACTION_VALUES_EXPENSES_INDEX] = {
   dimensions: ['year', 'total'],
   source: [...transactionsByYearMap]
     .sort(([yearA, _A], [yearB, _B]) => yearA - yearB)
-    .map(([year, objects]) => ({year: `${year}`, total: objects.reduce((sum, transaction) => sum + transaction.shipping, 0)}))
+    .map(([year, objects]) => ({year: year ? `${year}` : 'Unknown', total: objects.reduce((sum, transaction) => sum + (transaction.is_expense ? transaction.value : 0), 0)}))
     .filter(({year, total}) => total > 0)
 }
-const DATASET_TRANSACTION_CATEGORIES_INDEX = datasetListIndexSetter++
-DATASET_LIST[DATASET_TRANSACTION_CATEGORIES_INDEX] = {
+const DATASET_TRANSACTION_VALUES_INCOME_INDEX = datasetListIndexSetter++
+DATASET_LIST[DATASET_TRANSACTION_VALUES_INCOME_INDEX] = {
+  dimensions: ['year', 'total'],
+  source: [...transactionsByYearMap]
+    .sort(([yearA, _A], [yearB, _B]) => yearA - yearB)
+    .map(([year, objects]) => ({year: year ? `${year}` : 'Unknown', total: objects.reduce((sum, transaction) => sum + (transaction.is_expense ? 0 : -transaction.value), 0)}))
+    .filter(({year, total}) => total < 0)
+}
+const DATASET_TRANSACTION_SHIPPING_EXPENSES_INDEX = datasetListIndexSetter++
+DATASET_LIST[DATASET_TRANSACTION_SHIPPING_EXPENSES_INDEX] = {
+  dimensions: ['year', 'total'],
+  source: [...transactionsByYearMap]
+    .sort(([yearA, _A], [yearB, _B]) => yearA - yearB)
+    .map(([year, objects]) => ({year: `${year}`, total: objects.reduce((sum, transaction) => sum + (transaction.is_expense ? transaction.shipping : 0), 0)}))
+    .filter(({year, total}) => total > 0)
+}
+const DATASET_TRANSACTION_SHIPPING_INCOME_INDEX = datasetListIndexSetter++
+DATASET_LIST[DATASET_TRANSACTION_SHIPPING_INCOME_INDEX] = {
+  dimensions: ['year', 'total'],
+  source: [...transactionsByYearMap]
+    .sort(([yearA, _A], [yearB, _B]) => yearA - yearB)
+    .map(([year, objects]) => ({year: `${year}`, total: objects.reduce((sum, transaction) => sum + (transaction.is_expense ? 0 : -transaction.shipping), 0)}))
+    .filter(({year, total}) => total < 0)
+}
+const DATASET_TRANSACTION_ACTION_INDEX = datasetListIndexSetter++
+DATASET_LIST[DATASET_TRANSACTION_ACTION_INDEX] = {
   dimensions: ['label', 'count'],
-  source: [...transactionCategoriesMap.values()],
+  source: [...transactionActionsMap.values()],
+}
+const DATASET_TRANSACTION_MEDIUM_INDEX = datasetListIndexSetter++
+DATASET_LIST[DATASET_TRANSACTION_MEDIUM_INDEX] = {
+  dimensions: ['label', 'count'],
+  source: [...transactionMediumMap.values()],
 }
 
 const X_AXIS_LIST = []
@@ -203,7 +239,8 @@ const markAreaDataMonarchsWithoutLabels = markAreaDataMonarchs.map((markAreaValu
 const chartOptions = computed(() => ({
   title: [
     { text: 'Events by Year', left: 'center' },
-    { text: 'Transaction Categories', top: '10%', left: '87.5%', textAlign: 'center' },
+    { text: 'Transaction Actions', top: '10%', left: '87.5%', textAlign: 'center' },
+    { text: 'Transaction Mediums', top: '55%', left: '87.5%', textAlign: 'center' },
   ],
   tooltip: {
     trigger: 'axis',
@@ -230,7 +267,7 @@ const chartOptions = computed(() => ({
   legend: {
     orient: 'horizontal',
     top: 45,
-    data: ['Transactions', 'Injunctions', 'Inventories', 'Total Transaction Value', 'Total Transaction Shipping' ],
+    data: ['Transactions', 'Injunctions', 'Inventories', 'Expenses', 'Income', 'Shipping Expenses', 'Shipping Income' ],
   },
   series: [
     {
@@ -244,7 +281,12 @@ const chartOptions = computed(() => ({
       markArea: {
         silent: true,
         itemStyle: { opacity: 0.2 },
-        data: markAreaDataMonarchs
+        data: markAreaDataMonarchs,
+        // label: {
+        //   position: 'inside',
+        //   overflow: 'truncate',
+        //   ellipsis: '...',
+        // }
       },
     },
     {
@@ -286,12 +328,40 @@ const chartOptions = computed(() => ({
         itemStyle: { opacity: 0.2 },
         data: markAreaDataMonarchsWithoutLabels
       },
+      // markLine: {
+      //   data: [{ yAxis: 0 }],
+      //   label: { show: false },
+      //   lineStyle: { color: '#000',  type: 'solid' },
+      //   animation: false,
+      //   symbol: 'none',
+      // },
     },
+    // {
+    //   name: 'Total Expenses',
+    //   xAxisIndex: BOTTOM_CHART_X_AXIS_INDEX,
+    //   yAxisIndex: BOTTOM_CHART_Y_AXIS_INDEX,
+    //   datasetIndex: DATASET_TRANSACTION_EXPENSES_TOTAL_INDEX,
+    //   type: 'bar',
+    //   encode: { x: 'year', y: 'total'},
+    //   tooltip: { valueFormatter: getLsdString },
+    //   connectNulls: true,
+    // },
     {
-      name: 'Total Transaction Value',
+      name: 'Expenses',
       xAxisIndex: BOTTOM_CHART_X_AXIS_INDEX,
       yAxisIndex: BOTTOM_CHART_Y_AXIS_INDEX,
-      datasetIndex: DATASET_TRANSACTION_VALUES_TOTALS_INDEX,
+      datasetIndex: DATASET_TRANSACTION_VALUES_EXPENSES_INDEX,
+      type: 'bar',
+      stack: 'lsd_total',
+      encode: { x: 'year', y: 'total'},
+      tooltip: { valueFormatter: getLsdString },
+      connectNulls: true,
+    },
+    {
+      name: 'Income',
+      xAxisIndex: BOTTOM_CHART_X_AXIS_INDEX,
+      yAxisIndex: BOTTOM_CHART_Y_AXIS_INDEX,
+      datasetIndex: DATASET_TRANSACTION_VALUES_INCOME_INDEX,
       type: 'bar',
       stack: 'lsd_total',
       encode: { x: 'year', y: 'total'},
@@ -308,13 +378,24 @@ const chartOptions = computed(() => ({
     //   connectNulls: true,
     // },
     {
-      name: 'Total Transaction Shipping',
+      name: 'Shipping Expenses',
       xAxisIndex: BOTTOM_CHART_X_AXIS_INDEX,
       yAxisIndex: BOTTOM_CHART_Y_AXIS_INDEX,
-      datasetIndex: DATASET_TRANSACTION_SHIPPING_TOTALS_INDEX,
+      datasetIndex: DATASET_TRANSACTION_SHIPPING_EXPENSES_INDEX,
       type: 'bar',
       stack: 'lsd_total',
-      encode: { x: 'year', y: 'shippingTotal'},
+      encode: { x: 'year', y: 'total'},
+      tooltip: { valueFormatter: getLsdString },
+      connectNulls: true,
+    },
+    {
+      name: 'Shipping Income',
+      xAxisIndex: BOTTOM_CHART_X_AXIS_INDEX,
+      yAxisIndex: BOTTOM_CHART_Y_AXIS_INDEX,
+      datasetIndex: DATASET_TRANSACTION_SHIPPING_INCOME_INDEX,
+      type: 'bar',
+      stack: 'lsd_total',
+      encode: { x: 'year', y: 'total'},
       tooltip: { valueFormatter: getLsdString },
       connectNulls: true,
     },
@@ -328,12 +409,29 @@ const chartOptions = computed(() => ({
     //   connectNulls: true,
     // },
     {
-      name: 'Transaction Categories',
-      datasetIndex: DATASET_TRANSACTION_CATEGORIES_INDEX,
+      name: 'Transaction Actions',
+      datasetIndex: DATASET_TRANSACTION_ACTION_INDEX,
       type: 'pie',
       radius: '100%',
       center: ['50%', '50%'],
       top: '15%',
+      height: '35%',
+      left: '80%',
+      right: '5%',
+      encode: { itemName: 'label', value: 'count' },
+      avoidLabelOverlap: false,
+      label: { show: false, position: 'center' },
+      labelLine: { show: false },
+      emphasis: { show: false },
+      tooltip: { trigger: 'item' },
+    },
+    {
+      name: 'Transaction Mediums',
+      datasetIndex: DATASET_TRANSACTION_MEDIUM_INDEX,
+      type: 'pie',
+      radius: '100%',
+      center: ['50%', '50%'],
+      top: '60%',
       height: '35%',
       left: '80%',
       right: '5%',
@@ -354,7 +452,6 @@ const chartOptions = computed(() => ({
 
 <style scoped>
 .chart {
-  min-height: 40em;
-  height: 100%;
+  height: 40em;
 }
 </style>

@@ -31,6 +31,14 @@ Admin Interface will be available at `http://localhost:8080/admin/`
     # U.S. Web Design Standards
     docker exec -it bep_app python manage.py loaddata  admin_interface_theme_uswds.json
 
+### Import existing db
+
+    docker cp bep.sql bep_db:/bep.sql
+    docker exec -it bep_db bash
+
+        psql -U bep -X bep < /bep.sql
+        exit
+
 ### Create your superuser
 
     docker exec -it bep_app python manage.py createsuperuser

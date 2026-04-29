@@ -21,10 +21,10 @@ const object = await useBooksStore().getById(props.objectId)
     <div class="modal-title">
       <figure>
         <blockquote class="blockquote">
-          <h1 v-if="object.uniform_title" v-html="object.uniform_title" />
-          <h1 v-if="!object.uniform_title" v-html="object.title" />
+          <h1 v-if="object.full_title" v-html="object.full_title" />
+          <h1 v-if="!object.full_title" v-html="object.title" />
         </blockquote>
-        <figcaption class="blockquote-footer" v-if="object.title && object.uniform_title" v-html="object.title" />
+        <figcaption class="blockquote-footer" v-if="object.title && object.full_title" v-html="object.title" />
         <figcaption class="blockquote-footer" v-for="variant_title in object.variant_titles" v-html="variant_title" />
       </figure>
     </div>

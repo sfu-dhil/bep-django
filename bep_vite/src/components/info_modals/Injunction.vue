@@ -23,7 +23,7 @@ const object = await useInjunctionStore().getById(props.objectId)
         <blockquote class="blockquote">
           <h1 v-html="object.title" />
         </blockquote>
-        <figcaption class="blockquote-footer" v-if="object.uniform_title" v-html="object.uniform_title" />
+        <figcaption class="blockquote-footer" v-if="object.full_title" v-html="object.full_title" />
         <figcaption class="blockquote-footer" v-for="variant_title in object.variant_titles" v-html="variant_title" />
       </figure>
     </div>

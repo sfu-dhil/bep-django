@@ -9,7 +9,8 @@
             <details id="transaction-details" class="card-body" open>
                 <summary class="card-title h5">Transaction Details <hr class="mt-4" /></summary>
                 <dl class="row gy-3 m-0 row-cols-1 row-cols-lg-2">
-                    {% include '_partials/item_detail_info_modals.html' with label="Categories" object_type="transaction_category" items=transaction_categories %}
+                    {% include '_partials/item_detail_info_modals.html' with label="Actions" object_type="transaction_action" items=transaction_actions %}
+                    {% include '_partials/item_detail_info_modals.html' with label="Mediums" object_type="transaction_medium" items=transaction_mediums %}
                     {% if object.value %}
                         {% include '_partials/item_detail.html' with label="Transaction Value" value=object.get_value_lsd_str %}
                     {% endif %}
@@ -18,11 +19,7 @@
                     {% endif %}
                     {% include '_partials/item_detail.html' with label="Copies" value=object.copies %}
                     {% include '_partials/item_detail.html' with label="Page" value=object.page %}
-                    {% if object.written_date %}
-                        {% include '_partials/item_detail.html' with label="Date" value=object.written_date %}
-                    {% elif object.start_date %}
-                        {% include '_partials/item_detail.html' with label="Date" value=object.start_date|date:"Y" %}
-                    {% endif %}
+                    {% include '_partials/item_detail.html' with label="Date" value=object.date %}
                     {% include '_partials/item_detail.html' with label="Location" value=object.location %}
                     {% include '_partials/item_detail.html' with label="Transcription" value=object.transcription %}
                     {% include '_partials/item_detail.html' with label="Modern Transcription" value=object.modern_transcription %}

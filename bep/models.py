@@ -5,10 +5,27 @@ from django.contrib.gis.db.models.fields import MultiPolygonField, PointField
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.search import SearchVector, SearchVectorField
 from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.forms import SimpleArrayField
 from django.utils.html import strip_tags
 from django.utils.safestring import mark_safe
 from html import unescape
 from math import floor
+
+class SimpleArrayFieldSelect2Fix(SimpleArrayField):
+    def prepare_value(self, value):
+        if isinstance(value, list):
+            return self.delimiter.join(
+                str(f'"{self.base_field.prepare_value(v)}"') for v in value
+            )
+        return value
+
+class VariantNamesArrayField(ArrayField):
+    def formfield(self, **kwargs):
+        defaults = {
+            'form_class': SimpleArrayFieldSelect2Fix,
+        }
+        defaults.update(kwargs)
+        return super().formfield(**defaults)
 
 # abstract Models
 class AbstractImage(models.Model):
@@ -76,6 +93,39 @@ class Archive(models.Model):
     def __str__(self):
         return mark_safe(f"{self.label}")
 
+class TransactionAction(models.Model):
+    label = models.CharField(unique=True)
+    description = models.TextField(blank=True)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    # relationships
+    # one-to-many transactions via Transaction Model
+
+    class Meta:
+        db_table = 'bep_transaction_action'
+
+    def __str__(self):
+        return mark_safe(f"{self.label}")
+
+class TransactionMedium(models.Model):
+    label = models.CharField(unique=True)
+    description = models.TextField(blank=True)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    # relationships
+    # many-to-many transactions via Transaction Model
+
+    class Meta:
+        db_table = 'bep_transaction_medium'
+
+    def __str__(self):
+        return mark_safe(f"{self.label}")
+
+# TODO: remove after confirming that `transaction_actions` and `transaction_mediums` are okay
 class TransactionCategory(models.Model):
     label = models.CharField(unique=True)
     description = models.TextField(blank=True)
@@ -404,8 +454,8 @@ class ManuscriptSource(models.Model):
 
 class Book(models.Model):
     title = models.CharField(blank=True)
-    uniform_title = models.CharField(blank=True)
-    variant_titles = ArrayField(models.CharField(), blank=True)
+    full_title = models.TextField(blank=True)
+    variant_titles = VariantNamesArrayField(models.CharField(), default=list, blank=True)
     author = models.CharField(blank=True)
     imprint = models.TextField(blank=True)
     variant_imprint = models.TextField(blank=True, verbose_name="Imprint, Modern English")
@@ -421,7 +471,7 @@ class Book(models.Model):
 
     search_vector = models.GeneratedField(
         expression=SearchVector("title", config="english", weight="A") +
-            SearchVector("uniform_title", config="english", weight="B") +
+            SearchVector("full_title", config="english", weight="B") +
             SearchVector("author", config="english", weight="A") +
             SearchVector("imprint", config="english", weight="C") +
             SearchVector("variant_imprint", config="english", weight="D") +
@@ -458,8 +508,8 @@ class Book(models.Model):
         ]
 
     def __str__(self):
-        if self.uniform_title:
-            return mark_safe(self.uniform_title)
+        if self.full_title:
+            return mark_safe(self.full_title)
         elif self.title:
             return mark_safe(self.title)
         elif self.description:
@@ -467,11 +517,13 @@ class Book(models.Model):
         return 'No description provided'
 
 class Holding(models.Model):
+    reference_number = models.CharField(blank=True)
     description = models.TextField(blank=True)
     notes = models.TextField(blank=True)
+    # TODO: remove start_date
     start_date = models.DateField(null=True, blank=True)
-    end_date = models.DateField(null=True, blank=True)
-    written_date = models.CharField(blank=True)
+    sort_year = models.IntegerField(null=True, blank=True, help_text='Enter the year for sorting. For "unknown" dates leave blank (do not use zero or a placeholder). For uncertain dates (ex: "c. 1560-61") or ranges (ex: "1560-70") use the earliest year (ex: 1560).')
+    date = models.CharField(blank=True)
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -528,12 +580,13 @@ class HoldingImage(AbstractImage):
 
 class Injunction(models.Model):
     title = models.CharField()
-    uniform_title = models.TextField(blank=True)
-    variant_titles = ArrayField(models.CharField(), blank=True)
+    full_title = models.TextField(blank=True)
+    variant_titles = VariantNamesArrayField(models.CharField(), default=list, blank=True)
     author = models.CharField(blank=True)
     imprint = models.TextField(blank=True)
     variant_imprint = models.TextField(blank=True, verbose_name="Imprint, Modern English")
     estc = models.CharField(blank=True)
+    sort_year = models.IntegerField(null=True, blank=True, help_text='Enter the year for sorting. For "unknown" dates leave blank (do not use zero or a placeholder). For uncertain dates (ex: "c. 1560-61") or ranges (ex: "1560-70") use the earliest year (ex: 1560).')
     date = models.CharField(blank=True)
     physical_description = models.TextField(blank=True)
     transcription = models.TextField(blank=True)
@@ -596,9 +649,11 @@ class Inventory(models.Model):
     modifications = models.TextField()
     description = models.TextField(blank=True)
     notes = models.TextField(blank=True)
+    # TODO: remove start_date, end_date
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
-    written_date = models.CharField(blank=True)
+    sort_year = models.IntegerField(null=True, blank=True, help_text='Enter the year for sorting. For "unknown" dates leave blank (do not use zero or a placeholder). For uncertain dates (ex: "c. 1560-61") or ranges (ex: "1560-70") use the earliest year (ex: 1560).')
+    date = models.CharField(blank=True)
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -677,6 +732,11 @@ class InventoryImage(AbstractImage):
 class Transaction(models.Model):
     value = models.IntegerField(null=True, blank=True)
     shipping = models.IntegerField(null=True, blank=True)
+    is_expense = models.BooleanField(
+        verbose_name='Is expense?',
+        default=True,
+        help_text='Check for expense/cost/disposal/etc or uncheck for income/dotation/etc',
+    )
     copies = models.IntegerField(null=True, blank=True)
     location = models.CharField(blank=True)
     page = models.CharField(blank=True)
@@ -684,9 +744,11 @@ class Transaction(models.Model):
     modern_transcription = models.TextField(blank=True, verbose_name="Modern English")
     public_notes = models.TextField(blank=True)
     notes = models.TextField(blank=True)
+    # TODO: remove start_date, end_date
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
-    written_date = models.CharField(blank=True)
+    sort_year = models.IntegerField(null=True, blank=True, help_text='Enter the year for sorting. For "unknown" dates leave blank (do not use zero or a placeholder). For uncertain dates (ex: "c. 1560-61") or ranges (ex: "1560-70") use the earliest year (ex: 1560).')
+    date = models.CharField(blank=True)
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -725,7 +787,17 @@ class Transaction(models.Model):
         related_name='transactions',
         on_delete=models.SET_NULL,
     )
-
+    transaction_actions = models.ManyToManyField(
+        TransactionAction,
+        blank=True,
+        related_name='transactions',
+    )
+    transaction_mediums = models.ManyToManyField(
+        TransactionMedium,
+        blank=True,
+        related_name='transactions',
+    )
+    # TODO: remove after confirming that `transaction_actions` and `transaction_mediums` are okay
     transaction_categories = models.ManyToManyField(
         TransactionCategory,
         blank=True,

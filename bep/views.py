@@ -56,11 +56,13 @@ class TransactionsView(ListView):
             if data.get('shipping_l_max') or data.get('shipping_s_max') or data.get('shipping_d_max'):
                 queryset = queryset.filter(shipping__lte=Transaction.get_total_from_lsd(data.get('shipping_l_max'), data.get('shipping_s_max'), data.get('shipping_d_max')))
             if data.get('year_min'):
-                queryset = queryset.filter(start_date__year__gte=data.get('year_min'))
+                queryset = queryset.filter(sort_year__gte=data.get('year_min'))
             if data.get('year_max'):
-                queryset = queryset.filter(start_date__year__lte=data.get('year_max'))
-            if data.get('transaction_category'):
-                queryset = queryset.filter(transaction_categories=data.get('transaction_category'))
+                queryset = queryset.filter(sort_year__lte=data.get('year_max'))
+            if data.get('transaction_action'):
+                queryset = queryset.filter(transaction_actions=data.get('transaction_action'))
+            if data.get('transaction_medium'):
+                queryset = queryset.filter(transaction_mediums=data.get('transaction_medium'))
             if data.get('monarch'):
                 queryset = queryset.filter(monarch=data.get('monarch'))
             if data.get('diocese'):
@@ -90,7 +92,8 @@ class TransactionView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['books'] = self.object.books.all()
-        context['transaction_categories'] = self.object.transaction_categories.all()
+        context['transaction_actions'] = self.object.transaction_actions.all()
+        context['transaction_mediums'] = self.object.transaction_mediums.all()
         context['manuscript_source'] = self.object.manuscript_source
         context['print_source'] = self.object.print_source
         context['injunction'] = self.object.injunction

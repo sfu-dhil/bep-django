@@ -3,7 +3,7 @@ from django_select2.forms import Select2Widget
 
 from .models import Transaction, Monarch, \
     Parish, Diocese, County, Book, \
-    TransactionCategory, ManuscriptSource, PrintSource, Injunction
+    TransactionAction, TransactionMedium, ManuscriptSource, PrintSource, Injunction
 
 class TransactionAdminForm(forms.ModelForm):
     value_l = forms.IntegerField(min_value=0, initial=0, required=True, label="Cost in Pounds")
@@ -65,11 +65,18 @@ class TransactionSearchForm(forms.Form):
     shipping_d_max = forms.IntegerField(min_value=0, required=False, label='Pence')
     year_min = forms.IntegerField(min_value=0, required=False)
     year_max = forms.IntegerField(min_value=0, required=False)
-    transaction_category = forms.ModelChoiceField(
+    transaction_action = forms.ModelChoiceField(
         widget=Select2Widget(attrs={
             'data-theme': 'bootstrap-5',
         }),
-        queryset=TransactionCategory.objects.order_by('label'),
+        queryset=TransactionAction.objects.order_by('label'),
+        required=False,
+    )
+    transaction_medium = forms.ModelChoiceField(
+        widget=Select2Widget(attrs={
+            'data-theme': 'bootstrap-5',
+        }),
+        queryset=TransactionMedium.objects.order_by('label'),
         required=False,
     )
     monarch = forms.ModelChoiceField(

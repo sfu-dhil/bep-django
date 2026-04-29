@@ -10,7 +10,7 @@ export const filterByArchdeaconryId = (id) => _filterByObjectId('archdeaconry', 
 export const filterByParishId = (id) => _filterByObjectId('parish', id)
 
 export const formattedDateRange = (dates) => {
-  dates = dates.filter((d) => d !== null && d != '1000-01-01' && d != '1500-01-01')
+  dates = dates.filter((d) => d !== null)
   if (dates.length === 0) { return null }
 
   const startDate = new Date(Math.min(...dates))
@@ -24,15 +24,27 @@ export const formattedDateRange = (dates) => {
   }
 }
 
+export const formattedYearRange = (years) => {
+  years = years.filter((d) => d !== null)
+  if (years.length === 0) { return null }
+
+  const startDate = new Date(Math.min(...years), 0)
+  const endDate = new Date(Math.max(...years), 0)
+  if (startDate.getFullYear() != endDate.getFullYear()) {
+    return `${startDate.toLocaleString('en-CA', { year: 'numeric' })}-${endDate.toLocaleString('en-CA', { year: 'numeric' })}`
+  } else {
+    return `${startDate.toLocaleString('en-CA', { year: 'numeric' })}`
+  }
+}
+
 
 export const getLsd = (totalPence) => {
   if (!totalPence) { totalPence = 0 }
-  return { l: Math.floor(totalPence/240), s: Math.floor((totalPence%240)/12), d: Math.floor((totalPence % 240) % 12) }
+  return { l: Math.floor(Math.abs(totalPence)/240), s: Math.floor((Math.abs(totalPence) % 240) / 12), d: Math.floor((Math.abs(totalPence) % 240) % 12) }
 }
-export const getLsdString = (totalPence, zeroLabel) => {
-  zeroLabel = zeroLabel || '0d'
+export const getLsdString = (totalPence) => {
   const {l, s, d} = getLsd(totalPence)
-  if (l === 0 && s === 0 && d === 0) { return zeroLabel }
+  if (l === 0 && s === 0 && d === 0) { return '0d' }
   const lsdParts = []
   if (l > 0) { lsdParts.push(`£${l}`) }
   if (s > 0) { lsdParts.push(`${s}s`) }

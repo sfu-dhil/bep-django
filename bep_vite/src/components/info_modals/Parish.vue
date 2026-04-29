@@ -7,7 +7,7 @@ import {
   useParishHoldingsStore,
 } from '../../stores/data.js'
 import { useInfoModalStore } from '../../stores/info_modal.js'
-import { formattedDateRange } from '../../helpers/utils.js'
+import { formattedYearRange } from '../../helpers/utils.js'
 import ObjectLinkList from './_ObjectLinkList.vue'
 import ObjectModalLinkList from './_ObjectModalLinkList.vue'
 import BasicDetail from './_BasicDetail.vue'
@@ -25,10 +25,10 @@ const inventories = await useParishInventoriesStore().getByParishId(props.object
 const transactions = await useParishTransactionsStore().getByParishId(props.objectId)
 const holdings = await useParishHoldingsStore().getByParishId(props.objectId)
 
-const getDates = (objects) => objects.map((o) => o.start_date).filter((o) => o != null).map((date) => new Date(date))
-const inventoriesDateRange = computed(() => formattedDateRange(getDates(inventories)))
-const transactionsDateRange = computed(() => formattedDateRange(getDates(transactions)))
-const holdingsDateRange = computed(() => formattedDateRange(getDates(holdings)))
+const getYears = (objects) => objects.map((o) => o.sort_year).filter((o) => o != null)
+const inventoriesYearRange = computed(() => formattedYearRange(getYears(inventories)))
+const transactionsYearRange = computed(() => formattedYearRange(getYears(transactions)))
+const holdingsYearRange = computed(() => formattedYearRange(getYears(holdings)))
 </script>
 
 <template>
@@ -48,9 +48,9 @@ const holdingsDateRange = computed(() => formattedDateRange(getDates(holdings)))
 
     <dl class="row gy-3 m-0 row-cols-1 row-cols-lg-2">
       <LinksList :links="object.links" v-if="object.links.length > 0" />
-      <BasicDetail :label="`${transactions.length} Transactions`" :value="`From ${transactionsDateRange}`" v-if="transactionsDateRange" />
-      <BasicDetail :label="`${inventories.length} Inventories`" :value="`From ${inventoriesDateRange}`" v-if="inventoriesDateRange" />
-      <BasicDetail :label="`${holdings.length} Surviving Texts`" :value="`From ${holdingsDateRange}`" v-if="holdingsDateRange" />
+      <BasicDetail :label="`${transactions.length} Transactions`" :value="`From ${transactionsYearRange}`" v-if="transactionsYearRange" />
+      <BasicDetail :label="`${inventories.length} Inventories`" :value="`From ${inventoriesYearRange}`" v-if="inventoriesYearRange" />
+      <BasicDetail :label="`${holdings.length} Surviving Texts`" :value="`From ${holdingsYearRange}`" v-if="holdingsYearRange" />
     </dl>
   </div>
   <div class="modal-footer">

@@ -10,12 +10,7 @@
                 <summary class="card-title h5">Inventory Details <hr class="mt-4" /></summary>
                 <dl class="row gy-3 m-0 row-cols-1 row-cols-lg-2">
                     {% include '_partials/item_detail.html' with label="Page Number" value=object.page_number %}
-                    {% if object.written_date %}
-                        {% include '_partials/item_detail.html' with label="Date" value=object.written_date %}
-                    {% elif object.start_date %}
-                        {% include '_partials/item_detail.html' with label="Date" value=object.start_date|date:"Y" %}
-                    {% endif %}
-
+                    {% include '_partials/item_detail.html' with label="Date" value=object.date %}
                     {% include '_partials/item_detail.html' with label="Transcription" value=object.transcription %}
                     {% include '_partials/item_detail.html' with label="Modifications" value=object.modifications %}
                     {% include '_partials/item_detail.html' with label="Description" value=object.description %}

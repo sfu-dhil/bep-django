@@ -6,12 +6,11 @@ from tinymce.widgets import TinyMCE
 from modelclone import ClonableModelAdmin
 from leaflet.admin import LeafletGeoAdmin
 
-from .widgets import Select2TagArrayWidget
+from .widgets import Select2TagArrayWidget, Select2TagWithCommaArrayWidget
 from .models import Archdeaconry, Archive, Book, Holding, ManuscriptSource, Parish, \
     Injunction, Transaction, Inventory, County, Town, Diocese, InventoryImage, HoldingImage, \
-    Monarch, Nation, Province, PrintSource, Format, SourceCategory, TransactionCategory
+    Monarch, Nation, Province, PrintSource, Format, SourceCategory, TransactionAction, TransactionMedium
 from .forms import TransactionAdminForm
-
 
 # Inlines (used by admin panel items)
 class ReadOnlyTabularInline(TabularInline):
@@ -77,7 +76,7 @@ class InjunctionReadOnlyInline(ReadOnlyTabularInline):
 
 
 class TransactionReadOnlyInline(ReadOnlyTabularInline):
-    fields = ['written_date', '_value', 'copies', 'location']
+    fields = ['date', '_value', 'copies', 'location']
     ordering = ['id']
     readonly_fields = ['_value']
     model = Transaction
@@ -105,18 +104,18 @@ class InventoryReadOnlyInline(ReadOnlyTabularInline):
     _modifications.short_description = 'Modifications'
 
 class BookReadOnlyInline(ReadOnlyTabularInline):
-    fields = ['_title', '_uniform_title', 'author', '_imprint', 'date']
+    fields = ['_title', '_full_title', 'author', '_imprint', 'date']
     ordering = ['title']
-    readonly_fields = ['_title', '_uniform_title', '_imprint']
+    readonly_fields = ['_title', '_full_title', '_imprint']
     model = Book
 
     def _title(self, obj):
         return mark_safe(obj.title)
     _title.short_description = 'Title'
 
-    def _uniform_title(self, obj):
-        return mark_safe(obj.uniform_title)
-    _uniform_title.short_description = 'Uniform Title'
+    def _full_title(self, obj):
+        return mark_safe(obj.full_title)
+    _full_title.short_description = 'Full Title'
 
     def _imprint(self, obj):
         return mark_safe(obj.imprint)
@@ -141,8 +140,12 @@ class BookM2MHoldingReadOnlyInline(ReadOnlyTabularInline):
     model = Book.holdings.through
     verbose_name = 'surviving text'
 
-class TransactionCategoryM2MTransactionReadOnlyInline(ReadOnlyTabularInline):
-    model = TransactionCategory.transactions.through
+class TransactionActionM2MTransactionReadOnlyInline(ReadOnlyTabularInline):
+    model = TransactionAction.transactions.through
+    verbose_name = 'transaction'
+
+class TransactionMediumM2MTransactionReadOnlyInline(ReadOnlyTabularInline):
+    model = TransactionMedium.transactions.through
     verbose_name = 'transaction'
 
 # Image Inlines
@@ -178,7 +181,7 @@ class BepAdminDefaults(ModelAdmin):
                 'data-placeholder': 'Click to add one or more links',
             })
         elif db_field.name == 'variant_titles':
-            kwargs['widget'] = Select2TagArrayWidget(attrs={
+            kwargs['widget'] = Select2TagWithCommaArrayWidget(attrs={
                 'data-placeholder': 'Click to add one or more variant title',
             })
         return super().formfield_for_dbfield(db_field, **kwargs)
@@ -211,8 +214,8 @@ class ArchiveAdmin(SimpleTermModelDefaults):
 
 @admin.register(Book)
 class BookAdmin(BepAdminDefaults):
-    list_display = ['_title', '_uniform_title', 'author', '_imprint', 'date', 'monarch']
-    search_fields = ['title', 'uniform_title', 'author', 'imprint', 'date']
+    list_display = ['_title', '_full_title', 'author', '_imprint', 'date', 'monarch']
+    search_fields = ['title', 'full_title', 'author', 'imprint', 'date']
     ordering = ['title']
 
     autocomplete_fields = ['format', 'monarch']
@@ -227,10 +230,10 @@ class BookAdmin(BepAdminDefaults):
     _title.short_description = 'Title'
     _title.admin_order_field = 'title'
 
-    def _uniform_title(self, obj):
-        return obj.uniform_title if len(obj.uniform_title) <= 100 else obj.uniform_title[:100].rsplit(' ', 1)[0] + '...'
-    _uniform_title.short_description = 'Uniform Title'
-    _uniform_title.admin_order_field = 'uniform_title'
+    def _full_title(self, obj):
+        return obj.full_title if len(obj.full_title) <= 100 else obj.full_title[:100].rsplit(' ', 1)[0] + '...'
+    _full_title.short_description = 'Full Title'
+    _full_title.admin_order_field = 'full_title'
 
     def _imprint(self, obj):
         return mark_safe(obj.imprint)
@@ -260,8 +263,8 @@ class DioceseAdmin(SimpleTermModelDefaults, LeafletGeoAdmin):
 
 @admin.register(Injunction)
 class InjunctionAdmin(BepAdminDefaults):
-    list_display = ['_title', 'date', 'monarch', '_transcription']
-    search_fields = ['title', 'date', 'transcription']
+    list_display = ['_title', 'sort_year', 'date', 'monarch', '_transcription']
+    search_fields = ['title', 'sort_year', 'date', 'transcription']
     ordering = ['title']
 
     autocomplete_fields = ['nation', 'diocese', 'province', 'archdeaconry', 'monarch']
@@ -283,9 +286,11 @@ class InjunctionAdmin(BepAdminDefaults):
 
 @admin.register(Inventory)
 class InventoryAdmin(BepAdminDefaults):
-    list_display = ['_id', '_date', '_transcription', 'parish', 'print_source', '_books']
-    search_fields = ['id', 'transcription']
+    list_display = ['_id', 'sort_year', 'date', '_transcription', 'parish', 'print_source', '_books']
+    search_fields = ['id', 'sort_year', 'date', 'transcription']
     ordering = ['id']
+    # TODO: remove
+    readonly_fields = ['start_date', 'end_date']
 
     autocomplete_fields = ['manuscript_source', 'print_source', 'parish', 'monarch', 'injunction', 'books']
     inlines = [
@@ -301,17 +306,6 @@ class InventoryAdmin(BepAdminDefaults):
         return f"{obj}"
     _transcription.short_description = 'Transcription'
     _transcription.admin_order_field = 'transcription'
-
-    def _date(self, obj):
-        if obj.start_date and obj.end_date:
-            return f"{obj.start_date}-{obj.end_date}"
-        elif obj.start_date:
-            return f"{obj.start_date}"
-        elif obj.end_date:
-            return f"{obj.end_date}"
-        return None
-    _date.short_description = 'Date'
-    _date.admin_order_field = 'start_date'
 
     def _books(self, obj):
         return obj.books.count()
@@ -329,6 +323,8 @@ class ManuscriptSourceAdmin(SimpleTermModelDefaults):
 
 @admin.register(Monarch)
 class MonarchAdmin(SimpleTermModelDefaults):
+    list_display = ['label', 'start_date', 'end_date', '_description']
+    ordering = ['start_date']
     inlines = [
         TransactionReadOnlyInline,
         InjunctionReadOnlyInline,
@@ -392,14 +388,17 @@ class TransactionAdmin(ClonableModelAdmin, BepAdminDefaults):
     list_per_page = 10
     clone_verbose_name = 'Create new copy of transaction'
     form = TransactionAdminForm
-    list_filter = ['transaction_categories', 'parish']
-    list_display = ['_id', '_date', 'manuscript_source', '_value', '_books', 'parish', '_modern_transcription']
-    search_fields = ['id', 'written_date', 'value', 'modern_transcription']
+    list_filter = ['transaction_actions', 'transaction_mediums', 'parish']
+    list_display = ['_id', 'sort_year', 'date', 'manuscript_source', '_value', '_books', 'parish', '_modern_transcription']
+    search_fields = ['id', 'sort_year', 'date', 'value', 'modern_transcription']
     ordering = ['id']
+    # TODO: remove start_date, end_date, transaction_categories
+    readonly_fields = ['start_date', 'end_date', 'transaction_categories']
 
-    autocomplete_fields = ['parish', 'manuscript_source', 'print_source', 'injunction', 'monarch', 'transaction_categories', 'books']
+    autocomplete_fields = ['parish', 'manuscript_source', 'print_source', 'injunction', 'monarch', 'transaction_actions', 'transaction_mediums', 'books']
 
     fields = [
+        'is_expense',
         ('value_l', 'value_s', 'value_d'),
         ('shipping_l', 'shipping_s', 'shipping_d'),
         'copies',
@@ -411,13 +410,16 @@ class TransactionAdmin(ClonableModelAdmin, BepAdminDefaults):
         'notes',
         'start_date',
         'end_date',
-        'written_date',
+        'sort_year',
+        'date',
         'parish',
         'manuscript_source',
         'print_source',
         'injunction',
         'monarch',
         'transaction_categories',
+        'transaction_actions',
+        'transaction_mediums',
         'books',
     ]
 
@@ -425,16 +427,6 @@ class TransactionAdmin(ClonableModelAdmin, BepAdminDefaults):
         return f"{obj.id:05d}"
     _id.short_description = 'ID'
     _id.admin_order_field = 'id'
-
-    def _date(self, obj):
-        if obj.written_date:
-            return mark_safe(obj.written_date)
-        if obj.start_date and obj.end_date:
-            return f"{obj.start_date}-{obj.end_date}"
-        elif obj.start_date:
-            return f"{obj.start_date}"
-        return 'No date'
-    _date.short_description = 'Date'
 
     def _value(self, obj):
         return Transaction.get_lsd_str(obj.value)
@@ -453,23 +445,15 @@ class TransactionAdmin(ClonableModelAdmin, BepAdminDefaults):
 
 @admin.register(Holding)
 class HoldingAdmin(BepAdminDefaults):
-    list_display = ['_date', 'parish', '_books']
-    search_fields = ['start_date', 'end_date', 'written_date', 'description']
-    ordering = ['start_date']
+    list_display = ['sort_year', 'date', 'parish', '_books']
+    search_fields = ['sort_year', 'date', 'description']
+    ordering = ['sort_year']
     autocomplete_fields = ['parish', 'archive', 'books']
     inlines = [
         HoldingImageInline,
     ]
-
-    def _date(self, obj):
-        if obj.start_date and obj.end_date:
-            return f"{obj.start_date}-{obj.end_date}"
-        elif obj.start_date:
-            return f"{obj.start_date}"
-        elif obj.written_date:
-            return obj.written_date
-        return 'No date'
-    _date.short_description = 'Date & Source'
+    # TODO: remove
+    readonly_fields = ['start_date']
 
     def _modern_transcription(self, obj):
         return mark_safe(obj.modern_transcription)
@@ -495,8 +479,14 @@ class SourceCategoryAdmin(SimpleTermModelDefaults):
         PrintSourceReadOnlyInline,
     ]
 
-@admin.register(TransactionCategory)
-class TransactionCategoryAdmin(SimpleTermModelDefaults):
+@admin.register(TransactionAction)
+class TransactionActionAdmin(SimpleTermModelDefaults):
     inlines = [
-        TransactionCategoryM2MTransactionReadOnlyInline,
+        TransactionActionM2MTransactionReadOnlyInline,
+    ]
+
+@admin.register(TransactionMedium)
+class TransactionMediumAdmin(SimpleTermModelDefaults):
+    inlines = [
+        TransactionMediumM2MTransactionReadOnlyInline,
     ]

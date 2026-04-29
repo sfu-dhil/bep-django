@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { useTransactionMediumsStore } from '../../stores/data.js'
 import { useInfoModalStore } from '../../stores/info_modal.js'
 import ObjectLinkList from './_ObjectLinkList.vue'
 import ObjectModalLinkList from './_ObjectModalLinkList.vue'
@@ -8,15 +8,12 @@ import LinksList from './_LinksList.vue'
 
 const props = defineProps({
   objectId: {
-    type: [Number, null],
+    type: Number,
     required: true,
   },
-  params: {
-    type: Object,
-    required: true,
-  }
 })
-const yearLabel = props.objectId === null ? 'Unknown Year' : `Year ${props.objectId}`
+
+const object = await useTransactionMediumsStore().getById(props.objectId)
 </script>
 
 <template>
@@ -24,21 +21,18 @@ const yearLabel = props.objectId === null ? 'Unknown Year' : `Year ${props.objec
     <div class="modal-title">
       <figure>
         <blockquote class="blockquote">
-          <h1 v-html="yearLabel" />
+          <h1 v-html="object.label" />
         </blockquote>
       </figure>
     </div>
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
   </div>
   <div class="modal-body py-0">
-    <dl class="row gy-3 m-0 row-cols-1 row-cols-lg-2">
-      <ObjectModalLinkList label="Injunctions" modal-type="injunction" :objects="params.injunctions" v-if="params.injunctions.length > 0" objectLabelProperty="title" />
-      <ObjectLinkList label="Transactions" :link-function="(id) => `/transactions/${id}`" :objects="params.transactions" v-if="params.transactions.length > 0" objectLabelProperty="modern_transcription" />
-      <ObjectLinkList label="Inventories" :link-function="(id) => `/inventories/${id}`" :objects="params.inventories" v-if="params.inventories.length > 0" objectLabelProperty="modifications" />
-    </dl>
+    <div class="pt-3" v-if="object.description" v-html="object.description" />
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-secondary me-auto" v-if="useInfoModalStore().hasHistory()" @click="() => useInfoModalStore().showPrevious()">Back</button>
+    <a :href="`/transactions?transaction_medium=${object.id}`" class="btn btn-primary ms-auto">View All Transactions</a>
   </div>
 </template>
 
