@@ -508,10 +508,10 @@ class Book(models.Model):
         ]
 
     def __str__(self):
-        if self.full_title:
-            return mark_safe(self.full_title)
-        elif self.title:
+        if self.title:
             return mark_safe(self.title)
+        elif self.full_title:
+            return mark_safe(self.full_title)
         elif self.description:
             return mark_safe(self.description)
         return 'No description provided'
@@ -827,7 +827,7 @@ class Transaction(models.Model):
         ]
 
     def __str__(self):
-        return f'{self.id:05d}'
+        return f'{self.id:05d}' if self.id else ''
 
     def get_value_lsd_str(self):
         return Transaction.get_lsd_short_str(self.value)
