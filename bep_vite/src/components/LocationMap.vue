@@ -339,7 +339,7 @@ watch(selectedParishId, (newValue, oldValue) => {
       <ol-rotate-control :autoHide="true" />
       <ol-full-screen-control />
       <ol-scale-line-control />
-      <ol-layerswitcher-control
+      <ol-layer-switcher-control
         :collapsed="false" :reordering="false" :trash="false" :noScroll="true"
         :displayInLayerSwitcher="layerSwitcherDisplayLayer" :onchangeCheck="layerSwitcherChange"
       />
