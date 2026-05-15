@@ -24,9 +24,8 @@ const props = defineProps({
 // setup onload data
 const monarchs = await useMonarchsStore().getAll()
 const injunctionsByYearMap = [...await useInjunctionStore().getAll()].reduce((result, injunction) => {
-  const axis = injunction.sort_year ? `${injunction.sort_year}` : 'Unknown'
-  if (!result.has(axis)) { result.set(axis, []) }
-  result.get(axis).push(injunction)
+  if (!result.has(injunction.sort_year)) { result.set(injunction.sort_year, []) }
+  result.get(injunction.sort_year).push(injunction)
   return result
 }, new Map())
 const parishMap = new Map()
@@ -61,7 +60,7 @@ for (let index = 0; index < props.parishIds.length; ++index) {
 }
 
 // gets all unique years from both sets
-const yearKeys = [...new Set([...transactionsByYearMap.keys(), ...injunctionsByYearMap.keys()])].filter((year) => year !== null).map((year) => parseInt(year))
+const yearKeys = [...new Set([...transactionsByYearMap.keys(), ...injunctionsByYearMap.keys()])].filter((year) => year !== null)
 const yearMin = Math.min(...yearKeys)
 const yearMax = Math.max(...yearKeys)
 const zoomStart = transactionsByYearMap.get(null) ? 'Unknown' : Math.min(...transactionsByYearMap.keys()) || yearMin
@@ -260,8 +259,8 @@ const chartOptions = computed(() => ({
   xAxis: X_AXIS_LIST,
   yAxis: Y_AXIS_LIST,
   dataZoom: [
-    { type: 'slider', startValue: zoomStart, endValue: zoomEnd, xAxisIndex: [TOP_CHART_X_AXIS_INDEX, BOTTOM_CHART_X_AXIS_INDEX] },
-    { type: 'inside', startValue: zoomStart, endValue: zoomEnd, xAxisIndex: [TOP_CHART_X_AXIS_INDEX, BOTTOM_CHART_X_AXIS_INDEX] },
+    { type: 'slider', startValue: `${zoomStart}`, endValue: `${zoomEnd}`, xAxisIndex: [TOP_CHART_X_AXIS_INDEX, BOTTOM_CHART_X_AXIS_INDEX] },
+    { type: 'inside', startValue: `${zoomStart}`, endValue: `${zoomEnd}`, xAxisIndex: [TOP_CHART_X_AXIS_INDEX, BOTTOM_CHART_X_AXIS_INDEX] },
   ],
   dataset: DATASET_LIST,
   legend: {
