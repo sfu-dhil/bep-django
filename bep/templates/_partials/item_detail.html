@@ -1,5 +1,5 @@
 {% if value %}
-    <dt class="col col-lg-{{ col_label|default:2 }} px-0">{{ label }}</dt>
+    <dt class="col col-lg-{{ col_label|default:2 }} px-0">{{ label }}{% if show_date_warning %} {% include '_partials/date_info_warning_btn.html' %}{% endif %}</dt>
     <dd class="col col-lg-{{ col_value|default:10 }} px-0">
         {{ value|safe }}
     </dd>

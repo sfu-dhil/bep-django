@@ -116,6 +116,7 @@
                                         {% if object.shipping %}
                                             {% include '_partials/search_detail.html' with label="Shipping Value" value=object.get_shipping_lsd_str %}
                                         {% endif %}
+                                        {% include '_partials/search_detail.html' with label="Date" value=object.date show_date_warning=True date_warning_override=object.parish.calendar_year_help_text_override %}
                                         {% include '_partials/search_detail.html' with label="Location" value=object.location value_headline=object.location_headline %}
                                         {% include '_partials/search_detail.html' with label="Transcription" value=object.transcription value_headline=object.transcription_headline %}
                                         {% include '_partials/search_detail.html' with label="Modern Transcription" value=object.modern_transcription value_headline=object.modern_transcription_headline %}

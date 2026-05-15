@@ -355,6 +355,9 @@ class Parish(models.Model):
     geom_point = PointField(verbose_name='Geo Point', geography=True, null=True, blank=True)
     address = models.TextField(blank=True)
     links = ArrayField(models.URLField(max_length=None), blank=True)
+    calendar_year_help_text_override = models.TextField(null=True, blank=True,
+        help_text='Enter the help text describing the Parish\'s calendar year (if different from the default March 25 - March 24)'
+    )
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)

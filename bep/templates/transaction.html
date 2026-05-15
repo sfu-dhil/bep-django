@@ -19,7 +19,7 @@
                     {% endif %}
                     {% include '_partials/item_detail.html' with label="Copies" value=object.copies %}
                     {% include '_partials/item_detail.html' with label="Page" value=object.page %}
-                    {% include '_partials/item_detail.html' with label="Date" value=object.date %}
+                    {% include '_partials/item_detail.html' with label="Date" value=object.date show_date_warning=True date_warning_override=object.parish.calendar_year_help_text_override %}
                     {% include '_partials/item_detail.html' with label="Location" value=object.location %}
                     {% include '_partials/item_detail.html' with label="Transcription" value=object.transcription %}
                     {% include '_partials/item_detail.html' with label="Modern Transcription" value=object.modern_transcription %}
