@@ -46,10 +46,12 @@ export const getLsdString = (totalPence) => {
   const {l, s, d} = getLsd(totalPence)
   if (l === 0 && s === 0 && d === 0) { return '0d' }
   const lsdParts = []
+  let lsdTotal = ''
   if (l > 0) { lsdParts.push(`£${l}`) }
   if (s > 0) { lsdParts.push(`${s}s`) }
   if (d > 0) { lsdParts.push(`${d}d`) }
-  return lsdParts.join(' ')
+  if (l > 0 || s > 0) { lsdTotal = `(${totalPence}d)` }
+  return `${lsdParts.join('. ')} ${lsdTotal}`
 }
 
 const CUSTOM_COLOR_PALLETTE = ['#003f5c', '#2f4b7c', '#665191', '#a05195', '#d45087', '#f95d6a', '#ff7c43', '#ffa600']

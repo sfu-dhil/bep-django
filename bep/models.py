@@ -856,6 +856,7 @@ class Transaction(models.Model):
     def get_lsd_short_str(total_pence):
         l, s, d = Transaction.get_lsd(total_pence)
         lsd_parts = []
+        lsd_total = ''
         if l > 0:
             lsd_parts.append(f'£{l}')
         if s > 0:
@@ -864,7 +865,9 @@ class Transaction(models.Model):
             lsd_parts.append(f'{d}d')
         if l == 0 and s == 0 and d == 0:
             lsd_parts.append(f'0d')
-        return '. '.join(lsd_parts)
+        if l > 0 or s > 0:
+            lsd_total = f'({total_pence}d)'
+        return f'{'. '.join(lsd_parts)} {lsd_total}'
         # total_str = f' (totalling {total_pence}d)' if l > 0 or s > 0 else ''
         # return '. '.join(lsd_parts) + total_str
 
