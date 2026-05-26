@@ -28,6 +28,12 @@
                         </div>
                     </dd>
                 </dl>
+                {% if object.geom_field %}
+                    <figure class="figure h-100 w-100 m-0 d-flex flex-column">
+                        <div class="county-map-app" data-county-id="{{ object.id }}"></div>
+                        <figcaption class="figure-caption text-center">Boundaries</figcaption>
+                    </figure>
+                {% endif %}
             </details>
         </div>
 

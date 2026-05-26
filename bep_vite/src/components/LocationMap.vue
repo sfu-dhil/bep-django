@@ -34,6 +34,7 @@ const {
   center,
   zoom,
   rotation,
+  countyVisible,
   diocesePre1541Visible,
   diocesePost1541Visible,
 } = locationStore
@@ -52,6 +53,7 @@ const mapRef = ref(null)
 const viewRef = ref(null)
 const parishSourceClusterRef = ref(null)
 const parishSourceVectorRef = ref(null)
+const countyTileLayerRef = ref(null)
 const diocesePre1541TileLayerRef = ref(null)
 const diocesePost1541TileLayerRef = ref(null)
 const websiteOrigin = window.location.origin
@@ -159,6 +161,27 @@ const overrideSelectedClusterStyle = (feature) => {
   }
   return new Style()
 }
+const countyRegionStyle = (feature) => {
+  const active = selectedCountyId.value && selectedCountyId.value == feature.get('id')
+  const activeFill = new Fill({
+    color: 'rgba(0, 0, 255, 0.1)',
+  })
+  return new Style({
+    stroke: new Stroke({
+      color: 'blue',
+      lineDash:[4],
+      width: active ? 2 : 1,
+    }),
+    fill: active ? activeFill : null,
+    text: new Text({
+      text: `${feature.get('label') ?? ''}`,
+      font: 'bold 0.5em system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans","Liberation Sans",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"',
+      fill: new Fill({ color: 'black' }),
+      stroke: new Stroke({ color: 'white', width: 3 }),
+    }),
+    zIndex: active ? Infinity : undefined,
+  })
+}
 const dioceseRegionStyle = (feature) => {
   // const active = selectedDioceseId.value && selectedDioceseId.value == feature.get('id')
   // const active = selectedParishId.value && useParishesStore().parishesMap.get(selectedParishId.value).diocese_id == feature.get('id')
@@ -184,14 +207,16 @@ const dioceseRegionStyle = (feature) => {
 }
 
 const layerSwitcherChange = (layer) => {
-  if (diocesePre1541TileLayerRef.value?.vectorTileLayer === layer) {
+  if (countyTileLayerRef.value?.vectorTileLayer === layer) {
+    locationStore.countyVisible = layer.getVisible()
+  } else if (diocesePre1541TileLayerRef.value?.vectorTileLayer === layer) {
     locationStore.diocesePre1541Visible = layer.getVisible()
   } else if (diocesePost1541TileLayerRef.value?.vectorTileLayer === layer) {
     locationStore.diocesePost1541Visible = layer.getVisible()
   }
 }
 const layerSwitcherDisplayLayer = (layer) => {
-  return diocesePre1541TileLayerRef.value?.vectorTileLayer === layer || diocesePost1541TileLayerRef.value?.vectorTileLayer === layer
+  return countyTileLayerRef.value?.vectorTileLayer === layer || diocesePre1541TileLayerRef.value?.vectorTileLayer === layer || diocesePost1541TileLayerRef.value?.vectorTileLayer === layer
 }
 
 const updateCenter = (event) => locationStore.center = event.target.getCenter()
@@ -310,6 +335,13 @@ watch(selectedParishId, (newValue, oldValue) => {
         <ol-style :overrideStyleFunction="overrideSelectedClusterStyle"></ol-style>
       </ol-interaction-select>
 
+      <ol-vector-tile-layer ref="diocesePost1541TileLayerRef"
+          :renderMode="'vector'" :updateWhileAnimating="true" :updateWhileInteracting="true" :visible="diocesePost1541Visible"
+          :properties="{ 'name': 'Dioceses 1541 and after' }">
+        <ol-source-vector-tile :url="websiteOrigin+'/api/geo/dioceses/post1541/tiles/{z}/{x}/{y}'" :format="mvt">
+          <ol-style :overrideStyleFunction="dioceseRegionStyle"></ol-style>
+        </ol-source-vector-tile>
+      </ol-vector-tile-layer>
       <ol-vector-tile-layer ref="diocesePre1541TileLayerRef"
           :renderMode="'vector'" :updateWhileAnimating="true" :updateWhileInteracting="true" :visible="diocesePre1541Visible"
           :properties="{ 'name': 'Dioceses before 1541' }">
@@ -317,11 +349,11 @@ watch(selectedParishId, (newValue, oldValue) => {
           <ol-style :overrideStyleFunction="dioceseRegionStyle"></ol-style>
         </ol-source-vector-tile>
       </ol-vector-tile-layer>
-      <ol-vector-tile-layer ref="diocesePost1541TileLayerRef"
-          :renderMode="'vector'" :updateWhileAnimating="true" :updateWhileInteracting="true" :visible="diocesePost1541Visible"
-          :properties="{ 'name': 'Dioceses 1541 and after' }">
-        <ol-source-vector-tile :url="websiteOrigin+'/api/geo/dioceses/post1541/tiles/{z}/{x}/{y}'" :format="mvt">
-          <ol-style :overrideStyleFunction="dioceseRegionStyle"></ol-style>
+      <ol-vector-tile-layer ref="countyTileLayerRef"
+          :renderMode="'vector'" :updateWhileAnimating="true" :updateWhileInteracting="true" :visible="countyVisible"
+          :properties="{ 'name': 'Counties' }">
+        <ol-source-vector-tile :url="websiteOrigin+'/api/geo/counties/tiles/{z}/{x}/{y}'" :format="mvt">
+          <ol-style :overrideStyleFunction="countyRegionStyle"></ol-style>
         </ol-source-vector-tile>
       </ol-vector-tile-layer>
 

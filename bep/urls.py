@@ -20,4 +20,5 @@ urlpatterns = [
     path("api/", api.urls),
     path("api/geo/dioceses/pre1541/tiles/<int:z>/<int:x>/<int:y>", cache_page(settings.CACHE_SECONDS)(views.DiocesePre1541TileView.as_view()), name="diocese-pre1541-tiles"),
     path("api/geo/dioceses/post1541/tiles/<int:z>/<int:x>/<int:y>", cache_page(settings.CACHE_SECONDS)(views.DiocesePost1541TileView.as_view()), name="diocese-post1541-tiles"),
+    path("api/geo/counties/tiles/<int:z>/<int:x>/<int:y>", cache_page(settings.CACHE_SECONDS)(views.CountyTileView.as_view()), name="county-tiles"),
 ]

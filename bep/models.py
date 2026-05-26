@@ -207,6 +207,7 @@ class County(models.Model):
     label = models.CharField(unique=True)
     description = models.TextField(blank=True)
     links = ArrayField(models.URLField(max_length=None), blank=True)
+    geom_field = MultiPolygonField(verbose_name='Geom Field', blank=True, null=True)
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -291,7 +292,6 @@ class Diocese(models.Model):
     label = models.CharField(unique=True)
     description = models.TextField(blank=True)
     links = ArrayField(models.URLField(max_length=None), blank=True)
-
     geom_pre_1541 = MultiPolygonField(verbose_name='Pre 1541 Geom', blank=True, null=True)
     geom_post_1541 = MultiPolygonField(verbose_name='Post 1541 Geom', blank=True, null=True)
 

@@ -241,7 +241,11 @@ class BookAdmin(BepAdminDefaults):
     _imprint.admin_order_field = 'imprint'
 
 @admin.register(County)
-class CountyAdmin(SimpleTermModelDefaults):
+class CountyAdmin(SimpleTermModelDefaults, LeafletGeoAdmin):
+    # LeafletGeoAdmin
+    # BUG: display_raw not working so override the template and forced display_raw = True content
+    # display_raw = True
+
     autocomplete_fields = ['nation']
     inlines = [
         TownReadOnlyInline,
@@ -250,10 +254,8 @@ class CountyAdmin(SimpleTermModelDefaults):
 @admin.register(Diocese)
 class DioceseAdmin(SimpleTermModelDefaults, LeafletGeoAdmin):
     # LeafletGeoAdmin
-    settings_overrides = {
-        'RESET_VIEW': False,
-    }
-    display_raw = True
+    # BUG: display_raw not working so override the template and forced display_raw = True content
+    # display_raw = True
 
     autocomplete_fields = ['province']
     inlines = [

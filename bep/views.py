@@ -8,7 +8,8 @@ import json
 from .models import Parish, Transaction, County, Diocese, Inventory
 from .forms import TransactionSearchForm, ParishSearchForm, DioceseSearchForm, CountySearchForm
 from .vector_layers import DiocesePre1541VectorLayer, DiocesePre1541LabelVectorLayer, \
-    DiocesePost1541VectorLayer, DiocesePost1541LabelVectorLayer
+    DiocesePost1541VectorLayer, DiocesePost1541LabelVectorLayer, \
+    CountyVectorLayer, CountyLabelVectorLayer
 
 class HomeView(TemplateView):
     template_name = 'home.html'
@@ -296,3 +297,6 @@ class DiocesePre1541TileView(MVTView):
 
 class DiocesePost1541TileView(MVTView):
     layer_classes = [DiocesePost1541VectorLayer, DiocesePost1541LabelVectorLayer]
+
+class CountyTileView(MVTView):
+    layer_classes = [CountyVectorLayer, CountyLabelVectorLayer]

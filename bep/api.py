@@ -220,12 +220,12 @@ def parishes(request):
 @api.get("/transactions/{pk}", response=TransactionSchema)
 @decorate_view(cache_page(settings.CACHE_SECONDS))
 def transaction(request, pk: int):
-    return Transaction.objects.prefetch_related('transaction_actions', 'transaction_mediums').get(pk=pk)
+    return Transaction.objects.prefetch_related('parish', 'transaction_actions', 'transaction_mediums').get(pk=pk)
 @api.get("/parishes/{parish_id}/transactions", response=PaginatedResponseSchema[TransactionSchema])
 @decorate_view(cache_page(settings.CACHE_SECONDS))
 @paginate
 def parishes_transactions(request, parish_id: int):
-    return Transaction.objects.prefetch_related('transaction_actions', 'transaction_mediums').filter(parish_id=parish_id).order_by('date').all()
+    return Transaction.objects.prefetch_related('parish', 'transaction_actions', 'transaction_mediums').filter(parish_id=parish_id).order_by('date').all()
 
 
 

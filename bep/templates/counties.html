@@ -27,30 +27,44 @@
         <hr />
         {% for object in object_list %}
             {% cache 600 counties_list_object object.pk form.q %}
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            {% if request.GET.q %}
-                                {{ object.label_headline|safe }}
-                            {% else %}
-                                {{ object.label|safe }}
-                            {% endif %}
-                        </h5>
+                {% with geom_field=object.geom_field %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                {% if request.GET.q %}
+                                    {{ object.label_headline|safe }}
+                                {% else %}
+                                    {{ object.label|safe }}
+                                {% endif %}
+                            </h5>
+                            <div class="row align-items-stretch gx-1">
+                                <div class="{% if geom_field %}col-xl-6{% endif %}">
+                                    {% if request.GET.q %}
+                                        {{ object.description_headline|safe }}
+                                    {% else %}
+                                        {{ object.description|safe }}
+                                    {% endif %}
+                                    {% comment %} {% include '_partials/search_tag.html' with category='Town' label=object.town.label %} {% endcomment %}
+                                    {% comment %} {% include '_partials/search_tag.html' with category='Nation' label=object.nation.label %} {% endcomment %}
+                                </div>
+                                {% if geom_field %}
+                                    <div class="col-xl-6">
+                                        <figure class="figure h-100 w-100 m-0 d-flex flex-column">
+                                            <div class="county-map-app" data-county-id="{{ object.id }}"></div>
+                                            <figcaption class="figure-caption text-center">Boundaries</figcaption>
+                                        </figure>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
                         {% if request.GET.q %}
-                            {{ object.description_headline|safe }}
-                        {% else %}
-                            {{ object.description|safe }}
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary" title="Matching Score">
+                                {{ object.rank|floatformat:"0" }}%
+                            </span>
                         {% endif %}
-                        {% comment %} {% include '_partials/search_tag.html' with category='Town' label=object.town.label %} {% endcomment %}
-                        {% comment %} {% include '_partials/search_tag.html' with category='Nation' label=object.nation.label %} {% endcomment %}
+                        <a href="{% url 'county' pk=object.pk %}" class="stretched-link"></a>
                     </div>
-                    {% if request.GET.q %}
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary" title="Matching Score">
-                            {{ object.rank|floatformat:"0" }}%
-                        </span>
-                    {% endif %}
-                    <a href="{% url 'county' pk=object.pk %}" class="stretched-link"></a>
-                </div>
+                {% endwith %}
             {% endcache %}
         {% empty %}
             <div class="alert alert-warning" role="alert">No records found. Try adjusting your search terms or filters.</div>

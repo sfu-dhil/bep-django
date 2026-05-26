@@ -9,6 +9,7 @@ import InfoModalApp from './InfoModalApp.vue'
 import InfoModalToggleApp from './InfoModalToggleApp.vue'
 import ParishMapApp from './ParishMapApp.vue'
 import DioceseMapApp from './DioceseMapApp.vue'
+import CountyMapApp from './CountyMapApp.vue'
 import EventVisualizationApp from './EventVisualizationApp.vue'
 
 // other
@@ -78,6 +79,13 @@ ready(() => {
 
   document.querySelectorAll('.diocese-map-app').forEach((mountEl) => {
     const app = createApp(DioceseMapApp, { ...mountEl.dataset })
+    app.use(pinia)
+    app.use(OpenLayersMap)
+    app.mount(mountEl)
+  })
+
+  document.querySelectorAll('.county-map-app').forEach((mountEl) => {
+    const app = createApp(CountyMapApp, { ...mountEl.dataset })
     app.use(pinia)
     app.use(OpenLayersMap)
     app.mount(mountEl)

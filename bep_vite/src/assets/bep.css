@@ -86,8 +86,9 @@ a[href^="https://"]::after {
 .parish-map-app {
     min-height: 200px;
 }
-.diocese-map-app {
-    min-height: 400px;
+.diocese-map-app,
+.county-map-app {
+    height: 400px;
 }
 
 /* support slightly fancy details */

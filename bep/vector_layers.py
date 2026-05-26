@@ -1,5 +1,5 @@
 from vectortiles.backends.postgis import VectorLayer
-from .models import Diocese
+from .models import Diocese, County
 from.vectortiles_overrides.complex_vector_layer import ComplexCenterPointsVectorLayer
 
 class DiocesePre1541VectorLayer(VectorLayer):
@@ -25,3 +25,15 @@ class DiocesePost1541LabelVectorLayer(ComplexCenterPointsVectorLayer):
     id = 'dioceses_post_1541_labels'
     tile_fields = ('id', 'label',)
     geom_field = 'geom_post_1541'
+
+class CountyVectorLayer(VectorLayer):
+    model = County
+    id = 'counties'
+    tile_fields = ('id',)
+    geom_field = 'geom_field'
+
+class CountyLabelVectorLayer(ComplexCenterPointsVectorLayer):
+    model = County
+    id = 'counties_labels'
+    tile_fields = ('id', 'label',)
+    geom_field = 'geom_field'

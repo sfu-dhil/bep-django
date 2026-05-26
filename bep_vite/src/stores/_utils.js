@@ -90,6 +90,7 @@ export const _generateParishDependantApiResourceStore = (parishResourcesApiUrlFu
   return {
     state: () => ({
       loadedObjects: [],
+      loadedParishes: [],
     }),
     getters: {
       objectMap: (state) => state.loadedObjects.reduce((result, o) => result.set(o.id, o), new Map()),
@@ -98,14 +99,16 @@ export const _generateParishDependantApiResourceStore = (parishResourcesApiUrlFu
         result.get(o.parish_id).push(o)
         return result
       }, new Map()),
+      loadedParishesMap: (state) => state.loadedParishes.reduce((result, parishId) => result.set(parishId, parishId), new Map()),
     },
     actions: {
       async getByParishId(id) {
         if (!id || !Number.isInteger(id) || id <= 0) { return null }
-        if (this.parishObjectMap.has(id)) { return this.parishObjectMap.get(id) }
+        if (this.loadedParishesMap.has(id)) { return this.parishObjectMap.get(id) ?? [] }
 
         const resources = await _getPaginatedApiResources(parishResourcesApiUrlFunction(id))
-        resources.filter((o) => !this.objectMap.has(o.id)).forEach((o) => this.loadedObjects.push(o))
+        resources.filter((o) => !this.objectMap.has(o.id)).forEach((o) => this.loadedObjects.push({ parish_id: id, ...o }))
+        this.loadedParishes.push(id)
         return resources
       },
     },
