@@ -50,7 +50,7 @@ export const getLsdString = (totalPence) => {
   if (l > 0) { lsdParts.push(`£${l}`) }
   if (s > 0) { lsdParts.push(`${s}s`) }
   if (d > 0) { lsdParts.push(`${d}d`) }
-  if (l > 0 || s > 0) { lsdTotal = `(${totalPence}d)` }
+  if (l > 0 || s > 0) { lsdTotal = `(${Math.abs(totalPence)}d)` }
   return `${lsdParts.join('. ')} ${lsdTotal}`
 }
 
