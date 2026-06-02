@@ -27,7 +27,7 @@
         <hr />
         {% for object in object_list %}
             {% cache 600 dioceses_list_object object.pk form.q %}
-                {% with geom_pre_1541=object.geom_pre_1541 geom_post_1541=object.geom_pre_1541 %}
+                {% with geom_pre_1541=object.geom_pre_1541 geom_post_1541=object.geom_post_1541 %}
                     <div class="card mb-3">
                         <div class="card-body">
                             <h5 class="card-title">
