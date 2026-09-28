@@ -30,30 +30,6 @@ export const _getApiResource = async (request) => {
   }
 }
 
-export const _generateSingleFetchApiResourceStore = (resourceApiUrlFunction) => {
-  return {
-    state: () => ({
-      loadedObjects: [],
-    }),
-    getters: {
-      objectMap: (state) => state.loadedObjects.reduce((result, o) => result.set(o.id, o), new Map()),
-    },
-    actions: {
-      async getById(id) {
-        if (!id || !Number.isInteger(id) || id <= 0) { return null }
-        if (this.objectMap.has(id)) { return this.objectMap.get(id) }
-
-        const resource = await _getApiResource(resourceApiUrlFunction(id))
-        this.loadedObjects.push(resource)
-        return resource
-      },
-    },
-    persist: {
-      storage: sessionStorage
-    },
-  }
-}
-
 export const _generateApiResourceStore = (resourceApiUrlFunction, resourcesApiUrl) => {
   return {
     state: () => ({

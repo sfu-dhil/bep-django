@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import {
-  _generateSingleFetchApiResourceStore,
   _generateApiResourceStore,
   _generateParishDependantApiResourceStore
 } from './_utils.js'
